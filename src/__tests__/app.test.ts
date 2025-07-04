@@ -1,0 +1,21 @@
+import express from 'express';
+import request from 'supertest';
+
+const app = express();
+app.use(express.json());
+
+app.post('/user', (req, res) => {
+  res.status(200).send('Usuário mockado criado com sucesso!');
+});
+
+describe('POST /user', () => {
+  it('should create a user', async () => {
+    const res = await request(app).post('/user').send({
+      username: 'testuser',
+      email: 'test@example.com'
+    });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.text).toEqual('Usuário mockado criado com sucesso!');
+  });
+});
