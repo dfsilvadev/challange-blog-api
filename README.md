@@ -146,7 +146,7 @@ Adicione o serviço pgAdmin ao seu `docker-compose.yml`:
 ```yaml
 services:
   # ... outros serviços ...
-  
+
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: blog-pgadmin
@@ -156,7 +156,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin123
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
-      - "5050:80"
+      - '5050:80'
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
@@ -187,12 +187,12 @@ volumes:
 
 #### Configurações de Conexão
 
-| Campo | Valor |
-|-------|-------|
-| **Host** | localhost |
-| **Port** | 5433 |
-| **Database** | `<DB_NAME>` |
-| **Username** | `<DB_USER>` |
+| Campo        | Valor           |
+| ------------ | --------------- |
+| **Host**     | localhost       |
+| **Port**     | 5433            |
+| **Database** | `<DB_NAME>`     |
+| **Username** | `<DB_USER>`     |
 | **Password** | `<DB_PASSWORD>` |
 
 #### Estrutura do Banco no pgAdmin 4
@@ -218,16 +218,19 @@ blog_db/
 #### Operações Comuns no pgAdmin 4
 
 **Visualizar Dados**:
+
 - Expanda `Tables` → Clique com botão direito na tabela → `View/Edit Data` → `All Rows`
 
 **Executar Queries**:
+
 - Clique no ícone de SQL (Query Tool) na barra de ferramentas
 - Digite sua query SQL e execute com F5
 
 **Exemplo de Queries Úteis**:
+
 ```sql
 -- Verificar se as tabelas foram criadas
-SELECT table_name FROM information_schema.tables 
+SELECT table_name FROM information_schema.tables
 WHERE table_schema = 'public';
 
 -- Verificar dados de usuários
