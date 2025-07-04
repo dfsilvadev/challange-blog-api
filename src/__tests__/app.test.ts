@@ -11,8 +11,8 @@ app.post('/user', (req, res) => {
 describe('POST /user', () => {
   it('should create a user', async () => {
     const res = await request(app).post('/user').send({
-      username: 'testuser',
-      email: 'test@example.com'
+      username: 'johndoe',
+      email: 'johndoe@example.com'
     });
 
     expect(res.statusCode).toEqual(200);
