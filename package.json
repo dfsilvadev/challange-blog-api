@@ -17,7 +17,10 @@
     "test": "jest --detectOpenHandles --forceExit",
     "test:ci": "jest --passWithNoTests",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "test:changed": "jest --bail --findRelatedTests",
+    "test:staged": "jest --bail --findRelatedTests --onlyChanged",
+    "test:all": "jest --detectOpenHandles --forceExit --coverage"
   },
   "dependencies": {
     "cors": "^2.8.5",

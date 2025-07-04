@@ -1,3 +1,7 @@
 {
-  "*.{js,ts,tsx,cjs,mjs}": ["npm run lint:fix", "npm run format"]
+  "*.{js,ts,tsx,cjs,mjs}": [
+    "npm run lint:fix", 
+    "npm run format",
+    "jest --bail --findRelatedTests"
+  ]
 }
