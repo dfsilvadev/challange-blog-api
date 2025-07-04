@@ -14,6 +14,7 @@ services:
       - '5433:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./src/database/models/schema.sql:/docker-entrypoint-initdb.d/init.sql # <--- ATENÇÃO AQUI!
 
   app:
     build: .
@@ -24,7 +25,7 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5433/${POSTGRES_DB}
     volumes:
       - .:/app
       - /app/node_modules
