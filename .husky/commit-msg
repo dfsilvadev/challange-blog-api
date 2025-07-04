@@ -1,4 +1,3 @@
 #!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+npx git-commit-msg-linter
 
-.git/hooks/commit-msg $1
