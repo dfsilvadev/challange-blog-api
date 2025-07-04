@@ -5,7 +5,7 @@ const app = express();
 app.use(express.json());
 
 app.post('/user', (req, res) => {
-  res.status(200).send('Usuário mockado criado com sucesso!');
+  res.status(200).send('User mock created successfully!');
 });
 
 describe('POST /user', () => {
@@ -16,6 +16,6 @@ describe('POST /user', () => {
     });
 
     expect(res.statusCode).toEqual(200);
-    expect(res.text).toEqual('Usuário mockado criado com sucesso!');
+    expect(res.text).toEqual('User mock created successfully!');
   });
 });
