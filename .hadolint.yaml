@@ -1,0 +1,19 @@
+# Configuração do Hadolint
+# Ignora warnings específicos que não são críticos para este projeto
+
+# Ignora warning sobre versão do curl (DL3018)
+# O Alpine Linux não sempre tem versões específicas disponíveis
+override:
+  warning:
+    - DL3018
+
+# Ignora warning sobre versão do npm (DL3016)
+# A versão do yarn está fixada, mas o npm vem com a imagem base
+override:
+  warning:
+    - DL3016
+
+# Configurações gerais
+format: tty
+no-color: false
+verbose: false 

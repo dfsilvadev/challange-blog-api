@@ -2,14 +2,14 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Instalar yarn globalmente e curl para health check
-RUN npm install -g yarn && apk add --no-cache curl
+# Instalar yarn globalmente e curl para health check com versões fixadas
+RUN npm install -g yarn@1.22.22 && apk add --no-cache curl
 
 # Copiar arquivos de dependências
 COPY package.json yarn.lock ./
 
-# Instalar dependências
-RUN yarn install --frozen-lockfile
+# Instalar dependências e limpar cache
+RUN yarn install --frozen-lockfile && yarn cache clean
 
 # Copiar código fonte
 COPY . .

@@ -36,10 +36,12 @@ docs/
 
 scripts/
 ├── setup-ci.sh                  # Script de setup local
-└── test-docker.sh               # Script de teste Docker
+├── test-docker.sh               # Script de teste Docker
+└── test-hadolint.sh             # Script de teste Hadolint
 
 .codecov.yml                     # Configuração Codecov
 sonar-project.properties         # Configuração SonarCloud
+.hadolint.yaml                   # Configuração Hadolint
 ```
 
 ## 🚀 Funcionalidades

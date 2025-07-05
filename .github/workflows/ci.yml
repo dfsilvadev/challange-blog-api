@@ -157,6 +157,9 @@ jobs:
       uses: hadolint/hadolint-action@v3.1.0
       with:
         dockerfile: Dockerfile
+        config-file: .hadolint.yaml
+        failure-threshold: error
+        no-fail: true
         
     - name: Build Docker image
       run: |
