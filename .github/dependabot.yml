@@ -1,0 +1,62 @@
+version: 2
+updates:
+  # Configuração para dependências do npm/yarn
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "dfsilvadev"
+    assignees:
+      - "dfsilvadev"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "automated"
+    ignore:
+      # Ignora atualizações de versões major que podem quebrar
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+        
+  # Configuração para GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "dfsilvadev"
+    assignees:
+      - "dfsilvadev"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "github-actions"
+      - "automated"
+      
+  # Configuração para Docker
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "dfsilvadev"
+    assignees:
+      - "dfsilvadev"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "docker"
+      - "automated" 

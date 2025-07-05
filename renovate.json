@@ -1,0 +1,46 @@
+{
+  "extends": [
+    "config:base",
+    ":semanticCommits",
+    ":semanticCommitTypeAll(chore)"
+  ],
+  "schedule": ["before 4am on monday"],
+  "timezone": "America/Sao_Paulo",
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "labels": ["dependencies", "breaking"]
+    },
+    {
+      "matchPackagePatterns": ["^@types/"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true
+    },
+    {
+      "matchPackagePatterns": ["eslint", "prettier"],
+      "groupName": "linting packages",
+      "automerge": true
+    },
+    {
+      "matchPackagePatterns": ["jest", "ts-jest", "@types/jest"],
+      "groupName": "testing packages",
+      "automerge": true
+    }
+  ],
+  "assignees": ["dfsilvadev"],
+  "reviewers": ["dfsilvadev"],
+  "labels": ["dependencies", "automated"],
+  "commitMessagePrefix": "chore:",
+  "commitMessageAction": "update",
+  "commitMessageTopic": "{{depName}}",
+  "commitMessageExtra": "to {{newVersion}}"
+} 

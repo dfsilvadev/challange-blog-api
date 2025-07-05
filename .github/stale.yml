@@ -1,0 +1,51 @@
+# Configuração para Issues
+issues:
+  # Marca issues como stale após 30 dias sem atividade
+  daysUntilStale: 30
+  # Fecha issues após 7 dias marcadas como stale
+  daysUntilClose: 7
+  # Labels para marcar issues como stale
+  staleLabel: "no-issue-activity"
+  # Comentário quando marca como stale
+  markComment: >
+    Esta issue foi marcada como stale porque não teve atividade nos últimos 30 dias.
+    Se você ainda está interessado, por favor comente aqui para manter a issue ativa.
+  # Comentário quando fecha
+  closeComment: >
+    Esta issue foi fechada automaticamente porque não teve atividade nos últimos 7 dias.
+    Se você ainda precisa de ajuda, sinta-se à vontade para abrir uma nova issue.
+  # Labels que impedem que a issue seja marcada como stale
+  exemptLabels:
+    - "pinned"
+    - "security"
+    - "bug"
+    - "enhancement"
+    - "help wanted"
+    - "good first issue"
+  # Labels que impedem que a issue seja fechada
+  exemptAllLabels: false
+
+# Configuração para Pull Requests
+pullRequests:
+  # Marca PRs como stale após 7 dias sem atividade
+  daysUntilStale: 7
+  # Fecha PRs após 3 dias marcados como stale
+  daysUntilClose: 3
+  # Labels para marcar PRs como stale
+  staleLabel: "no-pr-activity"
+  # Comentário quando marca como stale
+  markComment: >
+    Este PR foi marcado como stale porque não teve atividade nos últimos 7 dias.
+    Se você ainda está trabalhando nele, por favor comente aqui para manter o PR ativo.
+  # Comentário quando fecha
+  closeComment: >
+    Este PR foi fechado automaticamente porque não teve atividade nos últimos 3 dias.
+    Se você ainda quer que seja revisado, sinta-se à vontade para reabrir.
+  # Labels que impedem que o PR seja marcado como stale
+  exemptLabels:
+    - "work in progress"
+    - "blocked"
+    - "dependencies"
+    - "automated"
+  # Labels que impedem que o PR seja fechado
+  exemptAllLabels: false 
