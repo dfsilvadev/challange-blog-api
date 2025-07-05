@@ -7,7 +7,7 @@ on:
     if: github.actor == 'dependabot[bot]'
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
   POSTGRES_USER: test_user
   POSTGRES_PASSWORD: test_password
   POSTGRES_DB: test_blog_db

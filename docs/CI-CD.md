@@ -36,8 +36,9 @@ O pipeline CI/CD foi configurado para executar automaticamente em:
 
 **Executa:**
 - ✅ Validação do Dockerfile com Hadolint
-- ✅ Build da imagem Docker
-- ✅ Teste da imagem Docker
+- ✅ Build da imagem Docker com Node.js 20
+- ✅ Verificação da existência da imagem
+- ✅ Teste da imagem Docker com health check
 - ✅ Cache de layers Docker
 
 ### 4. Security Scan

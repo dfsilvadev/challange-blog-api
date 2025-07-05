@@ -35,7 +35,8 @@ docs/
 └── CI-CD.md                     # Documentação completa
 
 scripts/
-└── setup-ci.sh                  # Script de setup local
+├── setup-ci.sh                  # Script de setup local
+└── test-docker.sh               # Script de teste Docker
 
 .codecov.yml                     # Configuração Codecov
 sonar-project.properties         # Configuração SonarCloud
@@ -71,6 +72,9 @@ SNYK_TOKEN=your_snyk_token
 SONAR_TOKEN=your_sonarcloud_token
 CODECOV_TOKEN=your_codecov_token (opcional)
 ```
+
+### Requisitos
+- Node.js 20+ (atualizado para compatibilidade com dependências)
 
 ### GitHub Apps
 - Dependabot (já configurado)

@@ -7,7 +7,7 @@ on:
     branches: [ main, develop ]
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
   POSTGRES_USER: test_user
   POSTGRES_PASSWORD: test_password
   POSTGRES_DB: test_blog_db
@@ -160,18 +160,44 @@ jobs:
         
     - name: Build Docker image
       run: |
+        echo "Building Docker image..."
         docker buildx build \
           --cache-from type=local,src=/tmp/.buildx-cache \
           --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
-          -t blog-api .
+          -t blog-api:latest .
+        
+        # Limpar cache antigo e mover novo
         rm -rf /tmp/.buildx-cache
         mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+        
+        echo "Docker build completed"
+        
+    - name: Verify Docker image exists
+      run: |
+        docker images | grep blog-api
+        echo "Docker image built successfully"
       
     - name: Test Docker image
       run: |
-        docker run --rm -d --name test-container -p 3000:3000 blog-api
-        sleep 10
+        echo "Starting Docker container..."
+        docker run --rm -d --name test-container -p 3000:3000 blog-api:latest
+        
+        echo "Container started, waiting for it to be ready..."
+        sleep 15
+        
+        echo "Checking if container is running..."
+        if docker ps | grep test-container; then
+          echo "Container is running successfully"
+        else
+          echo "Container failed to start"
+          docker logs test-container || true
+          exit 1
+        fi
+        
+        echo "Stopping container..."
         docker stop test-container
+        
+        echo "Container test completed successfully"
         
   # Job para segurança (paralelo)
   security:
