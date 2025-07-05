@@ -11,7 +11,7 @@ O pipeline CI/CD foi configurado para executar automaticamente em:
 ## 📋 Jobs do Pipeline
 
 ### 1. Code Quality
-**Arquivo:** `.github/workflows/ci.yml` e `.github/workflows/cache.yml`
+**Arquivo:** `.github/workflows/ci.yml`
 
 **Objetivo:** Verificar a qualidade do código
 
@@ -48,7 +48,15 @@ O pipeline CI/CD foi configurado para executar automaticamente em:
 - ✅ Scan de vulnerabilidades com Snyk
 - ✅ Cache de dependências
 
-### 5. SonarCloud Analysis
+### 5. Performance Analysis
+**Objetivo:** Análise de performance e tamanho do bundle
+
+**Executa:**
+- ✅ Análise do tamanho do bundle
+- ✅ Testes de performance
+- ✅ Métricas de build
+
+### 6. SonarCloud Analysis
 **Arquivo:** `.github/workflows/sonarcloud.yml`
 
 **Objetivo:** Análise de qualidade de código
@@ -58,13 +66,16 @@ O pipeline CI/CD foi configurado para executar automaticamente em:
 - ✅ Relatórios de qualidade
 - ✅ Métricas de manutenibilidade
 
-### 6. Deploy (Apenas na main)
-**Objetivo:** Deploy automático em produção
+### 7. Dependabot Security Updates
+**Arquivo:** `.github/workflows/dependabot.yml`
+
+**Objetivo:** Validação de atualizações de segurança
 
 **Executa:**
-- ✅ Build da aplicação
-- ✅ Criação de release no GitHub
-- ✅ Upload de artifacts
+- ✅ Validação de PRs do Dependabot
+- ✅ Testes de segurança
+- ✅ Build de validação
+- ✅ Comentários automáticos
 
 ## 🔧 Configurações
 
@@ -75,20 +86,6 @@ O pipeline CI/CD foi configurado para executar automaticamente em:
 - Atualizações automáticas para versões minor/patch
 - Revisão manual para versões major
 - Agendamento: Segundas-feiras às 09:00
-
-### Renovate (Alternativa)
-**Arquivo:** `renovate.json`
-
-- Configuração alternativa ao Dependabot
-- Merge automático para atualizações seguras
-- Agrupamento de dependências relacionadas
-
-### Stale Bot
-**Arquivo:** `.github/stale.yml`
-
-- Marca issues como stale após 30 dias
-- Marca PRs como stale após 7 dias
-- Fecha automaticamente após período de grace
 
 ## 📊 Ferramentas Integradas
 
@@ -137,7 +134,7 @@ Adicione os seguintes badges ao seu README:
 ```markdown
 [![CI/CD](https://github.com/dfsilvadev/challange-blog-api/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/dfsilvadev/challange-blog-api/actions)
 [![Codecov](https://codecov.io/gh/dfsilvadev/challange-blog-api/branch/main/graph/badge.svg)](https://codecov.io/gh/dfsilvadev/challange-blog-api)
-[![SonarCloud](https://sonarcloud.io/api/project_badges/measure?project=dfsilvadev_challange-blog-api&metric=alert_status)](https://sonarcloud.io/dashboard?id=dfsilvadev_challange-blog-api)
+[![SonarCloud](https://sonarcloud.io/api/project_badges/measure?project=dfsilva-dxp_blog-challenge&metric=alert_status)](https://sonarcloud.io/dashboard?id=dfsilva-dxp_blog-challenge)
 [![Dependabot](https://api.dependabot.com/badges/status?host=github&repo=dfsilvadev/challange-blog-api)](https://dependabot.com)
 ```
 
