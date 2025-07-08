@@ -1,87 +1,47 @@
-name: CI/CD
+name: 🐧 Versioning Control
+run-name: ${{ github.actor }} is running the tests and lint on GitHub Actions 🐧
 
 on:
-  push:
-    branches: [main, 'feature/**']
   pull_request:
-    branches: [main, 'feature/**']
+    branches: [main]
 
 jobs:
-  lint:
+  ci:
+    name: CI - Build and Lint
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 16
-      - run: npm install
-      - run: npm run lint
 
-  format:
-    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 16
-      - run: npm install
-      - run: npm run format -- --check
+      - uses: actions/checkout@v3
 
-  test:
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Run lint
+        run: yarn lint
+
+  sonarcloud:
+    name: CI - Sonar Analysis
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: SonarCloud Scan
+        run: yarn
+
+      - name: Test and coverage
+        run: yarn test
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage
+          path: coverage
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
         env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    env:
-      DATABASE_URL: postgres://test:test@localhost:5432/test
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 16
-      - run: npm install
-      - run: npm run build
-      - run: npm test
-      - run: npm run test:coverage
-
-  audit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 16
-      - run: npm install
-      - run: npm audit --audit-level=high
-
-  docker:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build Docker image
-        run: docker build -t blog-api:ci .
-
-  scan:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build Docker image
-        run: docker build -t blog-api:ci .
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: blog-api:ci
-          format: table
-          exit-code: 1
-          ignore-unfixed: true 
+          GITHUB_TOKEN: ${{ secrets.SONARGITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
