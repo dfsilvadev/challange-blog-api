@@ -70,8 +70,7 @@ O projeto utiliza PostgreSQL com as seguintes tabelas principais:
 
 - Node.js 16+
 - PostgreSQL
-- Docker (opcional)
-- pgAdmin 4 (opcional - para gerenciamento visual do banco)
+- Docker
 
 ### Instalação Local
 
@@ -132,70 +131,8 @@ docker compose up -d
 A aplicação estará disponível em:
 
 - API: http://localhost:3001
-- Banco de dados: localhost:5433
-- pgAdmin 4: http://localhost:5050 (se configurado)
 
-### Configuração do pgAdmin 4
-
-Para facilitar o gerenciamento visual do banco de dados, você pode configurar o pgAdmin 4:
-
-#### Opção 1: Docker Compose (Recomendado)
-
-Adicione o serviço pgAdmin ao seu `docker-compose.yml`:
-
-```yaml
-services:
-  # ... outros serviços ...
-
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: blog-pgadmin
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@blog.com
-      PGADMIN_DEFAULT_PASSWORD: admin123
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-    ports:
-      - '5050:80'
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      - db
-
-volumes:
-  # ... outros volumes ...
-  pgadmin_data:
-```
-
-#### Opção 2: Instalação Local
-
-1. **Baixe e instale o pgAdmin 4**:
-   - [Download pgAdmin 4](https://www.pgadmin.org/download/pgadmin-4-windows/)
-   - Ou use o gerenciador de pacotes do seu sistema
-
-2. **Configure a conexão**:
-   - Abra o pgAdmin 4
-   - Clique com botão direito em "Servers" → "Register" → "Server"
-   - Na aba "General":
-     - **Name**: Blog API Database
-   - Na aba "Connection":
-     - **Host name/address**: localhost
-     - **Port**: 5433
-     - **Maintenance database**: postgres
-     - **Username**: `<DB_USER>`
-     - **Password**: `<DB_PASSWORD>`
-
-#### Configurações de Conexão
-
-| Campo        | Valor           |
-| ------------ | --------------- |
-| **Host**     | localhost       |
-| **Port**     | 5433            |
-| **Database** | `<DB_NAME>`     |
-| **Username** | `<DB_USER>`     |
-| **Password** | `<DB_PASSWORD>` |
-
-#### Estrutura do Banco no pgAdmin 4
+#### Estrutura do Banco
 
 Após conectar, você verá:
 
@@ -213,37 +150,6 @@ blog_db/
 │       │   └── tb_category_enum
 │       └── Functions/
 │           └── set_updated_at()
-```
-
-#### Operações Comuns no pgAdmin 4
-
-**Visualizar Dados**:
-
-- Expanda `Tables` → Clique com botão direito na tabela → `View/Edit Data` → `All Rows`
-
-**Executar Queries**:
-
-- Clique no ícone de SQL (Query Tool) na barra de ferramentas
-- Digite sua query SQL e execute com F5
-
-**Exemplo de Queries Úteis**:
-
-```sql
--- Verificar se as tabelas foram criadas
-SELECT table_name FROM information_schema.tables
-WHERE table_schema = 'public';
-
--- Verificar dados de usuários
-SELECT * FROM tb_user;
-
--- Verificar categorias disponíveis
-SELECT * FROM tb_category;
-
--- Verificar posts
-SELECT p.title, p.content, u.name as author, c.name as category
-FROM tb_post p
-JOIN tb_user u ON p.user_id = u.id
-JOIN tb_category c ON p.category_id = c.id;
 ```
 
 ## 📝 Scripts Disponíveis
