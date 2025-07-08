@@ -1,5 +1,7 @@
 # 🚀 Challenge Blog API
 
+[![CI](https://github.com/dfsilvadev/challange-blog-api/actions/workflows/ci.yml/badge.svg)](https://github.com/dfsilvadev/challange-blog-api/actions/workflows/ci.yml)
+
 Uma API RESTful moderna para gerenciamento de blog educacional, construída com Node.js, TypeScript, Express e PostgreSQL.
 
 ## 📋 Descrição
