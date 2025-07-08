@@ -18,8 +18,8 @@
     "test:ci": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:changed": "jest --bail --findRelatedTests",
-    "test:staged": "jest --bail --findRelatedTests --onlyChanged",
+    "test:changed": "jest --bail --findRelatedTests --passWithNoTests",
+    "test:staged": "jest --bail --findRelatedTests --onlyChanged --passWithNoTests",
     "test:all": "jest --detectOpenHandles --forceExit --coverage"
   },
   "dependencies": {
