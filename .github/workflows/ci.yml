@@ -47,7 +47,7 @@ jobs:
       - name: Gerar cobertura
         run: yarn test:coverage
       - name: Upload cobertura
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: coverage
           path: coverage
@@ -65,7 +65,7 @@ jobs:
       - name: Test and coverage
         run: yarn test
       - name: Upload coverage report
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: coverage
           path: coverage
