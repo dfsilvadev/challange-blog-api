@@ -25,9 +25,10 @@ app.use(cors({ credentials: true, origin: 'http://localhost:5173' }));
 /**
  * Routes
  */
-import routes from './app/routes/router';
+import router from './app/routes/router';
 
-app.use(routes);
+app.use(express.json());
+app.use('/api', router);
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`🔥 Server started at http://localhost:${PORT}`);
