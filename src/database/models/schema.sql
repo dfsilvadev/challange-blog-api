@@ -91,3 +91,31 @@ CREATE TRIGGER trg_tb_category_updated_at
 BEFORE UPDATE ON tb_category
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
+
+-- Migration: Inserir role e usuário teacher padrão
+DO $$
+DECLARE
+    teacher_role_id UUID;
+    teacher_user_id UUID := uuid_generate_v4();
+BEGIN
+    -- Criar role 'teacher' se não existir
+    IF NOT EXISTS (SELECT 1 FROM tb_role WHERE name = 'teacher') THEN
+        INSERT INTO tb_role (name) VALUES ('teacher');
+    END IF;
+
+    -- Buscar o id da role 'teacher'
+    SELECT id INTO teacher_role_id FROM tb_role WHERE name = 'teacher';
+
+    -- Inserir usuário apenas se não existir
+    IF NOT EXISTS (SELECT 1 FROM tb_user WHERE email = 'teacher@blog.com') THEN
+        INSERT INTO tb_user (id, name, email, phone, password_hash, role_id)
+        VALUES (
+            teacher_user_id,
+            'Teacher Padrão',
+            'teacher@blog.com',
+            '+5500000000000',
+            '$2a$12$ej5.hLFzE.deiyIpm51lSOUSlZnmwn1P9x2KWuGW7lOAVBwJUpDhC',
+            teacher_role_id
+        );
+    END IF;
+END $$;
