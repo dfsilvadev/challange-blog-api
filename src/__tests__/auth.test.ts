@@ -12,8 +12,8 @@ jest.mock('jsonwebtoken');
 describe('login controller', () => {
   const mockReq = {
     body: {
-      username: 'professor',
-      password: 'Test123*'
+      username: process.env.USER_NAME,
+      password: process.env.USER_PASSWORD
     }
   } as any;
 
@@ -29,10 +29,10 @@ describe('login controller', () => {
   it('deve retornar 200 e token se login for bem-sucedido', async () => {
     // Mocka retorno do repositório
     (userRepo.findUserByEmailOrName as jest.Mock).mockResolvedValue({
-      id: '1',
-      email: 'test@example.com',
-      name: 'professor',
-      password_hash: 'hashed_password'
+      id: process.env.USER_ID,
+      email: process.env.USER_EMAIL,
+      name: process.env.USER_NAME,
+      password_hash: process.env.USER_PASSWORD
     });
 
     // Mocka bcrypt e jwt
@@ -62,10 +62,10 @@ describe('login controller', () => {
 
   it('deve retornar 401 se a senha for inválida', async () => {
     (userRepo.findUserByEmailOrName as jest.Mock).mockResolvedValue({
-      id: '1',
-      email: 'test@example.com',
-      name: 'professor',
-      password_hash: 'hashed_password'
+      id: process.env.USER_ID,
+      email: process.env.USER_EMAIL,
+      name: process.env.USER_NAME,
+      password_hash: process.env.USER_PASSWORD
     });
     (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
