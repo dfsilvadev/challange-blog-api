@@ -20,7 +20,8 @@
     "test:coverage": "jest --coverage",
     "test:changed": "jest --bail --findRelatedTests --passWithNoTests",
     "test:staged": "jest --bail --findRelatedTests --onlyChanged --passWithNoTests",
-    "test:all": "jest --detectOpenHandles --forceExit --coverage"
+    "test:all": "jest --detectOpenHandles --forceExit --coverage",
+    "sonar:local": "yarn test:coverage && sonar-scanner"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
