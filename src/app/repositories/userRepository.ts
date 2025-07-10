@@ -7,17 +7,28 @@ interface CreateUserParams {
   roleId: string;
 }
 
-export const findUserByEmailOrName = async (emailOrName: string) => {
+interface UserFound {
+  id: string;
+  email: string;
+  name: string;
+  phone: string;
+  password_hash: string;
+}
+
+export const findUserByEmailOrName = async (
+  emailOrName: string
+): Promise<UserFound | null> => {
   const result = await query(
-    `SELECT id, email, name, password_hash
-    FROM tb_user
-    WHERE email = $1 OR name = $1
-    LIMIT 1;`,
+    `SELECT id, email, name, phone, password_hash  
+     FROM tb_user  
+     WHERE email = $1 OR name = $1  
+     LIMIT 1;`,
     [emailOrName]
   );
-  return result[0] || null;
-};
 
+  const row = result[0];
+  return row ? (row as UserFound) : null;
+};
 export const create = async ({
   name,
   email,
