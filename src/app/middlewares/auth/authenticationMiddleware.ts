@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { AuthRequest, TokenPayload } from '../models/dtos/AuthRequest';
-import config from '../../utils/config/config';
+import { AuthRequest, TokenPayload } from '../../models/dtos/AuthRequest';
+import config from '../../../utils/config/config';
 
 export const authenticateToken = (
   req: AuthRequest,

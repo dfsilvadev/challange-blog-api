@@ -1,4 +1,11 @@
 import { query } from '../../database/db';
+interface CreateUserParams {
+  name: string;
+  email: string;
+  phone: string;
+  password_hash: string;
+  roleId: string;
+}
 
 export const findUserByEmailOrName = async (emailOrName: string) => {
   const result = await query(
@@ -11,20 +18,20 @@ export const findUserByEmailOrName = async (emailOrName: string) => {
   return result[0] || null;
 };
 
-export const create = async (
-  name: string,
-  email: string,
-  phone: string,
-  password_hash: string,
-  roleId: string
-) => {
-  const result = await query(
-    `
-       INSERT INTO public.tb_user
-        (id, "name", email, phone, password_hash, role_id, created_at, updated_at)
-        VALUES(uuid_generate_v4(), $1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-        `,
+export const create = async ({
+  name,
+  email,
+  phone,
+  password_hash,
+  roleId
+}: CreateUserParams) => {
+  const [row] = await query(
+    `  
+     INSERT INTO public.tb_user  
+      (id, "name", email, phone, password_hash, role_id)  
+      VALUES(uuid_generate_v4(),$1, $2, $3, $4, $5);  
+      `,
     [name, email, phone, password_hash, roleId]
   );
-  return result[0];
+  return row;
 };
