@@ -148,13 +148,11 @@ describe('findUserById', () => {
       roleId: roleFake
     };
 
-    const id = process.env.USER_ID || uuidv4();
-
     (findUserById as jest.Mock).mockResolvedValue(mockUser);
 
-    const result = await findUserById(id);
+    const result = await findUserById(idFake);
     expect(result).toEqual(mockUser);
-    expect(findUserById).toHaveBeenCalledWith(id);
+    expect(findUserById).toHaveBeenCalledWith(idFake);
   });
 
   it('deve retornar null quando nenhum usuário é encontrado', async () => {
