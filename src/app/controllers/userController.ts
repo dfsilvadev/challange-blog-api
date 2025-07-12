@@ -1,4 +1,4 @@
-import { create } from '../repositories/userRepository';
+import { create, findUserById } from '../repositories/userRepository';
 import { findIdByName } from '../repositories/roleRepository';
 import { Request, RequestHandler, Response } from 'express';
 import bcrypt from 'bcryptjs';
@@ -21,14 +21,26 @@ export const createUser: RequestHandler = async (
     const saltRounds = 10;
     const password_hash = await bcrypt.hash(password, saltRounds);
 
-    const post = await create({
+    const user = await create({
       name,
       email,
       phone,
       password_hash,
       roleId
     });
-    res.status(201).json(post);
+    res.status(201).json({ status: 'OK', details: { user } });
+  } catch (err) {
+    res.status(500).json({ error: true, details: err });
+  }
+};
+
+export const getUser: RequestHandler = async (req: Request, res: Response) => {
+  const id = req.params.id;
+
+  try {
+    const user = await findUserById(id);
+
+    res.status(200).json({ status: 'OK', details: { user } });
   } catch (err) {
     res.status(500).json({ error: true, details: err });
   }
