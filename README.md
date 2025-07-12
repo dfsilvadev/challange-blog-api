@@ -132,6 +132,9 @@ docker compose up --build
 
 # Execuções subsequentes
 docker compose up -d
+
+# Teste de fluxo da execução do Docker
+docker build --progress=plain .
 ```
 
 A aplicação estará disponível em:
