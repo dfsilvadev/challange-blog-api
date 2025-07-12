@@ -1,17 +1,20 @@
-import { login } from '../app/controllers/authenticationController';
-import * as userRepo from '../app/repositories/userRepository';
+import { login } from '../../app/controllers/authenticationController';
+import * as userRepo from '../../app/repositories/userRepository';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { v4 as uuidv4 } from 'uuid';
 
-jest.mock('../app/repositories/userRepository');
+jest.mock('../../app/repositories/userRepository');
 jest.mock('bcryptjs');
 jest.mock('jsonwebtoken');
 
 describe('login controller', () => {
+  const idFake = uuidv4();
+
   const mockReq = {
     body: {
-      username: process.env.USER_NAME,
-      password: process.env.USER_PASSWORD
+      username: 'teste',
+      password: '11912345678'
     }
   } as any;
 
@@ -26,10 +29,10 @@ describe('login controller', () => {
 
   it('deve retornar 200 e token se login for bem-sucedido', async () => {
     (userRepo.findUserByEmailOrName as jest.Mock).mockResolvedValue({
-      id: process.env.USER_ID,
-      email: process.env.USER_EMAIL,
-      name: process.env.USER_NAME,
-      password_hash: process.env.USER_PASSWORD
+      id: idFake,
+      email: 'teste@email.com',
+      name: 'teste',
+      password_hash: '11912345678'
     });
 
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
@@ -58,10 +61,10 @@ describe('login controller', () => {
 
   it('deve retornar 401 se a senha for inválida', async () => {
     (userRepo.findUserByEmailOrName as jest.Mock).mockResolvedValue({
-      id: process.env.USER_ID,
-      email: process.env.USER_EMAIL,
-      name: process.env.USER_NAME,
-      password_hash: process.env.USER_PASSWORD
+      id: idFake,
+      email: 'teste@email.com',
+      name: 'teste',
+      password_hash: '11912345678'
     });
     (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
