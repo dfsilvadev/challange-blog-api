@@ -1,4 +1,3 @@
-// (Seu arquivo authenticationMiddleware.ts)
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { promisify } from 'util';

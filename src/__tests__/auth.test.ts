@@ -1,10 +1,8 @@
-// tests/authController.test.ts
 import { login } from '../app/controllers/authenticationController';
 import * as userRepo from '../app/repositories/userRepository';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-// Mocka as dependências
 jest.mock('../app/repositories/userRepository');
 jest.mock('bcryptjs');
 jest.mock('jsonwebtoken');
@@ -27,7 +25,6 @@ describe('login controller', () => {
   });
 
   it('deve retornar 200 e token se login for bem-sucedido', async () => {
-    // Mocka retorno do repositório
     (userRepo.findUserByEmailOrName as jest.Mock).mockResolvedValue({
       id: process.env.USER_ID,
       email: process.env.USER_EMAIL,
@@ -35,7 +32,6 @@ describe('login controller', () => {
       password_hash: process.env.USER_PASSWORD
     });
 
-    // Mocka bcrypt e jwt
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
     (jwt.sign as jest.Mock).mockReturnValue('fake-token');
 
