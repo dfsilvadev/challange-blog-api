@@ -3,8 +3,8 @@ import { createUser, getUser } from '../../controllers/userController';
 import {
   userValidationRules,
   validate
-} from '../../middlewares/user/userMiddleware';
-import { authenticateToken } from '../../middlewares/auth/authenticationMiddleware';
+} from '../../middlewares/user/userValidate';
+import { authenticateToken } from '../../middlewares/auth/authenticationValidate';
 import { asyncHandler } from '../../../utils/asyncHandler';
 
 const router = express.Router();

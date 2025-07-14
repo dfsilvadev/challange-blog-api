@@ -6,7 +6,7 @@
   "author": "Daniel Silva <dfsilva.dxp@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "node dist/server.js",
+    "start": "node dist/main.js",
     "dev": "ts-node src/server.ts",
     "build": "tsc",
     "format": "prettier --write .",
