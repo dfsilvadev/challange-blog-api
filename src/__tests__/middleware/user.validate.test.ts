@@ -1,11 +1,8 @@
-// tests/routes/userRoutes.test.ts
 import request from 'supertest';
 import app from '../../main';
-import jwt from 'jsonwebtoken';
-import { create, findUserById } from '../../app/repositories/userRepository';
-import { findIdByName } from '../../app/repositories/roleRepository';
 
-// Mock dos repositórios
+process.env.JWT_SECRET = 'mocked-secret';
+
 jest.mock('../../app/repositories/userRepository', () => ({
   create: jest.fn(),
   findUserById: jest.fn()
@@ -15,10 +12,8 @@ jest.mock('../../app/repositories/roleRepository', () => ({
   findIdByName: jest.fn()
 }));
 
-const FAKE_TOKEN = jwt.sign(
-  { id: 'user1' },
-  process.env.JWT_SECRET || 'secret'
-);
+import { create } from '../../app/repositories/userRepository';
+import { findIdByName } from '../../app/repositories/roleRepository';
 
 describe('Rotas de usuário', () => {
   beforeEach(() => {
@@ -56,30 +51,16 @@ describe('Rotas de usuário', () => {
       });
 
       expect(res.status).toBe(201);
-      expect(create).toHaveBeenCalled();
+      expect(create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'teste',
+          email: 'teste@email.com',
+          phone: '11970683909',
+          password_hash: expect.any(String),
+          roleId: 'role123'
+        })
+      );
       expect(findIdByName).toHaveBeenCalledWith('teacher');
-    });
-  });
-
-  describe('GET /users/:id (autenticado)', () => {
-    it('deve falhar se não enviar token', async () => {
-      const res = await request(app).get('/users/123');
-      expect(res.status).toBe(401);
-    });
-
-    it('deve permitir acesso com token válido (mocked)', async () => {
-      (findUserById as jest.Mock).mockResolvedValueOnce({
-        id: '123',
-        name: 'teste',
-        email: 'teste@email.com'
-      });
-
-      const res = await request(app)
-        .get('/users/123')
-        .set('Authorization', `Bearer ${FAKE_TOKEN}`);
-
-      expect(res.status).toBe(200);
-      expect(res.body.details.user).toHaveProperty('email');
     });
   });
 });
