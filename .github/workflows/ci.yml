@@ -83,8 +83,20 @@ jobs:
   docker:
     name: Docker Validation
     runs-on: ubuntu-latest
-    needs: [ci]
+    needs: [test]
     steps:
       - uses: actions/checkout@v3
       - name: Build Docker image
         run: docker build -t blog-api:ci .
+      - name: Test Docker container
+        run: |
+          echo "Starting container for validation..."
+          docker run -d --name test-container -p 3000:3000 blog-api:ci
+          echo "Waiting for container to be ready..."
+          sleep 15
+          echo "Testing container health..."
+          # Testa o endpoint de health check
+          curl -f http://localhost:3000/health || exit 1
+          echo "Container validation completed successfully"
+          docker stop test-container
+          docker rm test-container
