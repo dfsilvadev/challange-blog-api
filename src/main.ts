@@ -1,10 +1,14 @@
 import cors from 'cors';
 import express from 'express';
-import routes from './app/routes/router';
+
 /**
  * Import configurations
  * Port, Node Environment, and Database URL
  */
+import config from './utils/config/config';
+
+const PORT = config.port || 3000;
+
 const app = express();
 
 /**
@@ -21,6 +25,10 @@ app.use(cors({ credentials: true, origin: 'http://localhost:5173' }));
 /**
  * Routes
  */
-app.use(routes);
+import routes from './app/routes/router';
 
-export default app;
+app.use(routes);
+app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
+  console.log(`🔥 Server started at http://localhost:${PORT}`);
+});
