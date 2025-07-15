@@ -1,7 +1,7 @@
-import { create, findUserById } from '../repositories/userRepository';
-import { findIdByName } from '../repositories/roleRepository';
-import { Request, RequestHandler, Response } from 'express';
 import bcrypt from 'bcryptjs';
+import { Request, RequestHandler, Response } from 'express';
+import { findIdByName } from '../repositories/roleRepository';
+import { create, findUserById } from '../repositories/userRepository';
 
 export const createUser: RequestHandler = async (
   req: Request,
@@ -13,8 +13,9 @@ export const createUser: RequestHandler = async (
     const ROLE_NAME = 'teacher';
     const role = await findIdByName(ROLE_NAME);
     const roleId = typeof role === 'string' ? role : role?.id || '';
-    /* 
-    Criptografar a senha 
+
+    /*
+    Criptografar a senha
     - Determina quantas vezes o algoritmo vai aplicar o hash
     - 10 significa que o algoritmo faz 2¹⁰ = 1024 iterações internas.
     */
