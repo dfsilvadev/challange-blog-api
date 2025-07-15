@@ -1,65 +1,53 @@
+import bcrypt from 'bcryptjs';
+
+import { createUser } from '../../app/controllers/userController';
+
+import { findIdByName } from '../../app/repositories/roleRepository';
 import {
   create,
   findUserByEmailOrName
 } from '../../app/repositories/userRepository';
-import { findIdByName } from '../../app/repositories/roleRepository';
-jest.mock('../../app/repositories/userRepository');
-import { v4 as uuidv4 } from 'uuid';
-import { createUser } from '../../app/controllers/userController';
-import bcrypt from 'bcryptjs';
 
-// Mocka o módulo completo de userRepository, roleRepository e bcryptjs
+import { mockUser, roleFake } from '../../utils/mocks/mockUser';
+
+jest.mock('../../app/repositories/userRepository');
 jest.mock('../../app/repositories/roleRepository');
 jest.mock('../../app/repositories/userRepository');
 jest.mock('bcryptjs');
-
-// Mocka o módulo de banco de dados, especificamente a função query
 jest.mock('../../database/db', () => ({
   query: jest.fn()
 }));
 
+const mockFindIdByName = findIdByName as jest.Mock;
+const mockCreate = create as jest.Mock;
+const mockFindUserByEmailOrName = findUserByEmailOrName as jest.Mock;
+const mockBcryptHash = bcrypt.hash as jest.Mock;
+
 describe('createUser controller', () => {
+  const body = {
+    name: 'teste',
+    email: 'teste@email.com',
+    phone: '11999999999',
+    password: 'hashedPassword'
+  };
+  const json = jest.fn();
+  const status = jest.fn(() => ({ json }));
+  const res = { status } as any;
+
   // Limpa todos os mocks antes de cada teste
   beforeEach(() => {
+    mockFindIdByName.mockResolvedValue({ id: roleFake });
+    mockBcryptHash.mockResolvedValue('hashedPassword');
+    mockFindUserByEmailOrName.mockResolvedValue(null);
     jest.clearAllMocks();
   });
 
-  it('deve criar um usuário com sucesso', async () => {
-    const roleFake = uuidv4();
-    const idFake = uuidv4();
+  it('should create a user with valid data', async () => {
+    mockCreate.mockResolvedValue(mockUser);
 
-    // Criar mocks
-    (findIdByName as jest.Mock).mockResolvedValue({ id: roleFake });
-    (bcrypt.hash as jest.Mock).mockResolvedValue('hashedPassword');
-    (create as jest.Mock).mockResolvedValue({
-      id: idFake,
-      name: 'teste',
-      email: 'teste@email.com',
-      phone: '11999999999',
-      password_hash: 'hashedPassword',
-      roleId: roleFake
-    });
-    // Objeto de requisição simulado
     const req = {
-      body: {
-        name: 'teste',
-        email: 'teste@email.com',
-        phone: '11999999999',
-        password: 'hashedPassword'
-      }
+      body
     } as any;
-
-    const json = jest.fn();
-    const status = jest.fn(() => ({ json }));
-    const res = { status } as any;
-
-    const userExists = await findUserByEmailOrName('teste');
-    if (userExists) {
-      return res.status(409).json({
-        error: true,
-        message: 'Usuário já cadastrado, favor verificar os dados informados.'
-      });
-    }
 
     await createUser(req, res, jest.fn());
 
@@ -67,34 +55,17 @@ describe('createUser controller', () => {
     expect(json).toHaveBeenCalledWith({
       status: 'OK',
       details: {
-        user: {
-          id: idFake,
-          name: 'teste',
-          email: 'teste@email.com',
-          phone: '11999999999',
-          password_hash: 'hashedPassword',
-          roleId: roleFake
-        }
+        user: mockUser
       }
     });
   });
 
   it('deve retornar 500 em caso de erro', async () => {
-    (findIdByName as jest.Mock).mockResolvedValue({ id: 'role123' });
-    (create as jest.Mock).mockRejectedValue(new Error('Erro na criação'));
+    mockCreate.mockRejectedValue(new Error('Erro na criação'));
 
     const req = {
-      body: {
-        name: 'testeErro',
-        email: 'teste@erro.com',
-        phone: '123',
-        password: 'qualquer'
-      }
+      body
     } as any;
-
-    const json = jest.fn();
-    const status = jest.fn(() => ({ json }));
-    const res = { status } as any;
 
     await createUser(req, res, jest.fn());
 
