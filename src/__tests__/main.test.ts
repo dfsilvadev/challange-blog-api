@@ -12,6 +12,19 @@ jest.mock('express', () => {
   return expressMock;
 });
 
+jest.mock('pg', () => {
+  return {
+    Client: jest.fn().mockImplementation(() => ({
+      connect: jest.fn().mockResolvedValue(undefined),
+      query: jest.fn().mockResolvedValue({ rows: [] })
+    })),
+    types: {
+      setTypeParser: jest.fn()
+    },
+    QueryResultRow: jest.fn()
+  };
+});
+
 describe('main.ts', () => {
   it('should start the server and call listen', () => {
     jest.resetModules();
@@ -22,9 +35,6 @@ describe('main.ts', () => {
     const listen = express.__listen;
 
     expect(listen).toHaveBeenCalled();
-    expect(listen).toHaveBeenCalledWith(
-      expect.any(Number),
-      expect.any(Function)
-    );
+    expect(listen).toHaveBeenCalledWith(3000, expect.any(Function));
   });
 });
