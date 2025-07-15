@@ -1,12 +1,25 @@
-import { login } from '../../app/controllers/authenticationController';
-import * as userRepo from '../../app/repositories/userRepository';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
+import { login } from '../../app/controllers/authenticationController';
+import * as userRepo from '../../app/repositories/userRepository';
 
 jest.mock('../../app/repositories/userRepository');
 jest.mock('bcryptjs');
 jest.mock('jsonwebtoken');
+
+jest.mock('pg', () => {
+  return {
+    Client: jest.fn().mockImplementation(() => ({
+      connect: jest.fn().mockResolvedValue(undefined),
+      query: jest.fn().mockResolvedValue({ rows: [] })
+    })),
+    types: {
+      setTypeParser: jest.fn()
+    },
+    QueryResultRow: jest.fn()
+  };
+});
 
 describe('login controller', () => {
   const idFake = uuidv4();
