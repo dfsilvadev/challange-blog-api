@@ -1,0 +1,84 @@
+name: 🐧 Versioning Control
+run-name: ${{ github.actor }} is running the tests and lint on GitHub Actions 🐧
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: CI - Build and Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: yarn install
+      - name: Run lint
+        run: yarn lint
+
+  test:
+    name: CI - Test Suite
+    runs-on: ubuntu-latest
+    needs: [ci]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgres://test:test@localhost:5432/test
+    steps:
+      - uses: actions/checkout@v3
+      - name: Instalar dependências
+        run: yarn install
+      - name: Build do projeto
+        run: yarn build
+      - name: Executar testes
+        run: yarn test
+      - name: Gerar cobertura
+        run: yarn test:coverage
+      - name: Upload cobertura
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage
+
+  sonarcloud:
+    name: CI - Sonar Analysis
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: SonarCloud Scan
+        run: yarn
+      - name: Test and coverage
+        run: yarn test
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+
+  docker:
+    name: Docker Validation
+    runs-on: ubuntu-latest
+    needs: [ci]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Docker image
+        run: docker build -t blog-api:ci .

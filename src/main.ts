@@ -11,11 +11,6 @@ const PORT = config.port || 3000;
 
 const app = express();
 
-const foo = 'bar'; // Example variable to ensure the file is not empty
-
-// eslint-disable-next-line no-console
-console.log(foo);
-
 /**
  * Config Response
  * JSON
