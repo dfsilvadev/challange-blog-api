@@ -9,6 +9,7 @@ import {
 } from '../../app/repositories/userRepository';
 
 import { mockUser, roleFake } from '../../utils/mocks/mockUser';
+import crypto from 'crypto';
 
 jest.mock('../../app/repositories/userRepository');
 jest.mock('../../app/repositories/roleRepository');
@@ -23,12 +24,17 @@ const mockCreate = create as jest.Mock;
 const mockFindUserByEmailOrName = findUserByEmailOrName as jest.Mock;
 const mockBcryptHash = bcrypt.hash as jest.Mock;
 
+const generateRandomHash = (): string => {
+  const randomString = crypto.randomBytes(10).toString('hex');
+  return bcrypt.hashSync(randomString, 10);
+};
+
 describe('createUser controller', () => {
   const body = {
     name: 'teste',
     email: 'teste@email.com',
     phone: '11999999999',
-    password: 'hashedPassword'
+    password: generateRandomHash()
   };
   const json = jest.fn();
   const status = jest.fn(() => ({ json }));
