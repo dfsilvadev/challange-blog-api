@@ -1,5 +1,13 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
+
+const generateRandomHash = (): string => {
+  const randomString = crypto.randomBytes(10).toString('hex');
+  return bcrypt.hashSync(randomString, 10);
+};
+
 const roleFake = uuidv4();
 const idFake = uuidv4();
 const mockUser = {
@@ -7,7 +15,7 @@ const mockUser = {
   name: 'teste',
   email: 'teste@email.com',
   phone: '11999999999',
-  password_hash: 'hashedPassword',
+  password_hash: generateRandomHash(),
   roleId: roleFake
 };
 
