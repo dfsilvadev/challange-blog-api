@@ -37,12 +37,12 @@ describe('createUser controller', () => {
   // Limpa todos os mocks antes de cada teste
   beforeEach(() => {
     mockFindIdByName.mockResolvedValue({ id: roleFake });
-    mockBcryptHash.mockResolvedValue('hashedPassword');
+    mockBcryptHash.mockResolvedValue(body.password);
     mockFindUserByEmailOrName.mockResolvedValue(null);
     jest.clearAllMocks();
   });
 
-  it('should create a user with valid data', async () => {
+  it('deve criar um usuário com dados válidos', async () => {
     mockCreate.mockResolvedValue(mockUser);
 
     const req = {

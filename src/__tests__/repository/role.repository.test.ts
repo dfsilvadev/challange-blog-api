@@ -15,8 +15,7 @@ describe('findIdByName', () => {
     expect(result).toBe('role-123');
   });
 
-  it('deve retornar string vazia se rows[0].id for falsy', async () => {
-    // Simula retorno com objeto vazio (sem id)
+  it('deve retornar string vazia se rows[0].id for false', async () => {
     (query as jest.Mock).mockResolvedValue([{}]);
 
     const result = await findIdByName('no-id');
