@@ -1,5 +1,5 @@
 import express from 'express';
-import { createPost } from '../controllers/postController';
+import { createPost, updatePost } from '../controllers/postController'; // Importe updatePost
 
 const router = express.Router();
 
@@ -23,5 +23,6 @@ const router = express.Router();
 // });
 
 router.post('/posts', createPost);
+router.put('/posts/:id', updatePost); // Nova rota para atualizar post
 
 export default router;
