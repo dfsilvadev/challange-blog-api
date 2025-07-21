@@ -1,24 +1,19 @@
-import express from 'express';
+import { Router } from 'express';
+import authRoutes from './auth';
+import userRoutes from './user';
 
-const router = express.Router();
+const router = Router();
 
-type User = {
-  id: number;
-  name: string;
-  age: number;
-};
-
-const users: User[] = [];
-
-router.get('/users', (req, res) => {
-  res.json(users);
+// Health check endpoint
+router.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    service: 'blog-api'
+  });
 });
 
-router.post('/users', (req, res) => {
-  const { name, age } = req.body;
-  const user: User = { id: users.length + 1, name, age };
-  users.push(user);
-  res.status(201).json(user);
-});
+router.use('/auth', authRoutes);
+router.use('/users', userRoutes);
 
 export default router;
