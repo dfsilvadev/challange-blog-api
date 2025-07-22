@@ -3,35 +3,18 @@ import { createPost } from '../controllers/postController';
 import { validaContent } from '../middlewares/validarContent';
 import { validaTitle } from '../middlewares/validarTitle';
 import { validaIsActive } from '../middlewares/validarIsActive';
-import { validarUUID } from '../middlewares/validarUUID';
+import { validarUser } from '../middlewares/validarUser';
+import { validarCategory } from '../middlewares/validarCategory';
 
 const router = express.Router();
 
-// type User = {
-//   id: number;
-//   name: string;
-//   age: number;
-// };
-
-// const users: User[] = [];
-
-// router.get('/users', (req, res) => {
-//   res.json(users);
-// });
-
-// router.post('/users', (req, res) => {
-//   const { name, age } = req.body;
-//   const user: User = { id: users.length + 1, name, age };
-//   users.push(user);
-//   res.status(201).json(user);
-// });
-
 router.post(
-  '/posts',
+  '/api/posts',
   validaContent,
   validaTitle,
   validaIsActive,
-  validarUUID,
+  validarUser,
+  validarCategory,
   createPost
 );
 
