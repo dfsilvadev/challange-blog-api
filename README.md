@@ -17,6 +17,7 @@ Esta API foi desenvolvida para gerenciar um sistema de blog educacional com func
 - **Express.js** - Framework web para Node.js
 - **PostgreSQL** - Banco de dados relacional
 - **pg** - Cliente PostgreSQL para Node.js
+- **JWT** - Auntenticação via JWT
 
 ### Desenvolvimento e Qualidade
 
@@ -102,6 +103,9 @@ POSTGRES_USER='<DB_USER>'
 POSTGRES_PASSWORD='<DB_PASSWORD>'
 POSTGRES_DB='<DB_NAME>'
 
+# JWT
+JWT_SECRET='<Key>'
+
 # EXPRESS
 PORT=3001
 NODE_ENV=development
@@ -128,6 +132,9 @@ docker compose up --build
 
 # Execuções subsequentes
 docker compose up -d
+
+# Teste de fluxo da execução do Docker
+docker build --progress=plain .
 ```
 
 A aplicação estará disponível em:
@@ -261,7 +268,7 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ## 🔮 Próximos Passos
 
-- [ ] Implementar autenticação JWT
+- [x] Implementar autenticação JWT
 - [ ] Adicionar validação de dados com express-validator
 - [ ] Implementar upload de imagens
 - [ ] Adicionar documentação com Swagger

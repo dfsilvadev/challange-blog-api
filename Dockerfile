@@ -1,15 +1,19 @@
-FROM node:16-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
+# Copiar apenas arquivos de dependências primeiro para melhor cache
+COPY package.json yarn.lock ./
 
-RUN npm install
+# Instalar dependências
+RUN yarn install --frozen-lockfile
 
+# Copiar código fonte
 COPY . .
 
-RUN npm run build
+# Build da aplicação
+RUN yarn build
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["yarn", "start"]
