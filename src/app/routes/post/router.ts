@@ -1,5 +1,6 @@
 import express from 'express';
-import { createPost, updatePost } from '../controllers/postController'; // Importe updatePost
+import { createPost, updatePost } from '../../controllers/postController';
+import { validateUpdatePost } from '../../middlewares/validateUpdatePost'; // Importe o novo middleware
 
 const router = express.Router();
 
@@ -23,6 +24,7 @@ const router = express.Router();
 // });
 
 router.post('/posts', createPost);
-router.put('/posts/:id', updatePost); // Nova rota para atualizar post
+// Aplica o middleware validateUpdatePost antes do controlador updatePost
+router.put('/posts/:id', validateUpdatePost, updatePost);
 
 export default router;

@@ -30,7 +30,7 @@ app.use(cors({ credentials: true, origin: 'http://localhost:5173' }));
 /**
  * Routes
  */
-import routes from './app/routes/router';
+import routes from './app/routes/post/router';
 
 app.use(routes);
 

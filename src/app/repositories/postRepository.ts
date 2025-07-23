@@ -1,5 +1,12 @@
 import { query } from '../../database/db';
 
+interface UpdatePostData {
+  title?: string;
+  content?: string;
+  is_active?: boolean;
+  category_id?: string;
+}
+
 export const create = async (
   title: string,
   content: string,
@@ -20,38 +27,29 @@ export const create = async (
 
 export const updatePost = async (
   id: string,
-  title?: string,
-  content?: string,
-  is_active?: boolean,
-  category_id?: string
+  data: UpdatePostData // Agora recebe um objeto com os dados a serem atualizados
 ) => {
   const fields: string[] = [];
-  const values: (string | boolean)[] = [id];
-  let paramIndex = 2;
+  const values: (string | boolean | undefined)[] = [id]; // Adicionado 'undefined' ao tipo dos valores para maior flexibilidade
 
-  if (title !== undefined) {
-    fields.push(`title = $${paramIndex}`);
-    values.push(title);
-    paramIndex++;
-  }
-  if (content !== undefined) {
-    fields.push(`content = $${paramIndex}`);
-    values.push(content);
-    paramIndex++;
-  }
-  if (is_active !== undefined) {
-    fields.push(`is_active = $${paramIndex}`);
-    values.push(is_active);
-    paramIndex++;
-  }
-  if (category_id !== undefined) {
-    fields.push(`category_id = $${paramIndex}`);
-    values.push(category_id);
-    paramIndex++;
+  let paramIndex = 2; // Começa em 2 porque $1 é o ID
+
+  // Itera sobre as chaves do objeto 'data' para construir a query dinamicamente
+  for (const key in data) {
+    // Adicionamos a asserção 'as keyof UpdatePostData' aqui
+    if (
+      Object.prototype.hasOwnProperty.call(data, key) &&
+      data[key as keyof UpdatePostData] !== undefined
+    ) {
+      fields.push(`${key} = $${paramIndex}`);
+      values.push(data[key as keyof UpdatePostData]); // E aqui também
+      paramIndex++;
+    }
   }
 
+  // Se nenhum campo válido foi fornecido no objeto 'data', retorna null (safeguard)
   if (fields.length === 0) {
-    return null; // Nenhum campo para atualizar
+    return null;
   }
 
   const setClause = fields.join(', ');

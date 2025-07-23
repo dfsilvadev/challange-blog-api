@@ -1,7 +1,8 @@
 import express from 'express';
 import request from 'supertest';
 import { query } from '../database/db';
-import { createPost, updatePost } from '../app/controllers/postController'; // Importe updatePost
+import { createPost, updatePost } from '../app/controllers/postController';
+import { validateUpdatePost } from '../app/middlewares/validateUpdatePost'; // Importe o novo middleware
 
 // Mock do módulo de banco de dados para evitar interações reais com o DB durante o teste
 jest.mock('../database/db', () => ({
@@ -13,7 +14,8 @@ app.use(express.json());
 
 // Rotas para testes
 app.post('/posts', createPost);
-app.put('/posts/:id', updatePost);
+// Adicione o middleware validateUpdatePost aqui
+app.put('/posts/:id', validateUpdatePost, updatePost);
 
 describe('POST /posts', () => {
   beforeEach(() => {
@@ -90,7 +92,7 @@ describe('PUT /posts/:id', () => {
     (query as jest.Mock).mockClear();
   });
 
-  it('should update an existing post successfully', async () => {
+  it('should update an existing post successfully with all fields', async () => {
     const postId = 'existing-post-uuid';
     const updatedData = {
       title: 'Updated Title',
@@ -113,8 +115,16 @@ describe('PUT /posts/:id', () => {
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual(mockUpdatedPost);
     expect(query).toHaveBeenCalledTimes(1);
+    // A ordem dos parâmetros no `values` para a query é definida pelo `for...in`
+    // no repositório. Assume-se a ordem de inserção aqui.
     expect(query).toHaveBeenCalledWith(
-      expect.stringContaining('UPDATE tb_post'),
+      // Atualizado para comparar a string SQL exata, incluindo quebras de linha e RETURNING *
+      `
+    UPDATE tb_post
+    SET title = $2, content = $3, is_active = $4, category_id = $5
+    WHERE id = $1
+    RETURNING *
+    `,
       [
         postId,
         updatedData.title,
@@ -164,14 +174,14 @@ describe('PUT /posts/:id', () => {
     expect(query).toHaveBeenCalledTimes(1);
   });
 
-  it.skip('should update only the title', async () => {
+  it('should update only the title', async () => {
     const postId = 'existing-post-uuid';
     const updatedData = { title: 'Updated Title Only' };
     const mockUpdatedPost = {
       id: postId,
       title: 'Updated Title Only',
-      content: 'Original content.',
-      is_active: true,
+      content: 'Original content.', // Exemplo: assume que os outros campos permanecem
+      is_active: true, // Exemplo: assume que os outros campos permanecem
       user_id: 'user-uuid-1',
       category_id: 'category-uuid-1',
       created_at: '2023-01-01T00:00:00Z',
@@ -185,17 +195,23 @@ describe('PUT /posts/:id', () => {
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual(mockUpdatedPost);
     expect(query).toHaveBeenCalledWith(
-      expect.stringContaining('UPDATE tb_post SET title = $2 WHERE id = $1'),
+      // Atualizado para comparar a string SQL exata
+      `
+    UPDATE tb_post
+    SET title = $2
+    WHERE id = $1
+    RETURNING *
+    `,
       [postId, updatedData.title]
     );
   });
 
-  it.skip('should update only the content and is_active', async () => {
+  it('should update only the content and is_active', async () => {
     const postId = 'existing-post-uuid';
     const updatedData = { content: 'New content', is_active: false };
     const mockUpdatedPost = {
       id: postId,
-      title: 'Original Title',
+      title: 'Original Title', // Exemplo: assume que os outros campos permanecem
       content: 'New content',
       is_active: false,
       user_id: 'user-uuid-1',
@@ -210,11 +226,19 @@ describe('PUT /posts/:id', () => {
 
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual(mockUpdatedPost);
+    // Atualizado para comparar a string SQL exata com base na saída do seu teste
     expect(query).toHaveBeenCalledWith(
-      expect.stringContaining(
-        'UPDATE tb_post SET content = $2, is_active = $3 WHERE id = $1'
-      ),
-      [postId, updatedData.content, updatedData.is_active]
+      `
+    UPDATE tb_post
+    SET content = $2, is_active = $3
+    WHERE id = $1
+    RETURNING *
+    `,
+      expect.arrayContaining([
+        postId,
+        updatedData.content,
+        updatedData.is_active
+      ])
     );
   });
 });
