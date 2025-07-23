@@ -1,21 +1,12 @@
-import express from 'express';
-import { createPost } from '../controllers/postController';
-import { validaContent } from '../middlewares/validarContent';
-import { validaTitle } from '../middlewares/validarTitle';
-import { validaIsActive } from '../middlewares/validarIsActive';
-import { validarUser } from '../middlewares/validarUser';
-import { validarCategory } from '../middlewares/validarCategory';
+import { Router } from 'express';
+import postsRoutes from './post';
+import authRoutes from './auth';
+import userRoutes from './user';
 
-const router = express.Router();
+const router = Router();
 
-router.post(
-  '/api/posts',
-  validaContent,
-  validaTitle,
-  validaIsActive,
-  validarUser,
-  validarCategory,
-  createPost
-);
+router.use('/post', postsRoutes);
+router.use('/auth', authRoutes);
+router.use('/users', userRoutes);
 
 export default router;

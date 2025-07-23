@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { isUUID } from 'validator';
-import * as userRepository from '../repositories/userRepository';
+import { query } from '../../../database/db';
 
 export const validarCategory = async (
   req: Request,
@@ -14,7 +14,16 @@ export const validarCategory = async (
     return;
   }
 
-  const exists = await userRepository.existsById(category_id);
+  const result = await query<{ exists: boolean }>(
+    `
+      SELECT EXISTS (
+        SELECT 1 FROM tb_category WHERE id = $1
+      ) AS "exists"
+      `,
+    [category_id]
+  );
+
+  const exists = !!result[0]?.exists;
 
   if (!exists) {
     res.status(404).json({ error: true, details: 'CATEGORY_NOT_FOUND' });

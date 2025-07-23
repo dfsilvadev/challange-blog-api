@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { isUUID } from 'validator';
-import * as userRepository from '../repositories/userRepository';
+import * as userRepository from '../../repositories/userRepository';
 
 export const validarUser = async (
   req: Request,
