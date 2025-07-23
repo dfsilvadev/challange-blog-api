@@ -1,24 +1,9 @@
 import express from 'express';
+import { validarUUID } from '../middlewares/validarUUID';
+import { getPostById } from '../controllers/postController';
 
 const router = express.Router();
 
-type User = {
-  id: number;
-  name: string;
-  age: number;
-};
-
-const users: User[] = [];
-
-router.get('/users', (req, res) => {
-  res.json(users);
-});
-
-router.post('/users', (req, res) => {
-  const { name, age } = req.body;
-  const user: User = { id: users.length + 1, name, age };
-  users.push(user);
-  res.status(201).json(user);
-});
+router.get('/posts/:id', validarUUID, getPostById);
 
 export default router;

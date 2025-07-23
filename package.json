@@ -23,6 +23,7 @@
     "test:all": "jest --detectOpenHandles --forceExit --coverage"
   },
   "dependencies": {
+    "@types/validator": "^13.15.2",
     "cors": "^2.8.5",
     "dotenv": "^17.0.1",
     "express": "^5.1.0",
