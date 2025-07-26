@@ -6,21 +6,19 @@ jest.mock('../../database/db', () => ({
 }));
 
 jest.mock('../../app/repositories/postRepository', () => ({
-  updatePost: jest.fn(),
+  updatePost: jest.fn()
 }));
 
 jest.mock('../../app/middlewares/handleValidation', () => ({
-  validate: jest.fn((req, res, next) => next()),
+  validate: jest.fn((req, res, next) => next())
 }));
 
 jest.mock('../../app/middlewares/Post/validateUpdate', () => ({
   updatePostValidationRules: [],
   validateUpdatePost: jest.fn((req, res, next) => {
-
     next();
-  }),
+  })
 }));
-
 
 describe('updatePost Controller', () => {
   let mockRequest: Partial<Request>;
@@ -40,7 +38,7 @@ describe('updatePost Controller', () => {
     mockRequest = {
       params: { id: 'some-uuid-id' },
       body: updatePayload,
-      updateData: updatePayload,
+      updateData: updatePayload
     };
     mockResponse = {
       status: jest.fn().mockReturnThis(),
@@ -63,17 +61,18 @@ describe('updatePost Controller', () => {
 
     postRepository.updatePost.mockResolvedValue(mockUpdatedPost);
 
-    await updatePost(mockRequest as Request, mockResponse as Response, mockNext);
-
-    expect(postRepository.updatePost).toHaveBeenCalledWith(
-      'some-uuid-id',
-      {
-        title: 'Updated Title',
-        content: 'Updated Content',
-        is_active: true,
-        category_id: 'some-category-uuid'
-      }
+    await updatePost(
+      mockRequest as Request,
+      mockResponse as Response,
+      mockNext
     );
+
+    expect(postRepository.updatePost).toHaveBeenCalledWith('some-uuid-id', {
+      title: 'Updated Title',
+      content: 'Updated Content',
+      is_active: true,
+      category_id: 'some-category-uuid'
+    });
     expect(mockResponse.status).toHaveBeenCalledWith(200);
     expect(mockResponse.json).toHaveBeenCalledWith({
       message: 'Post atualizado com sucesso!',
@@ -85,21 +84,33 @@ describe('updatePost Controller', () => {
     const postRepository = require('../../app/repositories/postRepository');
     postRepository.updatePost.mockResolvedValue(null);
 
-    await updatePost(mockRequest as Request, mockResponse as Response, mockNext);
+    await updatePost(
+      mockRequest as Request,
+      mockResponse as Response,
+      mockNext
+    );
 
     expect(postRepository.updatePost).toHaveBeenCalled();
     expect(mockResponse.status).toHaveBeenCalledWith(404);
-    expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Post não encontrado.' });
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      message: 'Post não encontrado.'
+    });
   });
 
   it('should return 500 if an error occurs during update', async () => {
     const postRepository = require('../../app/repositories/postRepository');
     postRepository.updatePost.mockRejectedValue(new Error('Database error'));
 
-    await updatePost(mockRequest as Request, mockResponse as Response, mockNext);
+    await updatePost(
+      mockRequest as Request,
+      mockResponse as Response,
+      mockNext
+    );
 
     expect(postRepository.updatePost).toHaveBeenCalled();
     expect(mockResponse.status).toHaveBeenCalledWith(500);
-    expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Erro ao atualizar o post.' });
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      message: 'Erro ao atualizar o post.'
+    });
   });
 });

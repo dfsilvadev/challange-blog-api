@@ -9,10 +9,10 @@ export const validate = (req: Request, res: Response, next: NextFunction) => {
   }
 
   const extractedErrors: string[] = [];
-  errors.array().map(err => extractedErrors.push(err.msg));
+  errors.array().map((err) => extractedErrors.push(err.msg));
 
   return res.status(422).json({
     error: true,
-    details: extractedErrors,
+    details: extractedErrors
   });
 };

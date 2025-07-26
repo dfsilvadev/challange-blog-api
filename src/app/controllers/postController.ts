@@ -36,17 +36,17 @@ export const updatePost: RequestHandler = async (
   const updateData = req.updateData;
 
   try {
-    const updatedPost = await postRepository.updatePost(
-      id,
-      updateData!
-    );
+    const updatedPost = await postRepository.updatePost(id, updateData!);
 
     if (updatedPost) {
-      res.status(200).json({ message: 'Post atualizado com sucesso!', post: updatedPost });
+      res
+        .status(200)
+        .json({ message: 'Post atualizado com sucesso!', post: updatedPost });
     } else {
       res.status(404).json({ message: 'Post não encontrado.' });
     }
-  } catch (_error: any) { // 'error' tipado como 'any' e prefixado com '_', e uso de 'void'
+  } catch (_error: any) {
+    // 'error' tipado como 'any' e prefixado com '_', e uso de 'void'
     void _error; // Explicitamente marca _error como "usado" para o linter
     res.status(500).json({ message: 'Erro ao atualizar o post.' });
   }

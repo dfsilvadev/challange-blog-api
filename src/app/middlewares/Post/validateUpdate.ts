@@ -13,7 +13,8 @@ declare module 'express' {
 }
 
 // Middleware para construir o objeto updateData e verificar se há dados para atualização
-export const validateUpdatePost: RequestHandler = ( // Agora RequestHandler está definido
+export const validateUpdatePost: RequestHandler = (
+  // Agora RequestHandler está definido
   req: Request,
   res: Response,
   next: NextFunction
@@ -46,17 +47,24 @@ export const validateUpdatePost: RequestHandler = ( // Agora RequestHandler est�
 export const updatePostValidationRules: ValidationChain[] = [
   body('title')
     .optional()
-    .notEmpty().withMessage('O título não pode ser vazio se fornecido.')
-    .isString().withMessage('O título deve ser uma string.')
-    .isLength({ min: 5 }).withMessage('O título deve ter no mínimo 5 caracteres.'),
+    .notEmpty()
+    .withMessage('O título não pode ser vazio se fornecido.')
+    .isString()
+    .withMessage('O título deve ser uma string.')
+    .isLength({ min: 5 })
+    .withMessage('O título deve ter no mínimo 5 caracteres.'),
   body('content')
     .optional()
-    .notEmpty().withMessage('O conteúdo não pode ser vazio se fornecido.')
-    .isString().withMessage('O conteúdo deve ser uma string.'),
+    .notEmpty()
+    .withMessage('O conteúdo não pode ser vazio se fornecido.')
+    .isString()
+    .withMessage('O conteúdo deve ser uma string.'),
   body('is_active')
     .optional()
-    .isBoolean().withMessage('O status de ativo deve ser um valor booleano.'),
+    .isBoolean()
+    .withMessage('O status de ativo deve ser um valor booleano.'),
   body('category_id')
     .optional()
-    .isUUID().withMessage('O ID da categoria deve ser um UUID válido.'),
+    .isUUID()
+    .withMessage('O ID da categoria deve ser um UUID válido.')
 ];
