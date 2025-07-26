@@ -13,7 +13,6 @@ import crypto from 'crypto';
 
 jest.mock('../../app/repositories/userRepository');
 jest.mock('../../app/repositories/roleRepository');
-jest.mock('../../app/repositories/userRepository');
 jest.mock('bcryptjs');
 jest.mock('../../database/db', () => ({
   query: jest.fn()
