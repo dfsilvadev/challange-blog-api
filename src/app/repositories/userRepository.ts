@@ -98,11 +98,3 @@ export const create = async ({
   );
   return row;
 };
-
-export const existsById = async (id: string): Promise<boolean> => {
-  const result = await query<{ exists: boolean }>(
-    `SELECT EXISTS (SELECT 1 FROM tb_user WHERE id = $1) AS exists`,
-    [id]
-  );
-  return result[0]?.exists || false;
-};

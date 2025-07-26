@@ -5,7 +5,7 @@
 ## 📝 Tipo de mudança
 
 - [ ] Bugfix
-- [X] Nova feature
+- [x] Nova feature
 - [ ] Refatoração
 - [ ] Documentação
 - [ ] Testes
@@ -24,7 +24,7 @@
 - [x] Adicionei/atualizei testes relacionados
 - [ ] Atualizei a documentação (README, Wiki, etc)
 - [ ] Adicionei/atualizei o changelog
-- [X] O código segue o padrão do projeto (lint, prettier)
+- [x] O código segue o padrão do projeto (lint, prettier)
 - [x] O PR está pronto para revisão
 
 ## 📚 Referências

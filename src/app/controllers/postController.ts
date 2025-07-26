@@ -14,5 +14,5 @@ export const createPost: RequestHandler = async (
     user_id,
     category_id
   );
-  res.status(201).json(post);
+  res.status(201).json({ status: 'ok', details: post });
 };

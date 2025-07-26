@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { isUUID } from 'validator';
-import * as userRepository from '../../repositories/userRepository';
+import { findUserById } from '../../repositories/userRepository';
 
 export const validarUser = async (
   req: Request,
@@ -14,9 +14,9 @@ export const validarUser = async (
     return;
   }
 
-  const exists = await userRepository.existsById(user_id);
+  const user = await findUserById(user_id);
 
-  if (!exists) {
+  if (!user) {
     res.status(404).json({ error: true, details: 'USER_NOT_FOUND' });
     return;
   }

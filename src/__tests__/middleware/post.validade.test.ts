@@ -5,10 +5,10 @@ import { validaIsActive } from '../../app/middlewares/Post/validarIsActive';
 import { validarUser } from '../../app/middlewares/Post/validarUser';
 import { validarCategory } from '../../app/middlewares/Post/validarCategory';
 import * as userRepository from '../../app/repositories/userRepository';
-import { query } from '../../database/db';
+import { findCategoryById } from '../../app/repositories/postRepository';
 
 jest.mock('../../app/repositories/userRepository');
-jest.mock('../../database/db');
+jest.mock('../../app/repositories/postRepository');
 
 describe('Middlewares', () => {
   let next: jest.Mock;
@@ -80,7 +80,14 @@ describe('Middlewares', () => {
 
   describe('validarUser', () => {
     it('passa se user existe', async () => {
-      (userRepository.existsById as jest.Mock).mockResolvedValueOnce(true);
+      (userRepository.findUserById as jest.Mock).mockResolvedValueOnce({
+        id: validUuid,
+        email: 'teste@example.com',
+        name: 'Test User',
+        phone: '912345678',
+        roleid: 1
+      });
+
       const req = { body: { user_id: validUuid } } as Request;
       await validarUser(req, res, next);
       expect(next).toHaveBeenCalled();
@@ -97,7 +104,8 @@ describe('Middlewares', () => {
     });
 
     it('falha se user não existe', async () => {
-      (userRepository.existsById as jest.Mock).mockResolvedValueOnce(false);
+      (userRepository.findUserById as jest.Mock).mockResolvedValueOnce(null);
+
       const req = { body: { user_id: validUuid } } as Request;
       await validarUser(req, res, next);
       expect(res.status).toHaveBeenCalledWith(404);
@@ -110,7 +118,7 @@ describe('Middlewares', () => {
 
   describe('validarCategory', () => {
     it('passa se category existe', async () => {
-      (query as jest.Mock).mockResolvedValueOnce([{ exists: true }]);
+      (findCategoryById as jest.Mock).mockResolvedValueOnce(true);
       const req = { body: { category_id: validUuid } } as Request;
       await validarCategory(req, res, next);
       expect(next).toHaveBeenCalled();
@@ -127,7 +135,7 @@ describe('Middlewares', () => {
     });
 
     it('falha se category não existe', async () => {
-      (query as jest.Mock).mockResolvedValueOnce([{ exists: false }]);
+      (findCategoryById as jest.Mock).mockResolvedValueOnce(false);
       const req = { body: { category_id: validUuid } } as Request;
       await validarCategory(req, res, next);
       expect(res.status).toHaveBeenCalledWith(404);
