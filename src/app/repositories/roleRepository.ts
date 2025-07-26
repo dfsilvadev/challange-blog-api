@@ -5,9 +5,9 @@ interface RoleFound {
 
 export const findIdByName = async (name: string): Promise<RoleFound | ''> => {
   const rows = await query(
-    `SELECT id  
-     FROM tb_role  
-     WHERE "name" = $1  
+    `SELECT id
+     FROM tb_role
+     WHERE "name" = $1
      LIMIT 1;`,
     [name]
   );
