@@ -39,7 +39,6 @@ describe('createUser controller', () => {
   const status = jest.fn(() => ({ json }));
   const res = { status } as any;
 
-  // Limpa todos os mocks antes de cada teste
   beforeEach(() => {
     mockFindIdByName.mockResolvedValue({ id: roleFake });
     mockBcryptHash.mockResolvedValue(body.password);
