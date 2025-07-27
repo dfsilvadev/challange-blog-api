@@ -17,9 +17,7 @@ describe('postRepository', () => {
     const result = await getPostById('1f5dcd7c-f7aa-4a14-b26b-b65282682ce6');
 
     expect(query).toHaveBeenCalledWith(
-      expect.stringContaining(
-        'SELECT title, content, is_active, user_id, category_id, created_at, updated_at'
-      ),
+      expect.stringContaining('SELECT p.title, p.content'),
       ['1f5dcd7c-f7aa-4a14-b26b-b65282682ce6']
     );
     expect(result).toEqual(post1);

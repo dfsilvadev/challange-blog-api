@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import express from 'express';
 
 import { validarUUID } from '../middlewares/validarUUID';
 import { getPostById } from '../controllers/postController';

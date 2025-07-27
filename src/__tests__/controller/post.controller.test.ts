@@ -45,7 +45,7 @@ describe('GET /posts/:id', () => {
   });
 
   it('deve retornar 404 pois o post não foi encontrado', async () => {
-    (postRepository.getPostById as jest.Mock).mockRejectedValue('');
+    (postRepository.getPostById as jest.Mock).mockRejectedValue(null);
 
     const req = mockRequest({ id: '12' }) as Request;
     const res = mockResponse() as Response;
