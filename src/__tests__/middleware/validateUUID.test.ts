@@ -1,4 +1,4 @@
-import { validarUUID } from '../../app//middlewares/utils/validateUtils';
+import { validarUUID } from '../../app/middlewares/utils/validateUtils';
 import { Request, Response, NextFunction } from 'express';
 
 describe('validarUUID middleware (com mocks)', () => {
