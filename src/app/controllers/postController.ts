@@ -1,17 +1,6 @@
 import * as postRepository from '../repositories/postRepository';
 import { Request, RequestHandler, Response } from 'express';
 
-declare module 'express' {
-  export interface Request {
-    updateData?: {
-      title?: string;
-      content?: string;
-      is_active?: boolean;
-      category_id?: string;
-    };
-  }
-}
-
 export const createPost: RequestHandler = async (
   req: Request,
   res: Response
