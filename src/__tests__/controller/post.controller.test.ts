@@ -25,7 +25,7 @@ describe('GET /posts/:id', () => {
     jest.clearAllMocks();
   });
 
-  it('deve retornar o post com sucesso', async () => {
+  it('should return the post successfully', async () => {
     (postRepository.getPostById as jest.Mock).mockResolvedValue(post1);
     const req = mockRequest({
       id: '1f5dcd7c-f7aa-4a14-b26b-b65282682ce6'
@@ -44,7 +44,7 @@ describe('GET /posts/:id', () => {
     });
   });
 
-  it('deve retornar 404 pois o post não foi encontrado', async () => {
+  it('should return error 404 because the post was not found', async () => {
     (postRepository.getPostById as jest.Mock).mockRejectedValue(null);
 
     const req = mockRequest({ id: '12' }) as Request;

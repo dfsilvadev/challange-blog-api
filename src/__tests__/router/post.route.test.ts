@@ -26,7 +26,7 @@ describe('GET /posts/:id rota', () => {
     jest.clearAllMocks();
   });
 
-  it('deve chamar validarUUID e o getPostById do controller', async () => {
+  it('should call "validarUUID" and getPostById in the controller', async () => {
     const response = await request(app).get(`/posts/${post1.id}`);
 
     expect(validarUUID).toHaveBeenCalled();
@@ -35,7 +35,7 @@ describe('GET /posts/:id rota', () => {
     expect(response.body).toEqual({ status: 'Ok', details: post1 });
   });
 
-  it('deve chamar validarUUID mas dará erro antes por ser inválido', async () => {
+  it('should call "validarUUID" but an error should occur before it because its invalid', async () => {
     (validarUUID as jest.Mock).mockImplementation((req, res, _next) => {
       res.status(400).json({ error: true, details: 'INVALID_UUID' });
     });

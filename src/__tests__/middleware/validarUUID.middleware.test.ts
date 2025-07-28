@@ -26,7 +26,7 @@ describe('validarUUID', () => {
     jest.clearAllMocks();
   });
 
-  it('deve retornar undefined pois sucesso não há retorno', async () => {
+  it('should return undefined because the success does not return anything', async () => {
     (validator.isUUID as jest.Mock).mockReturnValue(true);
     const req1 = mockRequest({
       id: '1f5dcd7c-f7aa-4a14-b26b-b65282682ce6'
@@ -40,7 +40,7 @@ describe('validarUUID', () => {
     expect(res2.status).not.toHaveBeenCalled();
   });
 
-  it('deve retornar erro pois o id não é UUID', async () => {
+  it('should return error because the id is invalid', async () => {
     (validator.isUUID as jest.Mock).mockReturnValue(false);
     const req = mockRequest({ id: '12' }) as Request;
     const res = mockResponse() as Response;
