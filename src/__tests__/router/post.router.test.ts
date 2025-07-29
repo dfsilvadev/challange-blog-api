@@ -9,12 +9,12 @@ jest.mock('../../app/controllers/postController', () => ({
   )
 }));
 
-jest.mock('../../app/middlewares/validarUUID', () => ({
+jest.mock('../../app/middlewares/utils/validateUUID', () => ({
   validarUUID: jest.fn((req, res, next) => next())
 }));
 
 import { getPostById } from '../../app/controllers/postController';
-import { validarUUID } from '../../app/middlewares/validarUUID';
+import { validarUUID } from '../../app/middlewares/utils/validateUUID';
 
 describe('GET /posts/:id rota', () => {
   let app: express.Express;

@@ -7,7 +7,7 @@ jest.mock('validator', () => ({
 }));
 
 import { Request, Response, NextFunction } from 'express';
-import { validarUUID } from '../../app/middlewares/validarUUID';
+import { validarUUID } from '../../app/middlewares/utils/validateUUID';
 import validator from 'validator';
 
 const mockRequest = (params = {}): Partial<Request> => ({ params });
@@ -21,7 +21,7 @@ const mockResponse = (): Partial<Response> => {
 
 const mockNext: NextFunction = jest.fn();
 
-describe('validarUUID', () => {
+describe('validateUUID', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { validarUUID } from '../middlewares/validarUUID';
+import { validarUUID } from '../middlewares/utils/validateUUID';
 import { getPostById } from '../controllers/postController';
 
 import authRoutes from './auth';
