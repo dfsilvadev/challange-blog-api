@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { isUUID } from 'validator';
 
-export const validarUUID = (
+export const validateUUID = (
   req: Request,
   res: Response,
   next: NextFunction

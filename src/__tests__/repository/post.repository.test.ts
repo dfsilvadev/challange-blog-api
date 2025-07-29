@@ -1,33 +1,60 @@
+import { findById, deleteById } from '../../app/repositories/postRepository';
+
+import { mockPost } from '../../utils/mocks/mockPost';
+
+import { query } from '../../database/db';
+import { v4 as uuidv4 } from 'uuid';
+
 jest.mock('../../database/db', () => ({
   query: jest.fn()
 }));
 
-import { post1 } from '../../mocks/modulePosts';
-import { getPostById } from '../../app/repositories/postRepository';
-import { query } from '../../database/db';
+const mockedQuery = query as jest.Mock;
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('postRepository', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+  describe('findById', () => {
+    it('deve retornar um POST quando encontrado por ID', async () => {
+      mockedQuery.mockResolvedValueOnce([mockPost]);
+
+      const result = await findById(mockPost.id);
+
+      expect(mockedQuery).toHaveBeenCalledWith(
+        expect.stringContaining('SELECT'),
+        [mockPost.id]
+      );
+      expect(result).toEqual(mockPost);
+    });
+
+    it('deve retornar null se nenhum post for encontrado', async () => {
+      mockedQuery.mockResolvedValueOnce([]);
+
+      const result = await findById(uuidv4());
+      expect(result).toBeNull();
+    });
   });
 
-  it('should return an existing post', async () => {
-    (query as jest.Mock).mockResolvedValue([post1]);
+  describe('deleteById', () => {
+    it('deve deletar um POST por ID', async () => {
+      mockedQuery.mockResolvedValueOnce([mockPost]);
 
-    const result = await getPostById('1f5dcd7c-f7aa-4a14-b26b-b65282682ce6');
+      const result = await deleteById(mockPost.id);
 
-    expect(query).toHaveBeenCalledWith(
-      expect.stringContaining('SELECT p.title, p.content'),
-      ['1f5dcd7c-f7aa-4a14-b26b-b65282682ce6']
-    );
-    expect(result).toEqual(post1);
-  });
+      expect(mockedQuery).toHaveBeenCalledWith(
+        expect.stringContaining('DELETE FROM'),
+        [mockPost.id]
+      );
+      expect(result).toEqual(mockPost);
+    });
 
-  it('should return null because the post was not found', async () => {
-    (query as jest.Mock).mockResolvedValue([]);
+    it('deve retornar undefined se nenhum post for encontrado para deletar', async () => {
+      mockedQuery.mockResolvedValueOnce([]);
 
-    const result = await getPostById('1f5dcd7c-f7aa-4a14-b26b-b65282682ce6');
-
-    expect(result).toBeNull();
+      const result = await deleteById(uuidv4());
+      expect(result).toBeUndefined();
+    });
   });
 });

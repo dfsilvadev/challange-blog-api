@@ -1,6 +1,6 @@
 import { query } from '../../database/db';
 
-export const getPostById = async (id: string) => {
+export const findById = async (id: string) => {
   const result = await query(
     `
       SELECT p.title, p.content, p.is_active, p.user_id, p.category_id, p.created_at, p.updated_at,
@@ -13,4 +13,14 @@ export const getPostById = async (id: string) => {
     [id]
   );
   return result[0] || null;
+};
+
+export const deleteById = async (id: string) => {
+  const [row] = await query(
+    `
+      DELETE FROM tb_post WHERE id = $1
+    `,
+    [id]
+  );
+  return row;
 };

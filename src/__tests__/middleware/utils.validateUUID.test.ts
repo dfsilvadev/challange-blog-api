@@ -1,57 +1,40 @@
+import { validateUUID } from '../../app/middlewares/utils/validateUtils';
 import { Request, Response, NextFunction } from 'express';
-import { validarUUID } from '../../app/middlewares/utils/validateUUID';
-import validator from 'validator';
 
-jest.mock('../../app/repositories/postRepository');
-jest.mock('../../database/db', () => ({
-  query: jest.fn()
-}));
-jest.mock('validator', () => ({
-  isUUID: jest.fn(() => true)
-}));
+describe('validateUUID middleware (com mocks)', () => {
+  let req: Partial<Request>;
+  let res: Partial<Response>;
+  let next: jest.Mock;
 
-const mockRequest = (params = {}): Partial<Request> => ({ params });
-
-const mockResponse = (): Partial<Response> => {
-  const res: Partial<Response> = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
-  return res;
-};
-
-const mockNext: NextFunction = jest.fn();
-
-describe('validateUUID', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    req = { params: {} };
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
+    next = jest.fn();
   });
 
-  it('should return undefined because the success does not return anything', async () => {
-    (validator.isUUID as jest.Mock).mockReturnValue(true);
-    const req1 = mockRequest({
-      id: '1f5dcd7c-f7aa-4a14-b26b-b65282682ce6'
-    }) as Request;
-    const res2 = mockResponse() as Response;
-    validarUUID(req1, res2, mockNext);
-    expect(validator.isUUID).toHaveBeenCalledWith(
-      '1f5dcd7c-f7aa-4a14-b26b-b65282682ce6'
-    );
-    expect(res2.json).not.toHaveBeenCalled();
-    expect(res2.status).not.toHaveBeenCalled();
+  it('deve retornar UUID válido', () => {
+    req.params = { id: '123e4567-e89b-12d3-a456-426614174000' };
+
+    validateUUID(req as Request, res as Response, next as NextFunction);
+
+    expect(next).toHaveBeenCalled();
+    expect(res.status).not.toHaveBeenCalled();
+    expect(res.json).not.toHaveBeenCalled();
   });
 
-  it('should return error because the id is invalid', async () => {
-    (validator.isUUID as jest.Mock).mockReturnValue(false);
-    const req = mockRequest({ id: '12' }) as Request;
-    const res = mockResponse() as Response;
+  it('deve retornar 400 se o UUID for inválido', () => {
+    req.params = { id: 'invalido' };
 
-    validarUUID(req, res, mockNext);
+    validateUUID(req as Request, res as Response, next as NextFunction);
 
-    expect(validator.isUUID).toHaveBeenCalledWith('12');
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({
       error: true,
       details: 'INVALID_UUID'
     });
+    expect(next).not.toHaveBeenCalled();
   });
 });

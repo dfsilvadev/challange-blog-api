@@ -1,50 +1,108 @@
-import request from 'supertest';
-import express from 'express';
-import router from '../../app/routes/router';
-import { post1 } from '../../mocks/modulePosts';
+import { removeById, getById } from '../../app/controllers/postController';
 
-jest.mock('../../app/controllers/postController', () => ({
-  getPostById: jest.fn((req, res) =>
-    res.status(200).json({ status: 'Ok', details: post1 })
-  )
+import { deleteById, findById } from '../../app/repositories/postRepository';
+
+import { mockPost } from '../../utils/mocks/mockPost';
+
+jest.mock('../../app/repositories/postRepository');
+jest.mock('../../database/db', () => ({
+  query: jest.fn()
 }));
 
-jest.mock('../../app/middlewares/utils/validateUUID', () => ({
-  validarUUID: jest.fn((req, res, next) => next())
-}));
+const mockFindById = findById as jest.Mock;
+const mockDeleteById = deleteById as jest.Mock;
 
-import { getPostById } from '../../app/controllers/postController';
-import { validarUUID } from '../../app/middlewares/utils/validateUUID';
+describe('GET /post/:id', () => {
+  const json = jest.fn();
+  const status = jest.fn(() => ({ json }));
 
-describe('GET /posts/:id rota', () => {
-  let app: express.Express;
+  const req = {
+    params: { id: mockPost.id }
+  } as any;
+  const res = { status } as any;
 
   beforeEach(() => {
-    app = express();
-    app.use(express.json());
-    app.use(router);
+    mockFindById.mockResolvedValue({ id: mockPost.id });
     jest.clearAllMocks();
   });
 
-  it('should call "validarUUID" and getPostById in the controller', async () => {
-    const response = await request(app).get(`/posts/${post1.id}`);
+  it('deve retornar o POST por ID', async () => {
+    await getById(req, res, jest.fn());
 
-    expect(validarUUID).toHaveBeenCalled();
-    expect(getPostById).toHaveBeenCalled();
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual({ status: 'Ok', details: post1 });
+    expect(status).toHaveBeenCalledWith(200);
+    expect(json).toHaveBeenCalledWith({
+      status: 'Ok',
+      details: { id: mockPost.id }
+    });
   });
 
-  it('should call "validarUUID" but an error should occur before it because its invalid', async () => {
-    (validarUUID as jest.Mock).mockImplementation((req, res, _next) => {
-      res.status(400).json({ error: true, details: 'INVALID_UUID' });
+  it('deve retornar 404 se o ID do POST não existir', async () => {
+    mockFindById.mockResolvedValue(null);
+
+    await getById(req, res, jest.fn());
+
+    expect(status).toHaveBeenCalledWith(404);
+    expect(json).toHaveBeenCalledWith({
+      error: true,
+      details: 'NOT_FOUND_POST'
+    });
+  });
+});
+
+describe('DELETE /post/:id', () => {
+  const json = jest.fn();
+  const status = jest.fn(() => ({ json }));
+
+  const req = {
+    params: { id: mockPost.id }
+  } as any;
+  const res = { status } as any;
+
+  beforeEach(() => {
+    mockFindById.mockResolvedValue({ id: mockPost.id });
+    mockDeleteById.mockResolvedValue({ id: mockPost.id });
+    jest.clearAllMocks();
+  });
+
+  describe('removeById success', () => {
+    it('deve chamar removeById e retornar status 200', async () => {
+      mockFindById.mockResolvedValue(mockPost.id);
+      mockDeleteById.mockResolvedValue(mockPost.id);
+
+      await removeById(req, res, jest.fn());
+
+      expect(status).toHaveBeenCalledWith(200);
+      expect(json).toHaveBeenCalledWith({
+        status: 'OK',
+        details: { post: mockPost.id }
+      });
     });
 
-    const response = await request(app).get('/posts/12');
+    it('deve retornar 404 se o ID do POST não existir', async () => {
+      mockFindById.mockResolvedValue(null);
+      mockDeleteById.mockResolvedValue(null);
 
-    expect(validarUUID).toHaveBeenCalled();
-    expect(getPostById).not.toHaveBeenCalled();
-    expect(response.status).toBe(400);
-    expect(response.body).toEqual({ error: true, details: 'INVALID_UUID' });
+      await removeById(req, res, jest.fn());
+
+      expect(status).toHaveBeenCalledWith(404);
+      expect(json).toHaveBeenCalledWith({
+        error: true,
+        details: 'NOT_FOUND_POST'
+      });
+    });
+
+    it('deve retornar 500 se voltar qualquer erro, fora o 404', async () => {
+      mockFindById.mockImplementation(() => {
+        throw new Error('SERVER_ERROR_INTERNAL');
+      });
+
+      await removeById(req, res, jest.fn());
+
+      expect(status).toHaveBeenCalledWith(500);
+      expect(json).toHaveBeenCalledWith({
+        error: true,
+        details: new Error('SERVER_ERROR_INTERNAL')
+      });
+    });
   });
 });

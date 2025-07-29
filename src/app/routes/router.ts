@@ -1,16 +1,13 @@
 import { Router } from 'express';
 
-import { validarUUID } from '../middlewares/utils/validateUUID';
-import { getPostById } from '../controllers/postController';
-
 import authRoutes from './auth';
 import userRoutes from './user';
+import postRoutes from './post';
 
 const router = Router();
 
-router.get('/posts/:id', validarUUID, getPostById);
-
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
+router.use('/post', postRoutes);
 
 export default router;
