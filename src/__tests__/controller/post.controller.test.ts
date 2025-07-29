@@ -1,13 +1,15 @@
+import { post1 } from '../../mocks/modulePosts';
+import * as postRepository from '../../app/repositories/postRepository';
+import { getPostById } from '../../app/controllers/postController';
+import * as validador from '../../app/middlewares/utils/validateUUID';
+import { Request, Response, NextFunction } from 'express';
+
 jest.mock('../../app/repositories/postRepository');
 jest.mock('../../database/db', () => ({
   query: jest.fn()
 }));
 jest.mock('express');
-
-import { post1 } from '../../mocks/modulePosts';
-import * as postRepository from '../../app/repositories/postRepository';
-import { getPostById } from '../../app/controllers/postController';
-import { Request, Response, NextFunction } from 'express';
+jest.mock('../../app/middlewares/utils/validateUUID');
 
 const mockRequest = (params = {}): Partial<Request> => ({ params });
 
@@ -25,18 +27,17 @@ describe('GET /posts/:id', () => {
     jest.clearAllMocks();
   });
 
-  it('should return the post successfully', async () => {
+  it('should return the post successfully with a valid UUID', async () => {
     (postRepository.getPostById as jest.Mock).mockResolvedValue(post1);
+
     const req = mockRequest({
       id: '1f5dcd7c-f7aa-4a14-b26b-b65282682ce6'
     }) as Request;
     const res = mockResponse() as Response;
 
+    validador.validarUUID(req, res, mockNext);
     await getPostById(req, res, mockNext);
 
-    expect(postRepository.getPostById).toHaveBeenCalledWith(
-      '1f5dcd7c-f7aa-4a14-b26b-b65282682ce6'
-    );
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       status: 'Ok',

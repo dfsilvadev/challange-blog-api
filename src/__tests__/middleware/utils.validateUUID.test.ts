@@ -1,3 +1,7 @@
+import { Request, Response, NextFunction } from 'express';
+import { validarUUID } from '../../app/middlewares/utils/validateUUID';
+import validator from 'validator';
+
 jest.mock('../../app/repositories/postRepository');
 jest.mock('../../database/db', () => ({
   query: jest.fn()
@@ -5,10 +9,6 @@ jest.mock('../../database/db', () => ({
 jest.mock('validator', () => ({
   isUUID: jest.fn(() => true)
 }));
-
-import { Request, Response, NextFunction } from 'express';
-import { validarUUID } from '../../app/middlewares/utils/validateUUID';
-import validator from 'validator';
 
 const mockRequest = (params = {}): Partial<Request> => ({ params });
 
