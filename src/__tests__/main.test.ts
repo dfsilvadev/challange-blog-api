@@ -1,6 +1,6 @@
 jest.mock('express', () => {
   const actualExpress = jest.requireActual('express');
-  const listen = jest.fn((port, cb) => cb && cb());
+  const listen = jest.fn((port, cb) => cb?.());
   const expressMock = () => {
     const app = actualExpress();
     app.listen = listen;

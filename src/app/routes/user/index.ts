@@ -1,9 +1,7 @@
 import express from 'express';
 import { createUser, getUser } from '../../controllers/userController';
-import {
-  userValidationRules,
-  validate
-} from '../../middlewares/user/userValidate';
+import { userValidationRules } from '../../middlewares/user/validateUser';
+import { validate } from '../../middlewares/utils/validateUtils';
 import { authenticateToken } from '../../middlewares/auth/authenticationValidate';
 import { asyncHandler } from '../../../utils/asyncHandler';
 

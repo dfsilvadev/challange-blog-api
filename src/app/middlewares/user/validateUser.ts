@@ -1,5 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
-import { body, validationResult } from 'express-validator';
+import { body } from 'express-validator';
 
 const userValidationRules = [
   body('email').isEmail().withMessage('Email inválido'),
@@ -21,13 +20,4 @@ const userValidationRules = [
     .withMessage('Deve conter ao menos um caractere especial')
 ];
 
-const validate = (req: Request, res: Response, next: NextFunction): void => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    res.status(400).json({ errors: errors.array() });
-    return;
-  }
-  next();
-};
-
-export { userValidationRules, validate };
+export { userValidationRules };

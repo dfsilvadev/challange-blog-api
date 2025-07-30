@@ -1,21 +1,25 @@
-import { createPost } from '../../controllers/postController';
-import { validaContent } from '../../middlewares/Post/validarContent';
-import { validaTitle } from '../../middlewares/Post/validarTitle';
-import { validaIsActive } from '../../middlewares/Post/validarIsActive';
-import { validarUser } from '../../middlewares/Post/validarUser';
-import { validarCategory } from '../../middlewares/Post/validarCategory';
 import { Router } from 'express';
+
+import { authenticateToken } from '../../middlewares/auth/authenticationValidate';
+import { postValidationRules } from '../../middlewares/post/validatePost';
+
+import { asyncHandler } from '../../../utils/asyncHandler';
+
+import { removeById, getById, created } from '../../controllers/postController';
+
+import { validateUUID } from '../../middlewares/utils/validateUtils';
 
 const router = Router();
 
-router.post(
-  '/post',
-  validaContent,
-  validaTitle,
-  validaIsActive,
-  validarUser,
-  validarCategory,
-  createPost
+router.get('/:id', validateUUID, getById);
+
+router.delete(
+  '/:id',
+  asyncHandler(authenticateToken),
+  validateUUID,
+  removeById
 );
+
+router.post('/', asyncHandler(authenticateToken), postValidationRules, created);
 
 export default router;

@@ -1,148 +1,71 @@
-import { Request, Response } from 'express';
-import { validaTitle } from '../../app/middlewares/Post/validarTitle';
-import { validaContent } from '../../app/middlewares/Post/validarContent';
-import { validaIsActive } from '../../app/middlewares/Post/validarIsActive';
-import { validarUser } from '../../app/middlewares/Post/validarUser';
-import { validarCategory } from '../../app/middlewares/Post/validarCategory';
-import * as userRepository from '../../app/repositories/userRepository';
-import { findCategoryById } from '../../app/repositories/postRepository';
+import { postValidationRules } from '../../app/middlewares/post/validatePost';
+import { validationResult, ValidationChain } from 'express-validator';
+import { Request } from 'express';
 
-jest.mock('../../app/repositories/userRepository');
-jest.mock('../../app/repositories/postRepository');
+const mockRequest = (body: any): Request => {
+  return {
+    body
+  } as Request;
+};
 
-describe('Middlewares', () => {
-  let next: jest.Mock;
-  let res: Response;
+const runValidation = async (rules: ValidationChain[], req: Request) => {
+  for (const rule of rules) {
+    await rule.run(req);
+  }
+  return validationResult(req);
+};
 
-  const validUuid = '3f2504e0-4f89-11d3-9a0c-0305e82c3301';
+describe('Validações do postValidationRules (sem usar e.param)', () => {
+  it('retorna erro se o título não for uma string', async () => {
+    const req = mockRequest({ title: 123 });
+    const result = await runValidation(postValidationRules, req);
 
-  beforeEach(() => {
-    next = jest.fn();
-    res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn()
-    } as unknown as Response;
+    const errorMessages = result.array().map((e) => e.msg);
+    expect(errorMessages).toContain('O Título deve ser uma string');
   });
 
-  describe('validaTitle', () => {
-    it('passa se válido', () => {
-      const req = { body: { title: 'Título' } } as Request;
-      validaTitle(req, res, next);
-      expect(next).toHaveBeenCalled();
-    });
+  it('retorna erro se o conteúdo não for uma string', async () => {
+    const req = mockRequest({ content: false });
+    const result = await runValidation(postValidationRules, req);
 
-    it('falha se inválido', () => {
-      const req = { body: {} } as Request;
-      validaTitle(req, res, next);
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        error: true,
-        details: 'INVALID_TITLE'
-      });
-    });
+    const errorMessages = result.array().map((e) => e.msg);
+    expect(errorMessages).toContain('O Conteúdo deve ser uma string');
   });
 
-  describe('validaContent', () => {
-    it('passa se válido', () => {
-      const req = { body: { content: 'Conteúdo' } } as Request;
-      validaContent(req, res, next);
-      expect(next).toHaveBeenCalled();
-    });
+  it('retorna erro se is_active não for booleano', async () => {
+    const req = mockRequest({ is_active: 'sim' });
+    const result = await runValidation(postValidationRules, req);
 
-    it('falha se inválido', () => {
-      const req = { body: {} } as Request;
-      validaContent(req, res, next);
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        error: true,
-        details: 'INVALID_CONTENT'
-      });
-    });
+    const errorMessages = result.array().map((e) => e.msg);
+    expect(errorMessages).toContain('O campo Ativo deve ser um booleano');
   });
 
-  describe('validaIsActive', () => {
-    it('passa se boolean', () => {
-      const req = { body: { is_active: true } } as Request;
-      validaIsActive(req, res, next);
-      expect(next).toHaveBeenCalled();
-    });
+  it('retorna erro se user_id não for um UUID válido', async () => {
+    const req = mockRequest({ user_id: '123' });
+    const result = await runValidation(postValidationRules, req);
 
-    it('falha se não boolean', () => {
-      const req = { body: { is_active: 'sim' } } as Request;
-      validaIsActive(req, res, next);
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        error: true,
-        details: 'INVALID_IS_ACTIVE'
-      });
-    });
+    const errorMessages = result.array().map((e) => e.msg);
+    expect(errorMessages).toContain('O Usuário deve ter um UUID válido');
   });
 
-  describe('validarUser', () => {
-    it('passa se user existe', async () => {
-      (userRepository.findUserById as jest.Mock).mockResolvedValueOnce({
-        id: validUuid,
-        email: 'teste@example.com',
-        name: 'Test User',
-        phone: '912345678',
-        roleid: 1
-      });
+  it('retorna erro se category_id não for um UUID válido', async () => {
+    const req = mockRequest({ category_id: 'abc' });
+    const result = await runValidation(postValidationRules, req);
 
-      const req = { body: { user_id: validUuid } } as Request;
-      await validarUser(req, res, next);
-      expect(next).toHaveBeenCalled();
-    });
-
-    it('falha se UUID inválido', async () => {
-      const req = { body: { user_id: 'invalido' } } as Request;
-      await validarUser(req, res, next);
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        error: true,
-        details: 'INVALID_UUID'
-      });
-    });
-
-    it('falha se user não existe', async () => {
-      (userRepository.findUserById as jest.Mock).mockResolvedValueOnce(null);
-
-      const req = { body: { user_id: validUuid } } as Request;
-      await validarUser(req, res, next);
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        error: true,
-        details: 'USER_NOT_FOUND'
-      });
-    });
+    const errorMessages = result.array().map((e) => e.msg);
+    expect(errorMessages).toContain('A Categoria deve ter um UUID válido');
   });
 
-  describe('validarCategory', () => {
-    it('passa se category existe', async () => {
-      (findCategoryById as jest.Mock).mockResolvedValueOnce(true);
-      const req = { body: { category_id: validUuid } } as Request;
-      await validarCategory(req, res, next);
-      expect(next).toHaveBeenCalled();
+  it('passa se todos os campos forem válidos', async () => {
+    const req = mockRequest({
+      title: 'Título válido',
+      content: 'Conteúdo válido',
+      is_active: true,
+      user_id: 'd290f1ee-6c54-4b01-90e6-d701748f0851',
+      category_id: 'c0a8012e-7f4f-4f33-b3b2-9a47f845a6aa'
     });
 
-    it('falha se UUID inválido', async () => {
-      const req = { body: { category_id: 'invalido' } } as Request;
-      await validarCategory(req, res, next);
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        error: true,
-        details: 'INVALID_UUID'
-      });
-    });
-
-    it('falha se category não existe', async () => {
-      (findCategoryById as jest.Mock).mockResolvedValueOnce(false);
-      const req = { body: { category_id: validUuid } } as Request;
-      await validarCategory(req, res, next);
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        error: true,
-        details: 'CATEGORY_NOT_FOUND'
-      });
-    });
+    const result = await runValidation(postValidationRules, req);
+    expect(result.isEmpty()).toBe(true);
   });
 });
