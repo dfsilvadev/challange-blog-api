@@ -1,4 +1,5 @@
 import { query } from '../../database/db';
+
 interface CreateUserParams {
   name: string;
   email: string;

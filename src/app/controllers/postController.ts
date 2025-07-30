@@ -1,6 +1,29 @@
 import { Request, RequestHandler, Response } from 'express';
 
-import { deleteById, findById } from '../repositories/postRepository';
+import { create, deleteById, findById } from '../repositories/postRepository';
+import { findUserById } from '../repositories/userRepository';
+
+export const created: RequestHandler = async (req: Request, res: Response) => {
+  const { title, content, is_active, user_id, category_id } = req.body;
+
+  try {
+    const user = await findUserById(user_id);
+    if (!user) {
+      res.status(404).json({ error: true, details: 'NOT_FOUND_USER' });
+      return;
+    }
+    const category = await findById(category_id);
+    if (!category) {
+      res.status(404).json({ error: true, details: 'NOT_FOUND_CATEGORY' });
+      return;
+    }
+
+    const post = await create(title, content, is_active, user_id, category_id);
+    res.status(201).json({ status: 'OK', details: post });
+  } catch (err) {
+    res.status(500).json({ error: true, details: err });
+  }
+};
 
 export const getById: RequestHandler = async (req: Request, res: Response) => {
   const { id } = req.params;

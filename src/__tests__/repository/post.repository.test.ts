@@ -1,4 +1,8 @@
-import { deleteById, findById } from '../../app/repositories/postRepository';
+import {
+  create,
+  deleteById,
+  findById
+} from '../../app/repositories/postRepository';
 
 import { mockPost } from '../../utils/mocks/mockPost';
 
@@ -139,6 +143,87 @@ describe('postRepository', () => {
 
       expect(mockedQuery).toHaveBeenCalledWith(expect.any(String), [testId]);
       expect(typeof mockedQuery.mock.calls[0][1][0]).toBe('string');
+    });
+  });
+
+  describe('create', () => {
+    it('deve inserir um post e retornar o resultado', async () => {
+      mockedQuery.mockResolvedValueOnce([mockPost]);
+
+      const result = await create(
+        mockPost.title,
+        mockPost.content,
+        mockPost.is_active,
+        mockPost.user_id,
+        mockPost.category_id
+      );
+
+      expect(query).toHaveBeenCalledWith(
+        `
+        INSERT INTO tb_post(title, content, is_active, user_id, category_id)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING *
+        `,
+        [
+          mockPost.title,
+          mockPost.content,
+          mockPost.is_active,
+          mockPost.user_id,
+          mockPost.category_id
+        ]
+      );
+
+      expect(result).toEqual([mockPost]);
+    });
+
+    it('deve propagar erro do banco de dados', async () => {
+      const errorMessage = 'Erro de banco';
+      mockedQuery.mockRejectedValueOnce(new Error(errorMessage));
+
+      await expect(
+        create(
+          mockPost.title,
+          mockPost.content,
+          mockPost.is_active,
+          mockPost.user_id,
+          mockPost.category_id
+        )
+      ).rejects.toThrow(errorMessage);
+    });
+
+    it('deve passar os parâmetros corretamente para o query', async () => {
+      mockedQuery.mockResolvedValueOnce([mockPost]);
+
+      await create(
+        mockPost.title,
+        mockPost.content,
+        mockPost.is_active,
+        mockPost.user_id,
+        mockPost.category_id
+      );
+
+      expect(query).toHaveBeenCalledWith(expect.any(String), [
+        mockPost.title,
+        mockPost.content,
+        mockPost.is_active,
+        mockPost.user_id,
+        mockPost.category_id
+      ]);
+    });
+
+    it('deve retornar um array com o post criado', async () => {
+      mockedQuery.mockResolvedValueOnce([mockPost]);
+
+      const result = await create(
+        mockPost.title,
+        mockPost.content,
+        mockPost.is_active,
+        mockPost.user_id,
+        mockPost.category_id
+      );
+
+      expect(Array.isArray(result)).toBe(true);
+      expect(result[0]).toEqual(mockPost);
     });
   });
 });
