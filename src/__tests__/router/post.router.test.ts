@@ -37,7 +37,7 @@ describe('post Controller', () => {
       expect(status).toHaveBeenCalledWith(200);
       expect(json).toHaveBeenCalledWith({
         status: 'OK',
-        details: { post: mockPost.id }
+        details: 'POST_DELETED'
       });
     });
 
