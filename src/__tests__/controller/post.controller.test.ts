@@ -1,14 +1,18 @@
-import { post1 } from '../../mocks/modulePosts';
-import { findById } from '../../app/repositories/postRepository';
-import { getById } from '../../app/controllers/postController';
-import { validateUUID } from '../../app/middlewares/utils/validateUtils';
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
+import { getById } from '../../app/controllers/postController';
+
+import { findById } from '../../app/repositories/postRepository';
+
+import { validateUUID } from '../../app/middlewares/utils/validateUtils';
+
+import { mockPost } from '../../utils/mocks/mockPost';
+
+jest.mock('express');
 jest.mock('../../app/repositories/postRepository');
 jest.mock('../../database/db', () => ({
   query: jest.fn()
 }));
-jest.mock('express');
 jest.mock('../../app/middlewares/utils/validateUtils');
 
 const mockRequest = (params = {}): Partial<Request> => ({ params });
@@ -28,7 +32,7 @@ describe('GET /posts/:id', () => {
   });
 
   it('should return the post successfully with a valid UUID', async () => {
-    (findById as jest.Mock).mockResolvedValue(post1);
+    (findById as jest.Mock).mockResolvedValue(mockPost);
 
     const req = mockRequest({
       id: '1f5dcd7c-f7aa-4a14-b26b-b65282682ce6'
@@ -41,7 +45,7 @@ describe('GET /posts/:id', () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       status: 'Ok',
-      details: post1
+      details: mockPost
     });
   });
 

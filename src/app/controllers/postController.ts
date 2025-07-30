@@ -1,7 +1,29 @@
 import { Request, RequestHandler, Response } from 'express';
-import { deleteById, findById, create } from '../repositories/postRepository';
+
+import { create, deleteById, findById } from '../repositories/postRepository';
 import { findUserById } from '../repositories/userRepository';
-import * as categories from '../repositories/categoryRepository';
+
+export const created: RequestHandler = async (req: Request, res: Response) => {
+  const { title, content, is_active, user_id, category_id } = req.body;
+
+  try {
+    const user = await findUserById(user_id);
+    if (!user) {
+      res.status(404).json({ error: true, details: 'NOT_FOUND_USER' });
+      return;
+    }
+    const category = await findById(category_id);
+    if (!category) {
+      res.status(404).json({ error: true, details: 'NOT_FOUND_CATEGORY' });
+      return;
+    }
+
+    const post = await create(title, content, is_active, user_id, category_id);
+    res.status(201).json({ status: 'OK', details: post });
+  } catch (err) {
+    res.status(500).json({ error: true, details: err });
+  }
+};
 
 export const getById: RequestHandler = async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -28,34 +50,11 @@ export const removeById: RequestHandler = async (
     const validate = await findById(id);
 
     if (!validate) {
-      res.status(404).json({ error: true, details: 'NOT_FOUND_POST' });
-    } else {
-      const post = await deleteById(id);
-
-      res.status(200).json({ status: 'OK', details: { post } });
-    }
-  } catch (err) {
-    res.status(500).json({ error: true, details: err });
-  }
-};
-
-export const created: RequestHandler = async (req: Request, res: Response) => {
-  const { title, content, is_active, user_id, category_id } = req.body;
-
-  try {
-    const user = await findUserById(user_id);
-    if (!user) {
-      res.status(404).json({ error: true, details: 'NOT_FOUND_USER' });
-      return;
-    }
-    const category = await categories.findById(category_id);
-    if (!category) {
-      res.status(404).json({ error: true, details: 'NOT_FOUND_CATEGORY' });
-      return;
+      return res.status(404).json({ error: true, details: 'NOT_FOUND_POST' });
     }
 
-    const post = await create(title, content, is_active, user_id, category_id);
-    res.status(201).json({ status: 'OK', details: post });
+    await deleteById(id);
+    res.status(200).json({ status: 'OK', details: 'POST_DELETED' });
   } catch (err) {
     res.status(500).json({ error: true, details: err });
   }

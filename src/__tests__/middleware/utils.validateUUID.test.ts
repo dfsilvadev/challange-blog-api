@@ -1,9 +1,9 @@
-import {
-  validateUUID,
-  validate
-} from '../../app/middlewares/utils/validateUtils';
+import { NextFunction, Request, Response } from 'express';
 import { validationResult } from 'express-validator';
-import { Request, Response, NextFunction } from 'express';
+import {
+  validate,
+  validateUUID
+} from '../../app/middlewares/utils/validateUtils';
 
 jest.mock('express-validator', () => ({
   validationResult: jest.fn()

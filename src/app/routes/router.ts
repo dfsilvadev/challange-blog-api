@@ -1,11 +1,12 @@
 import { Router } from 'express';
 
 import authRoutes from './auth';
-import userRoutes from './user';
 import postRoutes from './post';
+import userRoutes from './user';
 
 const router = Router();
 
+// Health check endpoint
 router.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
@@ -15,7 +16,7 @@ router.get('/health', (req, res) => {
 });
 
 router.use('/auth', authRoutes);
-router.use('/users', userRoutes);
+router.use('/user', userRoutes);
 router.use('/post', postRoutes);
 
 export default router;
