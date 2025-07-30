@@ -1,5 +1,13 @@
-import { validateUUID } from '../../app/middlewares/utils/validateUtils';
+import {
+  validateUUID,
+  validate
+} from '../../app/middlewares/utils/validateUtils';
+import { validationResult } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
+
+jest.mock('express-validator', () => ({
+  validationResult: jest.fn()
+}));
 
 describe('validateUUID middleware (com mocks)', () => {
   let req: Partial<Request>;
@@ -36,5 +44,46 @@ describe('validateUUID middleware (com mocks)', () => {
       details: 'INVALID_UUID'
     });
     expect(next).not.toHaveBeenCalled();
+  });
+});
+
+describe('validate middleware', () => {
+  const mockReq = {} as Request;
+  const mockRes = {
+    status: jest.fn().mockReturnThis(),
+    json: jest.fn()
+  } as unknown as Response;
+  const mockNext = jest.fn();
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('deve chamar next() se não houver erros de validação', () => {
+    (validationResult as unknown as jest.Mock).mockReturnValue({
+      isEmpty: () => true
+    });
+
+    validate(mockReq, mockRes, mockNext);
+
+    expect(validationResult).toHaveBeenCalledWith(mockReq);
+    expect(mockNext).toHaveBeenCalled();
+    expect(mockRes.status).not.toHaveBeenCalled();
+    expect(mockRes.json).not.toHaveBeenCalled();
+  });
+
+  it('deve retornar 400 e json com erros se houver erros de validação', () => {
+    const fakeErrors = [{ msg: 'Campo obrigatório', param: 'name' }];
+    (validationResult as unknown as jest.Mock).mockReturnValue({
+      isEmpty: () => false,
+      array: () => fakeErrors
+    });
+
+    validate(mockReq, mockRes, mockNext);
+
+    expect(validationResult).toHaveBeenCalledWith(mockReq);
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith({ errors: fakeErrors });
+    expect(mockNext).not.toHaveBeenCalled();
   });
 });
