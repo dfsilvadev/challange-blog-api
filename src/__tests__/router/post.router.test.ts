@@ -28,7 +28,7 @@ describe('post Controller', () => {
   });
 
   describe('removeById success', () => {
-    it('deve chamar removeById e retornar status 200', async () => {
+    it('should call removeById and return status 200', async () => {
       mockFindById.mockResolvedValue(mockPost.id);
       mockDeleteById.mockResolvedValue(mockPost.id);
 
@@ -41,7 +41,7 @@ describe('post Controller', () => {
       });
     });
 
-    it('deve retornar 404 se o ID do POST não existir', async () => {
+    it('should return 404 if the POST ID does not exist', async () => {
       mockFindById.mockResolvedValue(null);
       mockDeleteById.mockResolvedValue(null);
 
@@ -54,7 +54,7 @@ describe('post Controller', () => {
       });
     });
 
-    it('deve retornar 500 se voltar qualquer erro, fora o 404', async () => {
+    it('should return 500 if any error occurs, other than 404', async () => {
       mockFindById.mockImplementation(() => {
         throw new Error('SERVER_ERROR_INTERNAL');
       });
