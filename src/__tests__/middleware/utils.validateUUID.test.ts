@@ -1,7 +1,8 @@
-import { validarUUID } from '../../app/middlewares/utils/validateUtils';
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
-describe('validarUUID middleware (com mocks)', () => {
+import { validateUUID } from '../../app/middlewares/utils/validateUtils';
+
+describe('validateUUID middleware (com mocks)', () => {
   let req: Partial<Request>;
   let res: Partial<Response>;
   let next: jest.Mock;
@@ -15,20 +16,20 @@ describe('validarUUID middleware (com mocks)', () => {
     next = jest.fn();
   });
 
-  it('deve retornar UUID válido', () => {
+  it('should return a valid UUID', () => {
     req.params = { id: '123e4567-e89b-12d3-a456-426614174000' };
 
-    validarUUID(req as Request, res as Response, next as NextFunction);
+    validateUUID(req as Request, res as Response, next as NextFunction);
 
     expect(next).toHaveBeenCalled();
     expect(res.status).not.toHaveBeenCalled();
     expect(res.json).not.toHaveBeenCalled();
   });
 
-  it('deve retornar 400 se o UUID for inválido', () => {
+  it('should return 400 if the UUID is invalid', () => {
     req.params = { id: 'invalido' };
 
-    validarUUID(req as Request, res as Response, next as NextFunction);
+    validateUUID(req as Request, res as Response, next as NextFunction);
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({

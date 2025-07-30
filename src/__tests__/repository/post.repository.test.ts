@@ -19,7 +19,7 @@ describe('postRepository', () => {
 
   describe('findById', () => {
     it('should return a POST when found by ID', async () => {
-      mockedQuery.mockResolvedValueOnce([mockPost]);
+      mockedQuery.mockResolvedValueOnce(mockPost);
 
       const result = await findById(mockPost.id);
 
@@ -31,7 +31,7 @@ describe('postRepository', () => {
     });
 
     it('should return null if no post is found', async () => {
-      mockedQuery.mockResolvedValueOnce([]);
+      mockedQuery.mockResolvedValueOnce(null);
 
       const result = await findById(uuidv4());
       expect(result).toBeNull();
@@ -56,7 +56,7 @@ describe('postRepository', () => {
       await findById(mockPost.id);
 
       expect(mockedQuery).toHaveBeenCalledWith(
-        expect.stringContaining('WHERE id = $1'),
+        expect.stringContaining('WHERE p.id = $1'),
         [mockPost.id]
       );
     });
