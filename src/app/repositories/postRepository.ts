@@ -80,6 +80,8 @@ export const count = async (filters: PostCountFilters = {}) => {
   if (filters.isActive !== undefined) {
     values.push(filters.isActive);
     conditions.push(`tb_post.is_active = $${paramIndex++}::boolean`);
+  } else {
+    conditions.push('tb_post.is_active = TRUE');
   }
 
   const whereClause = `WHERE ${conditions.join(' AND ')}`;
