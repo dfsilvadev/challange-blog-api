@@ -1,13 +1,13 @@
 import {
-  findUserByEmailOrName,
-  findUserById,
   alter,
   alterPassword,
-  create
+  create,
+  findUserByEmailOrName,
+  findUserById
 } from '../../app/repositories/userRepository';
 
-import { query } from '../../database/db';
 import { v4 as uuidv4 } from 'uuid';
+import { query } from '../../database/db';
 
 jest.mock('../../database/db', () => ({
   query: jest.fn()
@@ -21,7 +21,7 @@ beforeEach(() => {
 
 describe('userRepository', () => {
   describe('findUserByEmailOrName', () => {
-    it('deve retornar um usuário quando encontrado por e-mail ou nome', async () => {
+    it('should return a user when found by email or name', async () => {
       const mockUser = {
         id: uuidv4(),
         name: 'teste',
@@ -41,7 +41,7 @@ describe('userRepository', () => {
       expect(result).toEqual(mockUser);
     });
 
-    it('deve retornar null se nenhum usuário for encontrado', async () => {
+    it('should return null if no user is found', async () => {
       mockedQuery.mockResolvedValueOnce([]);
 
       const result = await findUserByEmailOrName('inexistente@email.com');
@@ -50,7 +50,7 @@ describe('userRepository', () => {
   });
 
   describe('findUserById', () => {
-    it('deve retornar um usuário quando encontrado por id', async () => {
+    it('should return a user when found by id', async () => {
       const id = uuidv4();
       const mockUser = {
         id,
@@ -71,7 +71,7 @@ describe('userRepository', () => {
       expect(result).toEqual(mockUser);
     });
 
-    it('deve retornar null se nenhum usuário for encontrado', async () => {
+    it('should return null if no user is found', async () => {
       mockedQuery.mockResolvedValueOnce([]);
 
       const result = await findUserById(uuidv4());
@@ -80,7 +80,7 @@ describe('userRepository', () => {
   });
 
   describe('alter', () => {
-    it('deve atualizar um usuário e retornar a linha modificada', async () => {
+    it('should update a user and return the modified row', async () => {
       const mockUser = {
         id: uuidv4(),
         email: 'teste@email.com',
@@ -108,7 +108,7 @@ describe('userRepository', () => {
   });
 
   describe('alterPassword', () => {
-    it('deve alterar a senha de um usuário e retornar a linha modificada', async () => {
+    it('should update a user password and return the modified row', async () => {
       const userPassword = {
         id: uuidv4(),
         password_hash: 'newhash123'
@@ -127,7 +127,7 @@ describe('userRepository', () => {
   });
 
   describe('create', () => {
-    it('deve criar um usuário e retornar a linha criada', async () => {
+    it('should create a user and return the created row', async () => {
       const newUser = {
         name: 'teste',
         email: 'teste@email.com',

@@ -6,7 +6,7 @@ jest.mock('../../database/db', () => ({
 }));
 
 describe('findIdByName', () => {
-  it('deve retornar o id quando encontrado no banco', async () => {
+  it('should return the id when found in the database', async () => {
     (query as jest.Mock).mockResolvedValue([{ id: 'role-123' }]);
 
     const result = await findIdByName('admin');
@@ -15,7 +15,7 @@ describe('findIdByName', () => {
     expect(result).toBe('role-123');
   });
 
-  it('deve retornar string vazia se rows[0].id for false', async () => {
+  it('should return an empty string if rows[0].id is false', async () => {
     (query as jest.Mock).mockResolvedValue([{}]);
 
     const result = await findIdByName('no-id');

@@ -1,4 +1,5 @@
 import { Request, RequestHandler, Response } from 'express';
+
 import { deleteById, findById } from '../repositories/postRepository';
 
 export const getById: RequestHandler = async (req: Request, res: Response) => {
@@ -26,12 +27,11 @@ export const removeById: RequestHandler = async (
     const validate = await findById(id);
 
     if (!validate) {
-      res.status(404).json({ error: true, details: 'NOT_FOUND_POST' });
-    } else {
-      const post = await deleteById(id);
-
-      res.status(200).json({ status: 'OK', details: { post } });
+      return res.status(404).json({ error: true, details: 'NOT_FOUND_POST' });
     }
+
+    await deleteById(id);
+    res.status(200).json({ status: 'OK', details: 'POST_DELETED' });
   } catch (err) {
     res.status(500).json({ error: true, details: err });
   }

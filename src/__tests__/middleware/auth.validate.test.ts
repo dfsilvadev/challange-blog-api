@@ -1,6 +1,6 @@
-import { authenticateToken } from '../../app/middlewares/auth/authenticationValidate';
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import { authenticateToken } from '../../app/middlewares/auth/authenticationValidate';
 
 // Mock do config.jwtSecret
 jest.mock('../../utils/config/config', () => ({
@@ -30,7 +30,7 @@ describe('Middleware - authenticateToken', () => {
     jest.clearAllMocks();
   });
 
-  it('retorna 401 se o token não for fornecido', async () => {
+  it('should return 401 if the token is not provided', async () => {
     req.headers = {};
 
     await authenticateToken(req as Request, res as Response, next);
@@ -42,7 +42,7 @@ describe('Middleware - authenticateToken', () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  it('retorna 403 se o token for inválido', async () => {
+  it('should return 403 if the token is invalid', async () => {
     req.headers = {
       authorization: 'Bearer token-invalido'
     };
@@ -60,7 +60,7 @@ describe('Middleware - authenticateToken', () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  it('atribui req.user e chama next se o token for válido', async () => {
+  it('should assign req.user and call next if the token is valid', async () => {
     req.headers = {
       authorization: 'Bearer token-valido'
     };
