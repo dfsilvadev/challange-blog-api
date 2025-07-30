@@ -1,7 +1,8 @@
 import { query } from '../../database/db';
 
 export const findById = async (id: string) => {
-  const result = await query(
+  // TODO: add user name and user id
+  const row = await query(
     `
       SELECT p.title, p.content, p.is_active, p.user_id, p.category_id, p.created_at, p.updated_at,
              u.id as user_id, u.name as user_name
@@ -12,11 +13,11 @@ export const findById = async (id: string) => {
     `,
     [id]
   );
-  return result[0] || null;
+  return row || null;
 };
 
 export const deleteById = async (id: string) => {
-  const [row] = await query(
+  const row = await query(
     `
       DELETE FROM tb_post WHERE id = $1
     `,

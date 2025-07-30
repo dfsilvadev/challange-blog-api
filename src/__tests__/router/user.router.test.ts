@@ -8,8 +8,8 @@ import {
   findUserByEmailOrName
 } from '../../app/repositories/userRepository';
 
-import { mockUser, roleFake } from '../../utils/mocks/mockUser';
 import crypto from 'crypto';
+import { mockUser, roleFake } from '../../utils/mocks/mockUser';
 
 jest.mock('../../app/repositories/userRepository');
 jest.mock('../../app/repositories/roleRepository');

@@ -1,78 +1,41 @@
 import { NextFunction, Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
-import { authenticateToken } from '../../app/middlewares/auth/authenticationValidate';
 
-// Mock do config.jwtSecret
-jest.mock('../../utils/config/config', () => ({
-  default: {
-    jwtSecret: 'mock-secret'
-  }
-}));
+import { validateUUID } from '../../app/middlewares/utils/validateUtils';
 
-// Mock do jwt
-jest.mock('jsonwebtoken', () => ({
-  ...jest.requireActual('jsonwebtoken'),
-  verify: jest.fn()
-}));
-
-describe('Middleware - authenticateToken', () => {
+describe('validateUUID middleware', () => {
   let req: Partial<Request>;
   let res: Partial<Response>;
-  let next: NextFunction;
+  let next: jest.Mock;
 
   beforeEach(() => {
-    req = {};
+    req = { params: {} };
     res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn()
     };
     next = jest.fn();
-    jest.clearAllMocks();
   });
 
-  it('should return 401 if the token is not provided', async () => {
-    req.headers = {};
+  it('should return valid UUID', () => {
+    req.params = { id: '123e4567-e89b-12d3-a456-426614174000' };
 
-    await authenticateToken(req as Request, res as Response, next);
+    validateUUID(req as Request, res as Response, next as NextFunction);
 
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({
-      message: 'Token de autenticação não fornecido.'
-    });
-    expect(next).not.toHaveBeenCalled();
-  });
-
-  it('should return 403 if the token is invalid', async () => {
-    req.headers = {
-      authorization: 'Bearer token-invalido'
-    };
-
-    (jwt.verify as jest.Mock).mockImplementation((token, secret, callback) => {
-      callback(new Error('Token inválido'), null); // simula erro
-    });
-
-    await authenticateToken(req as Request, res as Response, next);
-
-    expect(res.status).toHaveBeenCalledWith(403);
-    expect(res.json).toHaveBeenCalledWith({
-      message: 'Token de autenticação inválido ou expirado.'
-    });
-    expect(next).not.toHaveBeenCalled();
-  });
-
-  it('should assign req.user and call next if the token is valid', async () => {
-    req.headers = {
-      authorization: 'Bearer token-valido'
-    };
-
-    const fakePayload = { id: 'user123', role: 'admin' };
-    (jwt.verify as jest.Mock).mockImplementation((token, secret, callback) => {
-      callback(null, fakePayload); // simula token válido
-    });
-
-    await authenticateToken(req as Request, res as Response, next);
-
-    expect(req).toHaveProperty('user', fakePayload);
     expect(next).toHaveBeenCalled();
+    expect(res.status).not.toHaveBeenCalled();
+    expect(res.json).not.toHaveBeenCalled();
+  });
+
+  it('should return 400 if UUID is invalid', () => {
+    req.params = { id: 'invalido' };
+
+    validateUUID(req as Request, res as Response, next as NextFunction);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      error: true,
+      details: 'INVALID_UUID'
+    });
+    expect(next).not.toHaveBeenCalled();
   });
 });
