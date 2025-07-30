@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { isUUID } from 'validator';
 import { validationResult } from 'express-validator';
 
