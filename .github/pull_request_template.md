@@ -1,11 +1,11 @@
 ## 🚀 Descrição
 
-É a implementação de uma rota para criar Postagens, suas validações e o tratamento dos dados.
+<!-- Descreva de forma objetiva o que este PR faz, o problema que resolve ou a feature que entrega. -->
 
 ## 📝 Tipo de mudança
 
 - [ ] Bugfix
-- [x] Nova feature
+- [ ] Nova feature
 - [ ] Refatoração
 - [ ] Documentação
 - [ ] Testes
@@ -21,15 +21,15 @@
 
 ## ✅ Checklist
 
-- [x] Adicionei/atualizei testes relacionados
+- [ ] Adicionei/atualizei testes relacionados
 - [ ] Atualizei a documentação (README, Wiki, etc)
 - [ ] Adicionei/atualizei o changelog
-- [x] O código segue o padrão do projeto (lint, prettier)
-- [x] O PR está pronto para revisão
+- [ ] O código segue o padrão do projeto (lint, prettier)
+- [ ] O PR está pronto para revisão
 
 ## 📚 Referências
 
-#4
+<!-- Links para issues, cards, RFCs, ou documentação relevante. -->
 
 ## 🤝 Quem deve revisar
 
