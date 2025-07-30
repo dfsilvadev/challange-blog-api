@@ -1,5 +1,22 @@
 import { v4 as uuidv4 } from 'uuid';
 
+const generateRandomPosts = (count: number) => {
+  const posts = [];
+  for (let i = 0; i < count; i++) {
+    posts.push({
+      id: uuidv4(),
+      title: `Título de Teste ${i + 1}`,
+      content: `Conteúdo de Teste ${i + 1}`,
+      is_active: true,
+      created_at: new Date(),
+      updated_at: new Date(),
+      user_id: uuidv4(),
+      category_id: uuidv4()
+    });
+  }
+  return posts;
+};
+
 const mockPost = {
   id: uuidv4(),
   title: 'Título de Teste',
@@ -12,40 +29,11 @@ const mockPost = {
 };
 
 const mockPosts = [
-  {
-    id: uuidv4(),
-    title: 'Título de Teste 1',
-    content: 'Conteúdo de Teste 1',
-    is_active: true,
-    created_at: new Date(),
-    updated_at: new Date(),
-    user_id: uuidv4(),
-    category_id: uuidv4()
-  },
-  {
-    id: uuidv4(),
-    title: 'Título de Teste 2',
-    content: 'Conteúdo de Teste 2',
-    is_active: true,
-    created_at: new Date(),
-    updated_at: new Date(),
-    user_id: uuidv4(),
-    category_id: uuidv4()
-  },
-  {
-    id: uuidv4(),
-    title: 'Título de Teste 3',
-    content: 'Conteúdo de Teste 3',
-    is_active: true,
-    created_at: new Date(),
-    updated_at: new Date(),
-    user_id: uuidv4(),
-    category_id: uuidv4()
-  },
+  ...generateRandomPosts(3),
   {
     id: uuidv4(),
     title: 'Título de Teste 4',
-    content: 'Conteúdo de Teste 3',
+    content: 'Conteúdo de Teste 4',
     is_active: true,
     created_at: new Date(),
     updated_at: new Date(),
