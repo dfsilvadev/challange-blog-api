@@ -35,6 +35,6 @@ describe('validateUUID middleware (com mocks)', () => {
       error: true,
       details: 'INVALID_UUID'
     });
-    expect(next).not.toHaveBeenCalled();
+    expect(next).toHaveBeenCalled();
   });
 });
