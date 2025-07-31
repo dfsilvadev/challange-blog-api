@@ -1,22 +1,26 @@
-import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
+import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { findUserByEmailOrName } from '../repositories/userRepository';
+
+import * as userRepository from '../repositories/userRepository';
+
 import config from '../../utils/config/config';
 
 export const login = async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
   try {
-    const user = await findUserByEmailOrName(username);
+    const user = await userRepository.findByEmailOrName(username);
+
     if (!user) {
       res.status(401).json({ error: true, details: 'INVALID_USER' });
     }
 
     const validPassword = await bcrypt.compare(
       password,
-      user?.password_hash || ''
+      user?.passwordHash || ''
     );
+
     if (!validPassword) {
       res.status(401).json({ error: true, details: 'ENCRYPTION_ERROR' });
     }

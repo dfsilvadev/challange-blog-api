@@ -1,34 +1,33 @@
 import { Request, RequestHandler, Response } from 'express';
 
-import { findById as findCategoryById } from '../repositories/categoryRepository';
-import {
-  count,
-  create,
-  deleteById,
-  findAll,
-  findById,
-  update as updatePost
-} from '../repositories/postRepository';
-import { findUserById } from '../repositories/userRepository';
+import * as categoryRepository from '../repositories/categoryRepository';
+import * as postRepository from '../repositories/postRepository';
+import * as userRepository from '../repositories/userRepository';
 
 import { Pagination } from '../repositories/models/postRepositoryTypes';
 
-export const created: RequestHandler = async (req: Request, res: Response) => {
+export const create: RequestHandler = async (req: Request, res: Response) => {
   const { title, content, is_active, user_id, category_id } = req.body;
 
   try {
-    const user = await findUserById(user_id);
+    const user = await userRepository.findById(user_id);
     if (!user) {
       res.status(404).json({ error: true, details: 'NOT_FOUND_USER' });
       return;
     }
-    const category = await findById(category_id);
+    const category = await categoryRepository.findById(category_id);
     if (!category) {
       res.status(404).json({ error: true, details: 'NOT_FOUND_CATEGORY' });
       return;
     }
 
-    const post = await create(title, content, is_active, user_id, category_id);
+    const post = await postRepository.create(
+      title,
+      content,
+      is_active,
+      user_id,
+      category_id
+    );
     res.status(201).json({ status: 'OK', details: post });
   } catch (err) {
     res
@@ -41,7 +40,7 @@ export const getById: RequestHandler = async (req: Request, res: Response) => {
   const { id } = req.params;
 
   try {
-    const post = await findById(id);
+    const post = await postRepository.findById(id);
     if (!post) {
       res.status(404).json({ error: true, details: 'NOT_FOUND_POST' });
       return;
@@ -62,13 +61,13 @@ export const updateById: RequestHandler = async (
   const { title, content, is_active, category_id } = req.body; // Ignora user_id
 
   try {
-    const post = await findById(id);
+    const post = await postRepository.findById(id);
     if (!post) {
       return res.status(404).json({ error: true, details: 'NOT_FOUND_POST' });
     }
 
     if (category_id) {
-      const categoryExists = await findCategoryById(category_id);
+      const categoryExists = await categoryRepository.findById(category_id);
       if (!categoryExists) {
         return res
           .status(404)
@@ -82,7 +81,7 @@ export const updateById: RequestHandler = async (
     if (is_active !== undefined) updateFields.is_active = is_active;
     if (category_id !== undefined) updateFields.category_id = category_id;
 
-    const updated = await updatePost(id, updateFields);
+    const updated = await postRepository.update(id, updateFields);
     res.status(200).json({ status: 'OK', details: updated });
   } catch (err) {
     res
@@ -98,13 +97,13 @@ export const removeById: RequestHandler = async (
   const id = req.params.id;
 
   try {
-    const validate = await findById(id);
+    const validate = await postRepository.findById(id);
 
     if (!validate) {
       return res.status(404).json({ error: true, details: 'NOT_FOUND_POST' });
     }
 
-    await deleteById(id);
+    await postRepository.deleteOne(id);
     res.status(200).json({ status: 'OK', details: 'POST_DELETED' });
   } catch (err) {
     res
@@ -126,13 +125,13 @@ const getPostsWithPagination = async (req: Request, res: Response) => {
       : 'ASC';
 
   const [posts, total] = await Promise.all([
-    findAll({
+    postRepository.findAll({
       page: currentPage,
       limit: currentLimit,
       orderBy: validOrder,
       userId
     }),
-    count({ userId })
+    postRepository.count({ userId })
   ]);
 
   const totalPages = Math.ceil(total / currentLimit);

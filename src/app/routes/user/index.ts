@@ -1,7 +1,7 @@
 import express from 'express';
 
-import { listByUserId } from '../../controllers/postController';
-import { createUser, getUser } from '../../controllers/userController';
+import * as postController from '../../controllers/postController';
+import * as userController from '../../controllers/userController';
 
 import { userValidationRules } from '../../middlewares/user/validateUser';
 
@@ -12,8 +12,12 @@ import { validate } from '../../middlewares/utils/validateUtils';
 
 const router = express.Router();
 
-router.post('/', userValidationRules, validate, createUser);
-router.get('/:id', asyncHandler(authenticateToken), getUser);
-router.get('/posts/:userId', asyncHandler(authenticateToken), listByUserId);
+router.post('/', userValidationRules, validate, userController.create);
+router.get('/:id', asyncHandler(authenticateToken), userController.findOne);
+router.get(
+  '/posts/:userId',
+  asyncHandler(authenticateToken),
+  postController.listByUserId
+);
 
 export default router;

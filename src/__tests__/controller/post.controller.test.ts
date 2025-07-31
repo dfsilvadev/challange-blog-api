@@ -1,16 +1,8 @@
 import { Request, Response } from 'express';
 
-import {
-  getById,
-  list,
-  listByUserId
-} from '../../app/controllers/postController';
+import * as postController from '../../app/controllers/postController';
 
-import {
-  count,
-  findAll,
-  findById
-} from '../../app/repositories/postRepository';
+import * as postRepository from '../../app/repositories/postRepository';
 
 import { validateUUID } from '../../app/middlewares/utils/validateUtils';
 
@@ -43,20 +35,22 @@ describe('postController', () => {
 
   describe('GET all posts and GET all posts by user ID', () => {
     it('should return paginated posts with default values', async () => {
-      (findAll as jest.Mock).mockResolvedValueOnce(mockPosts);
-      (count as jest.Mock).mockResolvedValueOnce(mockPosts.length);
+      (postRepository.findAll as jest.Mock).mockResolvedValueOnce(mockPosts);
+      (postRepository.count as jest.Mock).mockResolvedValueOnce(
+        mockPosts.length
+      );
       req.query = {};
       req.params = {};
 
-      await list(req as Request, res as Response);
+      await postController.list(req as Request, res as Response);
 
-      expect(findAll).toHaveBeenCalledWith({
+      expect(postRepository.findAll).toHaveBeenCalledWith({
         page: 1,
         limit: 10,
         orderBy: 'ASC',
         userId: undefined
       });
-      expect(count).toHaveBeenCalledWith({ userId: undefined });
+      expect(postRepository.count).toHaveBeenCalledWith({ userId: undefined });
       expect(statusMock).toHaveBeenCalledWith(200);
       expect(jsonMock).toHaveBeenCalledWith({
         status: 'Ok',
@@ -66,20 +60,22 @@ describe('postController', () => {
     });
 
     it('should use custom page, limit and orderBy DESC', async () => {
-      (findAll as jest.Mock).mockResolvedValueOnce([]);
-      (count as jest.Mock).mockResolvedValueOnce(mockPosts.length);
+      (postRepository.findAll as jest.Mock).mockResolvedValueOnce([]);
+      (postRepository.count as jest.Mock).mockResolvedValueOnce(
+        mockPosts.length
+      );
       req.query = { page: '2', limit: '2', orderBy: 'DESC' };
       req.params = {};
 
-      await list(req as Request, res as Response);
+      await postController.list(req as Request, res as Response);
 
-      expect(findAll).toHaveBeenCalledWith({
+      expect(postRepository.findAll).toHaveBeenCalledWith({
         page: 2,
         limit: 2,
         orderBy: 'DESC',
         userId: undefined
       });
-      expect(count).toHaveBeenCalledWith({ userId: undefined });
+      expect(postRepository.count).toHaveBeenCalledWith({ userId: undefined });
       expect(statusMock).toHaveBeenCalledWith(200);
       expect(jsonMock).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -102,20 +98,22 @@ describe('postController', () => {
     });
 
     it('should fallback to ASC if orderBy is invalid', async () => {
-      (findAll as jest.Mock).mockResolvedValueOnce(mockPosts);
-      (count as jest.Mock).mockResolvedValueOnce(mockPosts.length);
+      (postRepository.findAll as jest.Mock).mockResolvedValueOnce(mockPosts);
+      (postRepository.count as jest.Mock).mockResolvedValueOnce(
+        mockPosts.length
+      );
       req.query = { orderBy: 'INVALID' };
       req.params = {};
 
-      await list(req as Request, res as Response);
+      await postController.list(req as Request, res as Response);
 
-      expect(findAll).toHaveBeenCalledWith({
+      expect(postRepository.findAll).toHaveBeenCalledWith({
         page: 1,
         limit: 10,
         orderBy: 'ASC',
         userId: undefined
       });
-      expect(count).toHaveBeenCalledWith({ userId: undefined });
+      expect(postRepository.count).toHaveBeenCalledWith({ userId: undefined });
     });
 
     it('should handle userId from params', async () => {
@@ -123,20 +121,24 @@ describe('postController', () => {
       const mockPostByUserId = mockPosts.filter(
         (post) => post.user_id === userId
       );
-      (findAll as jest.Mock).mockResolvedValueOnce(mockPostByUserId);
-      (count as jest.Mock).mockResolvedValueOnce(mockPostByUserId.length);
+      (postRepository.findAll as jest.Mock).mockResolvedValueOnce(
+        mockPostByUserId
+      );
+      (postRepository.count as jest.Mock).mockResolvedValueOnce(
+        mockPostByUserId.length
+      );
       req.query = {};
       req.params = { userId };
 
-      await listByUserId(req as Request, res as Response);
+      await postController.listByUserId(req as Request, res as Response);
 
-      expect(findAll).toHaveBeenCalledWith({
+      expect(postRepository.findAll).toHaveBeenCalledWith({
         page: 1,
         limit: 10,
         orderBy: 'ASC',
         userId
       });
-      expect(count).toHaveBeenCalledWith({ userId });
+      expect(postRepository.count).toHaveBeenCalledWith({ userId });
       expect(jsonMock).toHaveBeenCalledWith(
         expect.objectContaining({
           status: 'Ok',
@@ -158,12 +160,14 @@ describe('postController', () => {
     });
 
     it('should handle pagination with only one page', async () => {
-      (findAll as jest.Mock).mockResolvedValueOnce(mockPosts);
-      (count as jest.Mock).mockResolvedValueOnce(mockPosts.length);
+      (postRepository.findAll as jest.Mock).mockResolvedValueOnce(mockPosts);
+      (postRepository.count as jest.Mock).mockResolvedValueOnce(
+        mockPosts.length
+      );
       req.query = { page: '1', limit: '10' };
       req.params = {};
 
-      await list(req as Request, res as Response);
+      await postController.list(req as Request, res as Response);
 
       expect(jsonMock).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -189,13 +193,15 @@ describe('postController', () => {
     it('should return the post successfully with a valid UUID', async () => {
       const id = '1f5dcd7c-f7aa-4a14-b26b-b65282682ce6';
       const mockPostById = mockPosts.filter((post) => post.id === id);
-      (findById as jest.Mock).mockResolvedValueOnce(mockPostById);
+      (postRepository.findById as jest.Mock).mockResolvedValueOnce(
+        mockPostById
+      );
       req.params = { id };
 
       validateUUID(req as Request, res as Response, next);
-      await getById(req as Request, res as Response, next);
+      await postController.getById(req as Request, res as Response, next);
 
-      expect(findById).toHaveBeenCalledWith(id);
+      expect(postRepository.findById).toHaveBeenCalledWith(id);
       expect(statusMock).toHaveBeenCalledWith(200);
       expect(jsonMock).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -206,10 +212,10 @@ describe('postController', () => {
     });
 
     it('deve retornar 404 se o post não for encontrado', async () => {
-      (findById as jest.Mock).mockResolvedValue(null);
+      (postRepository.findById as jest.Mock).mockResolvedValue(null);
       req.params = { id: '1f5dcd7c-f7aa-4a14-b26b-b65282682ce6' };
 
-      await getById(req as Request, res as Response, next);
+      await postController.getById(req as Request, res as Response, next);
 
       expect(statusMock).toHaveBeenCalledWith(404);
       expect(jsonMock).toHaveBeenCalledWith(
@@ -219,10 +225,12 @@ describe('postController', () => {
 
     it('deve retornar 500 se ocorrer um erro inesperado', async () => {
       const errorMessage = 'Unexpected error';
-      (findById as jest.Mock).mockRejectedValue(new Error(errorMessage));
+      (postRepository.findById as jest.Mock).mockRejectedValue(
+        new Error(errorMessage)
+      );
       req.params = { id: '1f5dcd7c-f7aa-4a14-b26b-b65282682ce6' };
 
-      await getById(req as Request, res as Response, next);
+      await postController.getById(req as Request, res as Response, next);
 
       expect(statusMock).toHaveBeenCalledWith(500);
       expect(jsonMock).toHaveBeenCalledWith(
@@ -231,10 +239,10 @@ describe('postController', () => {
     });
 
     it('deve garantir que só retorna post se is_active = true', async () => {
-      (findById as jest.Mock).mockResolvedValue(null);
+      (postRepository.findById as jest.Mock).mockResolvedValue(null);
       req.params = { id: 'inativo-id' };
 
-      await getById(req as Request, res as Response, next);
+      await postController.getById(req as Request, res as Response, next);
 
       expect(statusMock).toHaveBeenCalledWith(404);
       expect(jsonMock).toHaveBeenCalledWith(

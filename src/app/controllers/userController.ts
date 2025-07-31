@@ -1,17 +1,15 @@
 import bcrypt from 'bcryptjs';
 import { Request, RequestHandler, Response } from 'express';
-import { findIdByName } from '../repositories/roleRepository';
-import { create, findUserById } from '../repositories/userRepository';
 
-export const createUser: RequestHandler = async (
-  req: Request,
-  res: Response
-) => {
+import * as roleRepository from '../repositories/roleRepository';
+import * as userRepository from '../repositories/userRepository';
+
+export const create: RequestHandler = async (req: Request, res: Response) => {
   const { name, email, phone, password } = req.body;
 
   try {
     const ROLE_NAME = 'teacher';
-    const role = await findIdByName(ROLE_NAME);
+    const role = await roleRepository.findIdByName(ROLE_NAME);
     const roleId = typeof role === 'string' ? role : role?.id || '';
 
     /*
@@ -20,13 +18,13 @@ export const createUser: RequestHandler = async (
     - 10 significa que o algoritmo faz 2¹⁰ = 1024 iterações internas.
     */
     const saltRounds = 10;
-    const password_hash = await bcrypt.hash(password, saltRounds);
+    const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    const user = await create({
+    const user = await userRepository.create({
       name,
       email,
       phone,
-      password_hash,
+      passwordHash,
       roleId
     });
     res.status(201).json({ status: 'OK', details: { user } });
@@ -35,11 +33,11 @@ export const createUser: RequestHandler = async (
   }
 };
 
-export const getUser: RequestHandler = async (req: Request, res: Response) => {
+export const findOne: RequestHandler = async (req: Request, res: Response) => {
   const id = req.params.id;
 
   try {
-    const user = await findUserById(id);
+    const user = await userRepository.findById(id);
 
     res.status(200).json({ status: 'OK', details: { user } });
   } catch (err) {
