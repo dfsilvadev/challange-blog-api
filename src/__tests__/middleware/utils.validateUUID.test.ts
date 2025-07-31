@@ -83,7 +83,10 @@ describe('validate middleware', () => {
 
     expect(validationResult).toHaveBeenCalledWith(mockReq);
     expect(mockRes.status).toHaveBeenCalledWith(400);
-    expect(mockRes.json).toHaveBeenCalledWith({ errors: fakeErrors });
+    expect(mockRes.json).toHaveBeenCalledWith({
+      error: true,
+      details: fakeErrors
+    });
     expect(mockNext).not.toHaveBeenCalled();
   });
 });

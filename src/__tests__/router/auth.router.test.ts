@@ -4,6 +4,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { login } from '../../app/controllers/authenticationController';
 import * as userRepo from '../../app/repositories/userRepository';
 
+jest.mock('../../database/db', () => ({
+  query: jest.fn()
+}));
+jest.spyOn(console, 'log').mockImplementation(() => {});
+
 jest.mock('../../app/repositories/userRepository');
 jest.mock('bcryptjs');
 jest.mock('jsonwebtoken');
