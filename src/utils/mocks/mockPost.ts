@@ -39,6 +39,16 @@ const mockPosts = [
     updated_at: new Date(),
     user_id: '4536040b-22c5-4c38-a881-5966bf5b6cc3',
     category_id: uuidv4()
+  },
+  {
+    id: '1f5dcd7c-f7aa-4a14-b26b-b65282682ce6',
+    title: 'Título de Teste 7',
+    content: 'Conteúdo de Teste 7',
+    is_active: true,
+    created_at: new Date(),
+    updated_at: new Date(),
+    user_id: '4536040b-22c5-4c38-a881-5966bf5b6cc3',
+    category_id: uuidv4()
   }
 ];
 

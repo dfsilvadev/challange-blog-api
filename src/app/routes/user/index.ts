@@ -15,9 +15,7 @@ import { asyncHandler } from '../../../utils/asyncHandler';
 const router = express.Router();
 
 router.post('/', userValidationRules, validate, createUser);
-
 router.get('/:id', asyncHandler(authenticateToken), getUser);
-
 router.get('/posts/:userId', asyncHandler(authenticateToken), listByUserId);
 
 export default router;

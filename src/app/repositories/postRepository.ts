@@ -95,3 +95,89 @@ export const count = async (filters: PostCountFilters = {}) => {
   const [{ count }] = await query(querySql, values);
   return count;
 };
+
+export const create = async (
+  title: string,
+  content: string,
+  is_active: boolean,
+  user_id: string,
+  category_id: string
+) => {
+  const [row] = await query(
+    `
+        INSERT INTO tb_post(title, content, is_active, user_id, category_id)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING *
+        `,
+    [title, content, is_active, user_id, category_id]
+  );
+  return [row];
+};
+
+export const findById = async (id: string) => {
+  // TODO: add user name and user id
+  const row = await query(
+    `
+      SELECT p.title, p.content, p.is_active, p.user_id, p.category_id, p.created_at, p.updated_at,
+             u.id as user_id, u.name as user_name
+      FROM tb_post p
+      JOIN tb_user u ON p.user_id = u.id
+      JOIN tb_category c ON p.category_id = c.id
+      WHERE p.id = $1 AND p.is_active = true
+    `,
+    [id]
+  );
+  return row || null;
+};
+
+export const deleteById = async (id: string) => {
+  const row = await query(
+    `
+      DELETE FROM tb_post WHERE id = $1
+    `,
+    [id]
+  );
+  return row;
+};
+
+export const update = async (
+  id: string,
+  fields: Partial<{
+    title: string;
+    content: string;
+    is_active: boolean;
+    user_id: string;
+    category_id: string;
+  }>
+) => {
+  const allowedFields = [
+    'title',
+    'content',
+    'is_active',
+    'user_id',
+    'category_id'
+  ];
+  const setClauses = [];
+  const values = [];
+  let idx = 1;
+
+  for (const key of allowedFields) {
+    if (fields[key as keyof typeof fields] !== undefined) {
+      setClauses.push(`${key} = $${idx}`);
+      values.push(fields[key as keyof typeof fields]);
+      idx++;
+    }
+  }
+
+  if (setClauses.length === 0) {
+    throw new Error('Nenhum campo fornecido para atualização');
+  }
+
+  values.push(id);
+
+  const [row] = await query(
+    `UPDATE tb_post SET ${setClauses.join(', ')} WHERE id = $${idx} RETURNING *`,
+    values
+  );
+  return row;
+};
