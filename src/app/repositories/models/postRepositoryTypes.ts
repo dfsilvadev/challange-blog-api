@@ -56,7 +56,7 @@ interface UserPassword {
 }
 
 interface UserWithPasswordHash extends User {
-  readonly passwordHash: string;
+  readonly password_hash: string;
 }
 
 interface UserEntity extends User {
