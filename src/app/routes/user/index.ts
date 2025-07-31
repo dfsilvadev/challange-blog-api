@@ -12,12 +12,20 @@ import { validate } from '../../middlewares/utils/validateUtils';
 
 const router = express.Router();
 
-router.post('/', userValidationRules, validate, userController.create);
+/**
+ * User routes
+ * @route /user
+ * @group User - Operations about users
+ */
+/* Authenticated routes */
 router.get('/:id', asyncHandler(authenticateToken), userController.findOne);
 router.get(
   '/posts/:userId',
   asyncHandler(authenticateToken),
   postController.listByUserId
 );
+
+/* Public routes */
+router.post('/', userValidationRules, validate, userController.create);
 
 export default router;
