@@ -17,7 +17,7 @@ jest.mock('../../app/repositories/postRepository', () => ({
   update: jest.fn()
 }));
 
-describe('postController', () => {
+describe('PostController', () => {
   let req: Partial<Request>;
   let res: Partial<Response>;
   let jsonMock: jest.Mock;
@@ -59,7 +59,7 @@ describe('postController', () => {
       });
     });
 
-    it('should use custom page, limit and orderBy DESC', async () => {
+    it('should return paginated posts with custom page, limit and orderBy DESC', async () => {
       (postRepository.findAll as jest.Mock).mockResolvedValueOnce([]);
       (postRepository.count as jest.Mock).mockResolvedValueOnce(
         mockPosts.length
@@ -97,7 +97,7 @@ describe('postController', () => {
       );
     });
 
-    it('should fallback to ASC if orderBy is invalid', async () => {
+    it('should fallback to ASC order if orderBy is invalid', async () => {
       (postRepository.findAll as jest.Mock).mockResolvedValueOnce(mockPosts);
       (postRepository.count as jest.Mock).mockResolvedValueOnce(
         mockPosts.length
@@ -116,7 +116,7 @@ describe('postController', () => {
       expect(postRepository.count).toHaveBeenCalledWith({ userId: undefined });
     });
 
-    it('should handle userId from params', async () => {
+    it('should return posts filtered by userId', async () => {
       const userId = '4536040b-22c5-4c38-a881-5966bf5b6cc3';
       const mockPostByUserId = mockPosts.filter(
         (post) => post.user_id === userId
@@ -159,7 +159,7 @@ describe('postController', () => {
       );
     });
 
-    it('should handle pagination with only one page', async () => {
+    it('should return correct pagination when only one page', async () => {
       (postRepository.findAll as jest.Mock).mockResolvedValueOnce(mockPosts);
       (postRepository.count as jest.Mock).mockResolvedValueOnce(
         mockPosts.length
@@ -190,7 +190,7 @@ describe('postController', () => {
       jest.clearAllMocks();
     });
 
-    it('should return the post successfully with a valid UUID', async () => {
+    it('should return post by id when found', async () => {
       const id = '1f5dcd7c-f7aa-4a14-b26b-b65282682ce6';
       const mockPostById = mockPosts.filter((post) => post.id === id);
       (postRepository.findById as jest.Mock).mockResolvedValueOnce(
@@ -211,7 +211,7 @@ describe('postController', () => {
       );
     });
 
-    it('deve retornar 404 se o post não for encontrado', async () => {
+    it('should return 404 when post is not found', async () => {
       (postRepository.findById as jest.Mock).mockResolvedValue(null);
       req.params = { id: '1f5dcd7c-f7aa-4a14-b26b-b65282682ce6' };
 
@@ -223,7 +223,7 @@ describe('postController', () => {
       );
     });
 
-    it('deve retornar 500 se ocorrer um erro inesperado', async () => {
+    it('should return 500 when an unexpected error occurs', async () => {
       const errorMessage = 'Unexpected error';
       (postRepository.findById as jest.Mock).mockRejectedValue(
         new Error(errorMessage)
@@ -238,7 +238,7 @@ describe('postController', () => {
       );
     });
 
-    it('deve garantir que só retorna post se is_active = true', async () => {
+    it('should return 404 when post is inactive', async () => {
       (postRepository.findById as jest.Mock).mockResolvedValue(null);
       req.params = { id: 'inativo-id' };
 
