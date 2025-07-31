@@ -43,3 +43,45 @@ export const deleteById = async (id: string) => {
   );
   return row;
 };
+
+export const update = async (
+  id: string,
+  fields: Partial<{
+    title: string;
+    content: string;
+    is_active: boolean;
+    user_id: string;
+    category_id: string;
+  }>
+) => {
+  const allowedFields = [
+    'title',
+    'content',
+    'is_active',
+    'user_id',
+    'category_id'
+  ];
+  const setClauses = [];
+  const values = [];
+  let idx = 1;
+
+  for (const key of allowedFields) {
+    if (fields[key as keyof typeof fields] !== undefined) {
+      setClauses.push(`${key} = $${idx}`);
+      values.push(fields[key as keyof typeof fields]);
+      idx++;
+    }
+  }
+
+  if (setClauses.length === 0) {
+    throw new Error('Nenhum campo fornecido para atualização');
+  }
+
+  values.push(id);
+
+  const [row] = await query(
+    `UPDATE tb_post SET ${setClauses.join(', ')} WHERE id = $${idx} RETURNING *`,
+    values
+  );
+  return row;
+};

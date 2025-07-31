@@ -1,22 +1,46 @@
 import { Router } from 'express';
 
-import { created, getById, removeById } from '../../controllers/postController';
+import {
+  created,
+  getById,
+  removeById,
+  updateById
+} from '../../controllers/postController';
 
 import { authenticateToken } from '../../middlewares/auth/authenticationValidate';
-import { postValidationRules } from '../../middlewares/post/validatePost';
+import {
+  postUpdateValidationRules,
+  postValidationRules
+} from '../../middlewares/post/validatePost';
 import { validateUUID } from '../../middlewares/utils/validateUtils';
 
 import { asyncHandler } from '../../../utils/asyncHandler';
 
 const router = Router();
 
-router.get('/:id', validateUUID, getById);
+/**
+ * Posts routes
+ * @route /post
+ * @group Post - Operations about posts
+ */
+
+/* Authenticated routes */
 router.post('/', asyncHandler(authenticateToken), postValidationRules, created);
+router.patch(
+  '/:id',
+  asyncHandler(authenticateToken),
+  validateUUID,
+  postUpdateValidationRules,
+  updateById
+);
 router.delete(
   '/:id',
   asyncHandler(authenticateToken),
   validateUUID,
   removeById
 );
+
+/* Public routes */
+router.get('/:id', validateUUID, getById);
 
 export default router;

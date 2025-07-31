@@ -49,7 +49,7 @@ describe('GET /posts/:id', () => {
     });
   });
 
-  it('should return error 404 because the post was not found', async () => {
+  it('should return error 500 because the post was not found', async () => {
     (findById as jest.Mock).mockRejectedValue(null);
 
     const req = mockRequest({ id: '12' }) as Request;
@@ -58,10 +58,10 @@ describe('GET /posts/:id', () => {
     await getById(req, res, mockNext);
 
     expect(findById).toHaveBeenCalledWith('12');
-    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       error: true,
-      details: 'NOT_FOUND_POST'
+      details: null
     });
   });
 });

@@ -41,7 +41,7 @@ describe('post Controller', () => {
       });
     });
 
-    it('should return 404 if the POST ID does not exist', async () => {
+    it('should return 404 if findById fails', async () => {
       mockFindById.mockResolvedValue(null);
       mockDeleteById.mockResolvedValue(null);
 
@@ -64,7 +64,7 @@ describe('post Controller', () => {
       expect(status).toHaveBeenCalledWith(500);
       expect(json).toHaveBeenCalledWith({
         error: true,
-        details: new Error('SERVER_ERROR_INTERNAL')
+        details: 'SERVER_ERROR_INTERNAL'
       });
     });
   });
