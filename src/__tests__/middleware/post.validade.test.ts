@@ -21,6 +21,7 @@ describe('Validações do postValidationRules (sem usar e.param)', () => {
     const result = await runValidation(postValidationRules, req);
 
     const errorMessages = result.array().map((e) => e.msg);
+
     expect(errorMessages).toContain('O Título deve ser uma string');
   });
 
@@ -29,6 +30,7 @@ describe('Validações do postValidationRules (sem usar e.param)', () => {
     const result = await runValidation(postValidationRules, req);
 
     const errorMessages = result.array().map((e) => e.msg);
+
     expect(errorMessages).toContain('O Conteúdo deve ser uma string');
   });
 
@@ -37,6 +39,7 @@ describe('Validações do postValidationRules (sem usar e.param)', () => {
     const result = await runValidation(postValidationRules, req);
 
     const errorMessages = result.array().map((e) => e.msg);
+
     expect(errorMessages).toContain('O campo Ativo deve ser um booleano');
   });
 
@@ -45,6 +48,7 @@ describe('Validações do postValidationRules (sem usar e.param)', () => {
     const result = await runValidation(postValidationRules, req);
 
     const errorMessages = result.array().map((e) => e.msg);
+
     expect(errorMessages).toContain('O Usuário deve ter um UUID válido');
   });
 
@@ -53,6 +57,7 @@ describe('Validações do postValidationRules (sem usar e.param)', () => {
     const result = await runValidation(postValidationRules, req);
 
     const errorMessages = result.array().map((e) => e.msg);
+
     expect(errorMessages).toContain('A Categoria deve ter um UUID válido');
   });
 });
@@ -67,6 +72,7 @@ describe('Validações positivas do postValidationRules', () => {
       category_id: '4536040b-22c5-4c38-a881-5966bf5b6cc3'
     });
     const result = await runValidation(postValidationRules, req);
+
     expect(result.isEmpty()).toBe(true);
   });
 
@@ -79,6 +85,7 @@ describe('Validações positivas do postValidationRules', () => {
     });
     const result = await runValidation(postValidationRules, req);
     const errorMessages = result.array().map((e) => e.msg);
+
     expect(errorMessages).toContain(
       'O Título deve ter no mínimo 20 caracteres'
     );
@@ -93,6 +100,7 @@ describe('Validações positivas do postValidationRules', () => {
     });
     const result = await runValidation(postValidationRules, req);
     const errorMessages = result.array().map((e) => e.msg);
+
     expect(errorMessages).toContain(
       'O Conteúdo deve ter no mínimo 50 caracteres'
     );
@@ -113,6 +121,7 @@ describe('Validações positivas do postValidationRules', () => {
     const result2 = await runValidation(postValidationRules, req2);
     const errorMessages1 = result1.array().map((e) => e.msg);
     const errorMessages2 = result2.array().map((e) => e.msg);
+
     expect(errorMessages1).toContain('O Título é obrigatório');
     expect(errorMessages2).toContain('O Conteúdo é obrigatório');
   });

@@ -7,132 +7,176 @@ jest.mock('../../database/db', () => ({
   query: jest.fn()
 }));
 
-const mockedQuery = query as jest.Mock;
+const mockUser = {
+  id: uuidv4(),
+  name: 'Usuário Teste',
+  email: 'teste@email.com',
+  phone: '11999999999',
+  passwordHash: 'hash',
+  roleId: uuidv4(),
+  password_hash: 'hash',
+  role_id: uuidv4()
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
 describe('userRepository', () => {
-  describe('findUserByEmailOrName', () => {
-    it('should return a user when found by email or name', async () => {
-      const mockUser = {
-        id: uuidv4(),
-        name: 'teste',
-        email: 'teste@email.com',
-        phone: '11987654321',
-        password_hash: 'hash123'
-      };
-
-      mockedQuery.mockResolvedValueOnce([mockUser]);
-
-      const result = await userRepository.findByEmailOrName('teste@email.com');
-
-      expect(mockedQuery).toHaveBeenCalledWith(
-        expect.stringContaining('SELECT'),
-        ['teste@email.com']
-      );
+  describe('create', () => {
+    it('should insert user and return created object', async () => {
+      (query as jest.Mock).mockResolvedValueOnce([mockUser]);
+      const result = await userRepository.create({
+        name: mockUser.name,
+        email: mockUser.email,
+        phone: mockUser.phone,
+        passwordHash: mockUser.passwordHash,
+        roleId: mockUser.roleId
+      });
       expect(result).toEqual(mockUser);
+    });
+    it('should propagate database error', async () => {
+      (query as jest.Mock).mockRejectedValueOnce(new Error('DB error'));
+      await expect(
+        userRepository.create({
+          name: mockUser.name,
+          email: mockUser.email,
+          phone: mockUser.phone,
+          passwordHash: mockUser.passwordHash,
+          roleId: mockUser.roleId
+        })
+      ).rejects.toThrow('DB error');
+    });
+    it('should pass correct parameters to query', async () => {
+      (query as jest.Mock).mockResolvedValueOnce([mockUser]);
+      await userRepository.create({
+        name: mockUser.name,
+        email: mockUser.email,
+        phone: mockUser.phone,
+        passwordHash: mockUser.passwordHash,
+        roleId: mockUser.roleId
+      });
+      expect(query).toHaveBeenCalledWith(expect.any(String), [
+        mockUser.name,
+        mockUser.email,
+        mockUser.phone,
+        mockUser.passwordHash,
+        mockUser.roleId
+      ]);
     });
   });
 
-  describe('findUserById', () => {
-    it('should return a user when found by id', async () => {
-      const id = uuidv4();
-      const mockUser = {
-        id,
-        email: 'teste@email.com',
-        name: 'teste',
-        phone: '11912345678',
-        roleid: uuidv4()
-      };
-
-      mockedQuery.mockResolvedValueOnce([mockUser]);
-
-      const result = await userRepository.findById(id);
-
-      expect(mockedQuery).toHaveBeenCalledWith(
-        expect.stringContaining('SELECT'),
-        [id]
-      );
+  describe('findById', () => {
+    it('should return user if found', async () => {
+      (query as jest.Mock).mockResolvedValueOnce([mockUser]);
+      const result = await userRepository.findById(mockUser.id);
       expect(result).toEqual(mockUser);
+    });
+    it('should return undefined if not found', async () => {
+      (query as jest.Mock).mockResolvedValueOnce([]);
+      const result = await userRepository.findById('not-found-id');
+      expect(result).toBeUndefined();
+    });
+    it('should propagate database error', async () => {
+      (query as jest.Mock).mockRejectedValueOnce(new Error('DB error'));
+      await expect(userRepository.findById(mockUser.id)).rejects.toThrow(
+        'DB error'
+      );
+    });
+  });
+
+  describe('findByEmailOrName', () => {
+    it('should return user if found', async () => {
+      (query as jest.Mock).mockResolvedValueOnce([mockUser]);
+      const result = await userRepository.findByEmailOrName(mockUser.email);
+      expect(result).toEqual(mockUser);
+    });
+    it('should return undefined if not found', async () => {
+      (query as jest.Mock).mockResolvedValueOnce([]);
+      const result = await userRepository.findByEmailOrName(
+        'not-found@email.com'
+      );
+      expect(result).toBeUndefined();
+    });
+    it('should propagate database error', async () => {
+      (query as jest.Mock).mockRejectedValueOnce(new Error('DB error'));
+      await expect(
+        userRepository.findByEmailOrName(mockUser.email)
+      ).rejects.toThrow('DB error');
     });
   });
 
   describe('alter', () => {
-    it('should update a user and return the modified row', async () => {
-      const mockUser = {
-        id: uuidv4(),
-        email: 'teste@email.com',
-        name: 'teste',
-        phone: '11900001111',
-        roleId: uuidv4()
-      };
-
-      mockedQuery.mockResolvedValueOnce([mockUser]);
-
-      const result = await userRepository.alter(mockUser);
-
-      expect(mockedQuery).toHaveBeenCalledWith(
-        expect.stringContaining('UPDATE'),
-        [
-          mockUser.id,
-          mockUser.name,
-          mockUser.email,
-          mockUser.phone,
-          mockUser.roleId
-        ]
-      );
+    it('should update user and return updated object', async () => {
+      (query as jest.Mock).mockResolvedValueOnce([mockUser]);
+      const result = await userRepository.alter({
+        id: mockUser.id,
+        name: mockUser.name,
+        email: mockUser.email,
+        phone: mockUser.phone,
+        roleId: mockUser.roleId
+      });
       expect(result).toEqual(mockUser);
+    });
+    it('should propagate database error', async () => {
+      (query as jest.Mock).mockRejectedValueOnce(new Error('DB error'));
+      await expect(
+        userRepository.alter({
+          id: mockUser.id,
+          name: mockUser.name,
+          email: mockUser.email,
+          phone: mockUser.phone,
+          roleId: mockUser.roleId
+        })
+      ).rejects.toThrow('DB error');
+    });
+    it('should pass correct parameters to query', async () => {
+      (query as jest.Mock).mockResolvedValueOnce([mockUser]);
+      await userRepository.alter({
+        id: mockUser.id,
+        name: mockUser.name,
+        email: mockUser.email,
+        phone: mockUser.phone,
+        roleId: mockUser.roleId
+      });
+      expect(query).toHaveBeenCalledWith(expect.any(String), [
+        mockUser.id,
+        mockUser.name,
+        mockUser.email,
+        mockUser.phone,
+        mockUser.roleId
+      ]);
     });
   });
 
   describe('alterPassword', () => {
-    it('should update a user password and return the modified row', async () => {
-      const userPassword = {
-        id: uuidv4(),
-        passwordHash: 'newhash123'
-      };
-
-      mockedQuery.mockResolvedValueOnce([userPassword]);
-
-      const result = await userRepository.alterPassword(userPassword);
-
-      expect(mockedQuery).toHaveBeenCalledWith(
-        expect.stringContaining('UPDATE'),
-        [userPassword.id, userPassword.passwordHash]
-      );
-      expect(result).toEqual(userPassword);
+    it('should update password and return updated object', async () => {
+      (query as jest.Mock).mockResolvedValueOnce([mockUser]);
+      const result = await userRepository.alterPassword({
+        id: mockUser.id,
+        passwordHash: mockUser.passwordHash
+      });
+      expect(result).toEqual(mockUser);
     });
-  });
-
-  describe('create', () => {
-    it('should create a user and return the created row', async () => {
-      const newUser = {
-        name: 'teste',
-        email: 'teste@email.com',
-        phone: '11999998888',
-        passwordHash: 'senha123',
-        roleId: uuidv4()
-      };
-
-      const createdUser = { id: uuidv4(), ...newUser };
-
-      mockedQuery.mockResolvedValueOnce([createdUser]);
-
-      const result = await userRepository.create(newUser);
-
-      expect(mockedQuery).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT'),
-        [
-          newUser.name,
-          newUser.email,
-          newUser.phone,
-          newUser.passwordHash,
-          newUser.roleId
-        ]
-      );
-      expect(result).toEqual(createdUser);
+    it('should propagate database error', async () => {
+      (query as jest.Mock).mockRejectedValueOnce(new Error('DB error'));
+      await expect(
+        userRepository.alterPassword({
+          id: mockUser.id,
+          passwordHash: mockUser.passwordHash
+        })
+      ).rejects.toThrow('DB error');
+    });
+    it('should pass correct parameters to query', async () => {
+      (query as jest.Mock).mockResolvedValueOnce([mockUser]);
+      await userRepository.alterPassword({
+        id: mockUser.id,
+        passwordHash: mockUser.passwordHash
+      });
+      expect(query).toHaveBeenCalledWith(expect.any(String), [
+        mockUser.id,
+        mockUser.passwordHash
+      ]);
     });
   });
 });

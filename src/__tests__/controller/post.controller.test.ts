@@ -2,11 +2,14 @@ import { Request, Response } from 'express';
 
 import * as postController from '../../app/controllers/postController';
 
+import * as categoryRepository from '../../app/repositories/categoryRepository';
 import * as postRepository from '../../app/repositories/postRepository';
+import * as userRepository from '../../app/repositories/userRepository';
 
 import { validateUUID } from '../../app/middlewares/utils/validateUtils';
 
 import { mockPagination, mockPosts } from '../../utils/mocks/mockPost';
+import { mockUser } from '../../utils/mocks/mockUser';
 
 jest.mock('../../app/repositories/postRepository', () => ({
   findAll: jest.fn(),
@@ -15,6 +18,14 @@ jest.mock('../../app/repositories/postRepository', () => ({
   create: jest.fn(),
   deleteOne: jest.fn(),
   update: jest.fn()
+}));
+
+jest.mock('../../app/repositories/userRepository', () => ({
+  findById: jest.fn()
+}));
+
+jest.mock('../../app/repositories/categoryRepository', () => ({
+  findById: jest.fn()
 }));
 
 describe('PostController', () => {
@@ -329,6 +340,128 @@ describe('PostController', () => {
       expect(jsonMock).toHaveBeenCalledWith({
         error: true,
         details: 'NOT_FOUND_POST'
+      });
+    });
+  });
+
+  describe('create', () => {
+    let next: jest.Mock;
+    beforeEach(() => {
+      jest.clearAllMocks();
+      next = jest.fn();
+    });
+
+    it('should return 404 if user does not exist', async () => {
+      (userRepository.findById as jest.Mock).mockResolvedValueOnce(null);
+      req.body = { user_id: 'user-id', category_id: 'cat-id' };
+      await postController.create(req as any, res as any, next);
+      expect(statusMock).toHaveBeenCalledWith(404);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: true,
+        details: 'NOT_FOUND_USER'
+      });
+    });
+
+    it('should return 404 if category does not exist', async () => {
+      (userRepository.findById as jest.Mock).mockResolvedValueOnce(mockUser);
+      (categoryRepository.findById as jest.Mock).mockResolvedValueOnce(null);
+
+      req.body = { user_id: 'user-id', category_id: 'cat-id' };
+      await postController.create(req as any, res as any, next);
+      expect(statusMock).toHaveBeenCalledWith(404);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: true,
+        details: 'NOT_FOUND_CATEGORY'
+      });
+    });
+
+    it('should return 500 on unexpected error', async () => {
+      (userRepository.findById as jest.Mock).mockRejectedValueOnce(
+        new Error('DB error')
+      );
+      req.body = { user_id: 'user-id', category_id: 'cat-id' };
+      await postController.create(req as any, res as any, next);
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: true,
+        details: 'DB error'
+      });
+    });
+  });
+
+  describe('updateById', () => {
+    it('should return 404 if post does not exist', async () => {
+      (postRepository.findById as jest.Mock).mockResolvedValueOnce(null);
+      req.params = { id: 'post-id' };
+      req.body = {}; // Garante que body existe
+      await postController.updateById(req as any, res as any, next);
+      expect(statusMock).toHaveBeenCalledWith(404);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: true,
+        details: 'NOT_FOUND_POST'
+      });
+    });
+
+    it('should return 404 if category does not exist', async () => {
+      (postRepository.findById as jest.Mock).mockResolvedValueOnce({
+        id: 'post-id'
+      }); // Retorna post válido
+      (categoryRepository.findById as jest.Mock).mockResolvedValueOnce(null);
+      req.params = { id: 'post-id' };
+      req.body = { category_id: 'cat-id' };
+      await postController.updateById(req as any, res as any, next);
+      expect(statusMock).toHaveBeenCalledWith(404);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: true,
+        details: 'NOT_FOUND_CATEGORY'
+      });
+    });
+
+    it('should return 500 on unexpected error', async () => {
+      (postRepository.findById as jest.Mock).mockRejectedValueOnce(
+        new Error('DB error')
+      );
+      req.params = { id: 'post-id' };
+      req.body = {}; // Garante que body existe
+      await postController.updateById(req as any, res as any, next);
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: true,
+        details: 'DB error'
+      });
+    });
+  });
+
+  describe('removeById', () => {
+    it('should return 500 on unexpected error', async () => {
+      (postRepository.findById as jest.Mock).mockRejectedValueOnce(
+        new Error('DB error')
+      );
+      req.params = { id: '1f5dcd7c-f7aa-4a14-b26b-b65282682ce6' };
+      req.user = { id: '1f5dcd7c-f7aa-4a14-b26b-b65282682df7' };
+      await postController.removeById(req as Request, res as Response, next);
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: true,
+        details: 'DB error'
+      });
+    });
+  });
+
+  describe('list', () => {
+    it('should return 500 on unexpected error', async () => {
+      (postRepository.findAll as jest.Mock).mockRejectedValueOnce(
+        new Error('DB error')
+      );
+      req.params = {};
+      req.query = {};
+
+      await postController.list(req as Request, res as Response);
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: true,
+        details: 'DB error'
       });
     });
   });
