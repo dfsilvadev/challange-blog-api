@@ -2,23 +2,37 @@ import { Request, Response } from 'express';
 
 import * as postController from '../../app/controllers/postController';
 
+import * as categoryRepository from '../../app/repositories/categoryRepository';
 import * as postRepository from '../../app/repositories/postRepository';
+import * as userRepository from '../../app/repositories/userRepository';
 
 import { validateUUID } from '../../app/middlewares/utils/validateUtils';
 
 import { mockPagination, mockPosts } from '../../utils/mocks/mockPost';
+import { mockUser } from '../../utils/mocks/mockUser';
 
 jest.mock('../../app/repositories/postRepository', () => ({
   findAll: jest.fn(),
   count: jest.fn(),
   findById: jest.fn(),
   create: jest.fn(),
-  deleteById: jest.fn(),
+  deleteOne: jest.fn(),
   update: jest.fn()
 }));
 
+jest.mock('../../app/repositories/userRepository', () => ({
+  findById: jest.fn()
+}));
+
+jest.mock('../../app/repositories/categoryRepository', () => ({
+  findById: jest.fn()
+}));
+
 describe('PostController', () => {
-  let req: Partial<Request>;
+  interface MockRequest extends Partial<Request> {
+    user?: { id: string };
+  }
+  let req: MockRequest;
   let res: Partial<Response>;
   let jsonMock: jest.Mock;
   let statusMock: jest.Mock;
@@ -248,6 +262,207 @@ describe('PostController', () => {
       expect(jsonMock).toHaveBeenCalledWith(
         expect.objectContaining({ details: 'NOT_FOUND_POST', error: true })
       );
+    });
+  });
+
+  describe('DELETE /post/:id', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should delete a post successfully if user is authenticated and is the creator', async () => {
+      const id = 'post-id-123';
+      const loggedUserId = 'user-1';
+      (postRepository.findById as jest.Mock).mockResolvedValueOnce({
+        id,
+        user_id: loggedUserId
+      });
+      (postRepository.deleteOne as jest.Mock).mockResolvedValueOnce({});
+      req.params = { id };
+      req.user = { id: loggedUserId };
+
+      await postController.removeById(req as Request, res as Response, next);
+
+      expect(postRepository.findById).toHaveBeenCalledWith(id);
+      expect(postRepository.deleteOne).toHaveBeenCalledWith(id);
+      expect(statusMock).toHaveBeenCalledWith(200);
+      expect(jsonMock).toHaveBeenCalledWith({
+        status: 'OK',
+        details: 'POST_DELETED'
+      });
+    });
+
+    it('should return 401 if user is not authenticated', async () => {
+      const id = 'post-id-123';
+      (postRepository.findById as jest.Mock).mockResolvedValueOnce({
+        id,
+        user_id: 'user-1'
+      });
+      req.params = { id };
+      req.user = undefined;
+
+      await postController.removeById(req as Request, res as Response, next);
+
+      expect(statusMock).toHaveBeenCalledWith(401);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: true,
+        details: 'UNAUTHORIZED'
+      });
+    });
+
+    it('should return 403 if user is not the creator', async () => {
+      const id = 'post-id-123';
+      (postRepository.findById as jest.Mock).mockResolvedValueOnce({
+        id,
+        user_id: 'user-1'
+      });
+      req.params = { id };
+      req.user = { id: 'other-user' };
+
+      await postController.removeById(req as Request, res as Response, next);
+
+      expect(statusMock).toHaveBeenCalledWith(403);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: true,
+        details: 'FORBIDDEN: Only the post creator can delete this post'
+      });
+    });
+
+    it('should return 404 if post does not exist', async () => {
+      const id = 'not-found-id';
+      (postRepository.findById as jest.Mock).mockResolvedValueOnce(null);
+      req.params = { id };
+      req.user = { id: 'user-1' };
+
+      await postController.removeById(req as Request, res as Response, next);
+
+      expect(statusMock).toHaveBeenCalledWith(404);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: true,
+        details: 'NOT_FOUND_POST'
+      });
+    });
+  });
+
+  describe('create', () => {
+    let next: jest.Mock;
+    beforeEach(() => {
+      jest.clearAllMocks();
+      next = jest.fn();
+    });
+
+    it('should return 404 if user does not exist', async () => {
+      (userRepository.findById as jest.Mock).mockResolvedValueOnce(null);
+      req.body = { user_id: 'user-id', category_id: 'cat-id' };
+      await postController.create(req as any, res as any, next);
+      expect(statusMock).toHaveBeenCalledWith(404);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: true,
+        details: 'NOT_FOUND_USER'
+      });
+    });
+
+    it('should return 404 if category does not exist', async () => {
+      (userRepository.findById as jest.Mock).mockResolvedValueOnce(mockUser);
+      (categoryRepository.findById as jest.Mock).mockResolvedValueOnce(null);
+
+      req.body = { user_id: 'user-id', category_id: 'cat-id' };
+      await postController.create(req as any, res as any, next);
+      expect(statusMock).toHaveBeenCalledWith(404);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: true,
+        details: 'NOT_FOUND_CATEGORY'
+      });
+    });
+
+    it('should return 500 on unexpected error', async () => {
+      (userRepository.findById as jest.Mock).mockRejectedValueOnce(
+        new Error('DB error')
+      );
+      req.body = { user_id: 'user-id', category_id: 'cat-id' };
+      await postController.create(req as any, res as any, next);
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: true,
+        details: 'DB error'
+      });
+    });
+  });
+
+  describe('updateById', () => {
+    it('should return 404 if post does not exist', async () => {
+      (postRepository.findById as jest.Mock).mockResolvedValueOnce(null);
+      req.params = { id: 'post-id' };
+      req.body = {}; // Garante que body existe
+      await postController.updateById(req as any, res as any, next);
+      expect(statusMock).toHaveBeenCalledWith(404);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: true,
+        details: 'NOT_FOUND_POST'
+      });
+    });
+
+    it('should return 404 if category does not exist', async () => {
+      (postRepository.findById as jest.Mock).mockResolvedValueOnce({
+        id: 'post-id'
+      }); // Retorna post válido
+      (categoryRepository.findById as jest.Mock).mockResolvedValueOnce(null);
+      req.params = { id: 'post-id' };
+      req.body = { category_id: 'cat-id' };
+      await postController.updateById(req as any, res as any, next);
+      expect(statusMock).toHaveBeenCalledWith(404);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: true,
+        details: 'NOT_FOUND_CATEGORY'
+      });
+    });
+
+    it('should return 500 on unexpected error', async () => {
+      (postRepository.findById as jest.Mock).mockRejectedValueOnce(
+        new Error('DB error')
+      );
+      req.params = { id: 'post-id' };
+      req.body = {}; // Garante que body existe
+      await postController.updateById(req as any, res as any, next);
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: true,
+        details: 'DB error'
+      });
+    });
+  });
+
+  describe('removeById', () => {
+    it('should return 500 on unexpected error', async () => {
+      (postRepository.findById as jest.Mock).mockRejectedValueOnce(
+        new Error('DB error')
+      );
+      req.params = { id: '1f5dcd7c-f7aa-4a14-b26b-b65282682ce6' };
+      req.user = { id: '1f5dcd7c-f7aa-4a14-b26b-b65282682df7' };
+      await postController.removeById(req as Request, res as Response, next);
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: true,
+        details: 'DB error'
+      });
+    });
+  });
+
+  describe('list', () => {
+    it('should return 500 on unexpected error', async () => {
+      (postRepository.findAll as jest.Mock).mockRejectedValueOnce(
+        new Error('DB error')
+      );
+      req.params = {};
+      req.query = {};
+
+      await postController.list(req as Request, res as Response);
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: true,
+        details: 'DB error'
+      });
     });
   });
 });

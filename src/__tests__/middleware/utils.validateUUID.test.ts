@@ -23,7 +23,7 @@ describe('validateUUID middleware (com mocks)', () => {
     next = jest.fn();
   });
 
-  it('deve retornar UUID válido', () => {
+  it('should return valid UUID', () => {
     req.params = { id: '123e4567-e89b-12d3-a456-426614174000' };
 
     validateUUID(req as Request, res as Response, next as NextFunction);
@@ -33,8 +33,8 @@ describe('validateUUID middleware (com mocks)', () => {
     expect(res.json).not.toHaveBeenCalled();
   });
 
-  it('deve retornar 400 se o UUID for inválido', () => {
-    req.params = { id: 'invalido' };
+  it('should return 400 if UUID is invalid', () => {
+    req.params = { id: 'invalid' };
 
     validateUUID(req as Request, res as Response, next as NextFunction);
 
@@ -59,7 +59,7 @@ describe('validate middleware', () => {
     jest.clearAllMocks();
   });
 
-  it('deve chamar next() se não houver erros de validação', () => {
+  it('should call next() if no validation errors exist', () => {
     (validationResult as unknown as jest.Mock).mockReturnValue({
       isEmpty: () => true
     });
@@ -72,8 +72,9 @@ describe('validate middleware', () => {
     expect(mockRes.json).not.toHaveBeenCalled();
   });
 
-  it('deve retornar 400 e json com erros se houver erros de validação', () => {
-    const fakeErrors = [{ msg: 'Campo obrigatório', param: 'name' }];
+  it('should return 422 and json with errors if validation errors exist', () => {
+    const errorMessage = 'Campo obrigatório';
+    const fakeErrors = [{ msg: errorMessage, param: 'name' }];
     (validationResult as unknown as jest.Mock).mockReturnValue({
       isEmpty: () => false,
       array: () => fakeErrors
@@ -82,11 +83,53 @@ describe('validate middleware', () => {
     validate(mockReq, mockRes, mockNext);
 
     expect(validationResult).toHaveBeenCalledWith(mockReq);
-    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.status).toHaveBeenCalledWith(422);
     expect(mockRes.json).toHaveBeenCalledWith({
       error: true,
-      details: fakeErrors
+      details: [errorMessage]
     });
     expect(mockNext).not.toHaveBeenCalled();
+  });
+});
+
+describe('validateUUID', () => {
+  let req: any;
+  let res: any;
+  let next: jest.Mock;
+  let statusMock: jest.Mock;
+  let jsonMock: jest.Mock;
+
+  beforeEach(() => {
+    req = { params: {} };
+    jsonMock = jest.fn();
+    statusMock = jest.fn(() => ({ json: jsonMock })) as any;
+    res = { status: statusMock };
+    next = jest.fn();
+  });
+
+  it('should call next if id is a valid UUID', () => {
+    req.params.id = '4536040b-22c5-4c38-a881-5966bf5b6cc3';
+    require('../../app/middlewares/utils/validateUtils').validateUUID(
+      req,
+      res,
+      next
+    );
+    expect(next).toHaveBeenCalled();
+    expect(statusMock).not.toHaveBeenCalled();
+  });
+
+  it('should return 400 if id is not a valid UUID', () => {
+    req.params.id = 'invalid-uuid';
+    require('../../app/middlewares/utils/validateUtils').validateUUID(
+      req,
+      res,
+      next
+    );
+    expect(statusMock).toHaveBeenCalledWith(400);
+    expect(jsonMock).toHaveBeenCalledWith({
+      error: true,
+      details: 'INVALID_UUID'
+    });
+    expect(next).not.toHaveBeenCalled();
   });
 });

@@ -1,8 +1,20 @@
 import { body } from 'express-validator';
 
 const postValidationRules = [
-  body('title').isString().withMessage('O Título deve ser uma string'),
-  body('content').isString().withMessage('O Conteúdo deve ser uma string'),
+  body('title')
+    .exists({ checkFalsy: true })
+    .withMessage('O Título é obrigatório')
+    .isString()
+    .withMessage('O Título deve ser uma string')
+    .isLength({ min: 20 })
+    .withMessage('O Título deve ter no mínimo 20 caracteres'),
+  body('content')
+    .exists({ checkFalsy: true })
+    .withMessage('O Conteúdo é obrigatório')
+    .isString()
+    .withMessage('O Conteúdo deve ser uma string')
+    .isLength({ min: 50 })
+    .withMessage('O Conteúdo deve ter no mínimo 50 caracteres'),
   body('is_active')
     .isBoolean()
     .withMessage('O campo Ativo deve ser um booleano'),

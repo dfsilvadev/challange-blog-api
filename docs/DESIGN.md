@@ -92,62 +92,67 @@ Optou-se por Express.js com TypeScript por ser mais leve, flexível e adequado p
 
 ## Cross-cutting concerns
 
-- **Segurança:**  
+- **Segurança:**
   - JWT para autenticação
   - Validação de dados com express-validator
   - Hash de senhas com bcrypt
-- **Observabilidade:**  
+- **Observabilidade:**
   - Logs estruturados (middleware customizável para o futuro)
-- **Infraestrutura:**  
+- **Infraestrutura:**
   - Uso local com PostgreSQL, extensível para deployment com Docker
-- **Testes:**  
+- **Testes:**
   - Jest para testes unitários e de integração
 
 ---
 
 ## Stack Técnica
 
-| Camada         | Tecnologia                |
-|----------------|--------------------------|
-| API            | Node.js + Express        |
-| Linguagem      | TypeScript               |
-| Banco de dados | PostgreSQL               |
-| Autenticação   | JWT                      |
-| ORM/Query      | Query manual (SQL)       |
-| Testes         | Jest                     |
-| Linting        | ESLint + Prettier        |
-| Hooks          | Husky + Lint Staged      |
+| Camada         | Tecnologia          |
+| -------------- | ------------------- |
+| API            | Node.js + Express   |
+| Linguagem      | TypeScript          |
+| Banco de dados | PostgreSQL          |
+| Autenticação   | JWT                 |
+| ORM/Query      | Query manual (SQL)  |
+| Testes         | Jest                |
+| Linting        | ESLint + Prettier   |
+| Hooks          | Husky + Lint Staged |
 
 ---
 
 ## Rotas Implementadas
 
 ### Health Check
-| Método | Endpoint   | Descrição           | Autenticação |
-|--------|------------|---------------------|--------------|
-| GET    | /health    | Health check da API | Não          |
+
+| Método | Endpoint | Descrição           | Autenticação |
+| ------ | -------- | ------------------- | ------------ |
+| GET    | /health  | Health check da API | Não          |
 
 ### Autenticação
-| Método | Endpoint      | Descrição                    | Autenticação | Payload                         |
-|--------|---------------|------------------------------|--------------|----------------------------------|
-| POST   | /auth/login   | Login e obtenção de token    | Não          | `{ "username", "password" }`     |
+
+| Método | Endpoint    | Descrição                 | Autenticação | Payload                      |
+| ------ | ----------- | ------------------------- | ------------ | ---------------------------- |
+| POST   | /auth/login | Login e obtenção de token | Não          | `{ "username", "password" }` |
 
 ### Usuários
-| Método | Endpoint      | Descrição                    | Autenticação | Payload                         |
-|--------|---------------|------------------------------|--------------|----------------------------------|
-| POST   | /user/        | Criar usuário                | Não          | `{ "name", "email", "password", ... }` |
-| GET    | /user/:id     | Buscar usuário por ID        | Sim          |                                  |
+
+| Método | Endpoint  | Descrição             | Autenticação | Payload                                |
+| ------ | --------- | --------------------- | ------------ | -------------------------------------- |
+| POST   | /user/    | Criar usuário         | Não          | `{ "name", "email", "password", ... }` |
+| GET    | /user/:id | Buscar usuário por ID | Sim          |                                        |
 
 ### Posts
-| Método | Endpoint      | Descrição                    | Autenticação | Payload/Query                   |
-|--------|---------------|------------------------------|--------------|----------------------------------|
-| GET    | /post/        | Listar posts ativos          | Não          | `?page&limit&orderBy`           |
-| GET    | /post/:id     | Buscar post por ID           | Não          |                                  |
-| POST   | /post/        | Criar novo post              | Sim          | `{ "title", "content", "is_active", "user_id", "category_id" }` |
-| PATCH  | /post/:id     | Atualizar post               | Sim          | `{ "title?", "content?", "is_active?", "category_id?" }` |
-| DELETE | /post/:id     | Remover post                 | Sim          |                                  |
+
+| Método | Endpoint  | Descrição           | Autenticação | Payload/Query                                                   |
+| ------ | --------- | ------------------- | ------------ | --------------------------------------------------------------- |
+| GET    | /post/    | Listar posts ativos | Não          | `?page&limit&orderBy`                                           |
+| GET    | /post/:id | Buscar post por ID  | Não          |                                                                 |
+| POST   | /post/    | Criar novo post     | Sim          | `{ "title", "content", "is_active", "user_id", "category_id" }` |
+| PATCH  | /post/:id | Atualizar post      | Sim          | `{ "title?", "content?", "is_active?", "category_id?" }`        |
+| DELETE | /post/:id | Remover post        | Sim          |                                                                 |
 
 ### Categorias
+
 - **Não há rotas implementadas para categorias** (apenas repository).
 
 ---
@@ -155,6 +160,7 @@ Optou-se por Express.js com TypeScript por ser mais leve, flexível e adequado p
 ## Exemplos de Payloads
 
 ### Login
+
 ```json
 POST /auth/login
 {
@@ -164,6 +170,7 @@ POST /auth/login
 ```
 
 ### Criar Post
+
 ```json
 POST /post/
 {
@@ -176,6 +183,7 @@ POST /post/
 ```
 
 ### Atualizar Post
+
 ```json
 PATCH /post/:id
 {
@@ -199,6 +207,7 @@ PATCH /post/:id
 ## Diagramas de Sequência
 
 ### Login (POST /auth/login)
+
 ```mermaid
 sequenceDiagram
     participant C as Client
@@ -218,6 +227,7 @@ sequenceDiagram
 ```
 
 ### Criar Post (POST /post/)
+
 ```mermaid
 sequenceDiagram
     participant C as Client
@@ -231,6 +241,7 @@ sequenceDiagram
 ```
 
 ### Buscar Post (GET /post/:id)
+
 ```mermaid
 sequenceDiagram
     participant C as Client
@@ -248,6 +259,7 @@ sequenceDiagram
 ```
 
 ### Atualizar Post (PATCH /post/:id)
+
 ```mermaid
 sequenceDiagram
     participant C as Client
@@ -261,6 +273,7 @@ sequenceDiagram
 ```
 
 ### Deletar Post (DELETE /post/:id)
+
 ```mermaid
 sequenceDiagram
     participant C as Client
@@ -274,6 +287,7 @@ sequenceDiagram
 ```
 
 ### Criar Usuário (POST /user/)
+
 ```mermaid
 sequenceDiagram
     participant C as Client
@@ -288,6 +302,7 @@ sequenceDiagram
 ```
 
 ### Health Check (GET /health)
+
 ```mermaid
 sequenceDiagram
     participant C as Client

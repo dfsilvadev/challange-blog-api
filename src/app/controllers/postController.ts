@@ -58,7 +58,7 @@ export const updateById: RequestHandler = async (
   res: Response
 ) => {
   const { id } = req.params;
-  const { title, content, is_active, category_id } = req.body; // Ignora user_id
+  const { title, content, is_active, category_id } = req.body;
 
   try {
     const post = await postRepository.findById(id);
@@ -95,14 +95,24 @@ export const removeById: RequestHandler = async (
   res: Response
 ) => {
   const id = req.params.id;
+  // @ts-ignore: user populado pelo middleware de autenticação
+  const loggedUserId = req.user?.id;
 
   try {
-    const validate = await postRepository.findById(id);
-
-    if (!validate) {
+    const post = await postRepository.findById(id);
+    if (!post) {
       return res.status(404).json({ error: true, details: 'NOT_FOUND_POST' });
     }
+    if (!loggedUserId) {
+      return res.status(401).json({ error: true, details: 'UNAUTHORIZED' });
+    }
 
+    if (post.user_id !== loggedUserId) {
+      return res.status(403).json({
+        error: true,
+        details: 'FORBIDDEN: Only the post creator can delete this post'
+      });
+    }
     await postRepository.deleteOne(id);
     res.status(200).json({ status: 'OK', details: 'POST_DELETED' });
   } catch (err) {

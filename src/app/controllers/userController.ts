@@ -10,7 +10,6 @@ export const create: RequestHandler = async (req: Request, res: Response) => {
   try {
     const ROLE_NAME = 'teacher';
     const role = await roleRepository.findIdByName(ROLE_NAME);
-    const roleId = typeof role === 'string' ? role : role?.id || '';
 
     /*
     Criptografar a senha
@@ -25,11 +24,13 @@ export const create: RequestHandler = async (req: Request, res: Response) => {
       email,
       phone,
       passwordHash,
-      roleId
+      roleId: role
     });
-    res.status(201).json({ status: 'OK', details: { user } });
+    res.status(201).json({ status: 'OK', details: user });
   } catch (err) {
-    res.status(500).json({ error: true, details: err });
+    res
+      .status(500)
+      .json({ error: true, details: err instanceof Error ? err.message : err });
   }
 };
 
@@ -39,8 +40,14 @@ export const findOne: RequestHandler = async (req: Request, res: Response) => {
   try {
     const user = await userRepository.findById(id);
 
-    res.status(200).json({ status: 'OK', details: { user } });
+    if (!user) {
+      return res.status(200).json({ status: 'OK', details: 'USER_NOT_FOUND' });
+    }
+
+    res.status(200).json({ status: 'OK', details: user });
   } catch (err) {
-    res.status(500).json({ error: true, details: err });
+    res
+      .status(500)
+      .json({ error: true, details: err instanceof Error ? err.message : err });
   }
 };

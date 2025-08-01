@@ -1,6 +1,11 @@
 import { query } from '../../database/db';
 
-import { FindAllParams, PostCountFilters } from './models/postRepositoryTypes';
+import {
+  FindAllParams,
+  FindPostResponse,
+  Post,
+  PostCountFilters
+} from './models/postRepositoryTypes';
 
 export const create = async (
   title: string,
@@ -8,8 +13,8 @@ export const create = async (
   is_active: boolean,
   user_id: string,
   category_id: string
-) => {
-  const [row] = await query(
+): Promise<Post> => {
+  const [row] = await query<Post>(
     `
         INSERT INTO tb_post(title, content, is_active, user_id, category_id)
         VALUES ($1, $2, $3, $4, $5)
@@ -17,23 +22,35 @@ export const create = async (
         `,
     [title, content, is_active, user_id, category_id]
   );
-  return [row];
+  return row;
 };
 
-export const findById = async (id: string) => {
-  // TODO: add user name and user id
-  const row = await query(
+export const findById = async (id: string): Promise<FindPostResponse> => {
+  const [row] = await query<FindPostResponse>(
     `
-      SELECT p.title, p.content, p.is_active, p.user_id, p.category_id, p.created_at, p.updated_at,
-             u.id as user_id, u.name as user_name
-      FROM tb_post p
-      JOIN tb_user u ON p.user_id = u.id
-      JOIN tb_category c ON p.category_id = c.id
-      WHERE p.id = $1 AND p.is_active = true
+      SELECT
+        tb_post.id,
+        tb_post.title,
+        tb_post.content,
+        tb_post.is_active,
+        tb_post.created_at,
+        tb_post.updated_at,
+        tb_post.user_id,
+        tb_user.name AS "user_name",
+        tb_post.category_id,
+        tb_category.name AS "category_name"
+      FROM
+        tb_post
+      INNER JOIN
+        tb_user ON tb_user.id = tb_post.user_id
+      INNER JOIN
+        tb_category ON tb_category.id = tb_post.category_id
+      WHERE
+        tb_post.id = $1 AND tb_post.is_active = true
     `,
     [id]
   );
-  return row || null;
+  return row;
 };
 
 export const findAll = async ({
@@ -41,7 +58,7 @@ export const findAll = async ({
   limit,
   orderBy,
   userId
-}: FindAllParams) => {
+}: FindAllParams): Promise<FindPostResponse[]> => {
   const direction = orderBy.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
   const offset = (page - 1) * limit;
 
@@ -57,7 +74,7 @@ export const findAll = async ({
 
   const whereClause = conditions.join(' AND ');
 
-  const rows = await query(
+  const rows = await query<FindPostResponse>(
     `
       SELECT
         tb_post.id,
@@ -67,13 +84,15 @@ export const findAll = async ({
         tb_post.created_at,
         tb_post.updated_at,
         tb_post.user_id,
+        tb_user.name AS "user_name",
         tb_post.category_id,
-        tb_category.id AS "categoryId",
-        tb_category.name AS "categoryName"
+        tb_category.name AS "category_name"
       FROM
         tb_post
       INNER JOIN
         tb_category ON tb_category.id = tb_post.category_id
+      INNER JOIN
+        tb_user ON tb_user.id = tb_post.user_id
       WHERE
         ${whereClause}
       ORDER BY
@@ -86,7 +105,9 @@ export const findAll = async ({
   return rows;
 };
 
-export const count = async (filters: PostCountFilters = {}) => {
+export const count = async (
+  filters: PostCountFilters = {}
+): Promise<number> => {
   const conditions: string[] = ['tb_post.is_active = TRUE'];
   const values: (string | Date | boolean)[] = [];
   let paramIndex = 1;
@@ -126,7 +147,7 @@ export const count = async (filters: PostCountFilters = {}) => {
     ${whereClause}
   `;
 
-  const [{ count }] = await query(querySql, values);
+  const [{ count }] = await query<{ count: number }>(querySql, values);
   return count;
 };
 
@@ -139,7 +160,7 @@ export const update = async (
     user_id: string;
     category_id: string;
   }>
-) => {
+): Promise<Post | null> => {
   const allowedFields = [
     'title',
     'content',
@@ -165,10 +186,11 @@ export const update = async (
 
   values.push(id);
 
-  const [row] = await query(
+  const [row] = await query<Post>(
     `UPDATE tb_post SET ${setClauses.join(', ')} WHERE id = $${idx} RETURNING *`,
     values
   );
+
   return row;
 };
 

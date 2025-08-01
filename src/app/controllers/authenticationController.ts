@@ -29,9 +29,9 @@ export const login = async (req: Request, res: Response) => {
     const token = jwt.sign(payload, config.jwtSecret, { expiresIn: '1h' });
 
     return res.status(200).json({ status: 'OK', details: { token: token } });
-  } catch {
+  } catch (err) {
     return res
       .status(500)
-      .json({ error: true, details: 'SERVER_ERROR_INTERNAL' });
+      .json({ error: true, details: err instanceof Error ? err.message : err });
   }
 };

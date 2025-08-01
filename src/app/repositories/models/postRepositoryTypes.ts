@@ -2,6 +2,22 @@
  * Post Repository Types
  * Este arquivo define os tipos e interfaces usados no repositório de posts.
  */
+interface Post {
+  readonly id: string;
+  readonly title: string;
+  readonly content: string;
+  readonly is_active: boolean;
+  readonly user_id: string;
+  readonly category_id: string;
+  readonly created_at: Date;
+  readonly updated_at: Date;
+}
+
+interface FindPostResponse extends Post {
+  readonly user_name: string;
+  readonly category_name: string;
+}
+
 interface FindAllParams {
   readonly page: number;
   readonly limit: number;
@@ -68,16 +84,21 @@ interface UserEntity extends User {
  * Este arquivo define os tipos e interfaces usados no repositório de papéis.
  */
 
-interface RoleIdFound {
+interface Role {
   readonly id: string;
+  readonly name: string;
+  readonly created_at: Date;
+  readonly updated_at: Date;
 }
 
 export {
   CreateUserParams,
   FindAllParams,
+  FindPostResponse,
   Pagination,
+  Post,
   PostCountFilters,
-  RoleIdFound,
+  Role,
   UserEntity,
   UserPassword,
   UserWithPasswordHash

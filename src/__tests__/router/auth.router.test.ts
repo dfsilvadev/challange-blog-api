@@ -46,7 +46,7 @@ describe('login controller', () => {
     jest.clearAllMocks();
   });
 
-  it('deve retornar 200 e token se login for bem-sucedido', async () => {
+  it('should return 200 and token if login is successful', async () => {
     (userRepository.findByEmailOrName as jest.Mock).mockResolvedValue({
       id: idFake,
       email: 'teste@email.com',
@@ -66,7 +66,7 @@ describe('login controller', () => {
     });
   });
 
-  it('deve retornar 401 se o usuário não existir', async () => {
+  it('should return 401 if user does not exist', async () => {
     (userRepository.findByEmailOrName as jest.Mock).mockResolvedValue(null);
 
     await authenticationController.login(mockReq, mockRes);
@@ -78,7 +78,7 @@ describe('login controller', () => {
     });
   });
 
-  it('deve retornar 401 se a senha for inválida', async () => {
+  it('should return 401 if password is invalid', async () => {
     (userRepository.findByEmailOrName as jest.Mock).mockResolvedValue({
       id: idFake,
       email: 'teste@email.com',
@@ -96,9 +96,10 @@ describe('login controller', () => {
     });
   });
 
-  it('deve retornar 500 em erro inesperado', async () => {
+  it('should return 500 if unexpected error occurs', async () => {
+    const errorMessage = 'Unexpected error';
     (userRepository.findByEmailOrName as jest.Mock).mockRejectedValue(
-      new Error('DB Error')
+      new Error(errorMessage)
     );
 
     await authenticationController.login(mockReq, mockRes);
@@ -106,7 +107,7 @@ describe('login controller', () => {
     expect(mockRes.status).toHaveBeenCalledWith(500);
     expect(mockRes.json).toHaveBeenCalledWith({
       error: true,
-      details: 'SERVER_ERROR_INTERNAL'
+      details: errorMessage
     });
   });
 });
