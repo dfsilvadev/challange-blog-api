@@ -17,13 +17,19 @@ const validateUUID = (
   next();
 };
 
-const validate = (req: Request, res: Response, next: NextFunction): void => {
+const validate = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    res.status(400).json({ error: true, details: errors.array() });
-    return;
-  }
-  next();
+
+  if (errors.isEmpty()) return next();
+
+  const extractedErrors: string[] = [];
+
+  errors.array().map((err) => extractedErrors.push(err.msg));
+
+  return res.status(422).json({
+    error: true,
+    details: extractedErrors
+  });
 };
 
 export { validate, validateUUID };

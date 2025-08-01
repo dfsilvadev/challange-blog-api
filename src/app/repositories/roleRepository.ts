@@ -1,9 +1,9 @@
 import { query } from '../../database/db';
 
-import { RoleIdFound } from './models/postRepositoryTypes';
+import { Role } from './models/postRepositoryTypes';
 
-export const findIdByName = async (name: string): Promise<RoleIdFound | ''> => {
-  const rows = await query(
+export const findIdByName = async (name: string): Promise<string> => {
+  const [row] = await query<Role>(
     `SELECT id
      FROM tb_role
      WHERE "name" = $1
@@ -11,5 +11,5 @@ export const findIdByName = async (name: string): Promise<RoleIdFound | ''> => {
     [name]
   );
 
-  return rows[0].id || '';
+  return row.id || '';
 };

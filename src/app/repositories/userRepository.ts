@@ -13,8 +13,8 @@ export const create = async ({
   phone,
   passwordHash,
   roleId
-}: CreateUserParams) => {
-  const [row] = await query(
+}: CreateUserParams): Promise<UserWithPasswordHash> => {
+  const [row] = await query<UserWithPasswordHash>(
     `
      INSERT INTO public.tb_user
       (id, "name", email, phone, password_hash, role_id)
@@ -25,8 +25,8 @@ export const create = async ({
   return row;
 };
 
-export const findById = async (id: string): Promise<UserEntity | null> => {
-  const result = await query(
+export const findById = async (id: string): Promise<UserEntity> => {
+  const [row] = await query<UserEntity>(
     `SELECT id, email, name, phone, role_id as "roleid"
      FROM tb_user
      WHERE id = $1
@@ -34,14 +34,13 @@ export const findById = async (id: string): Promise<UserEntity | null> => {
     [id]
   );
 
-  const row = result[0];
-  return row ? (row as UserEntity) : null;
+  return row;
 };
 
 export const findByEmailOrName = async (
   emailOrName: string
-): Promise<UserWithPasswordHash | null> => {
-  const result = await query(
+): Promise<UserWithPasswordHash> => {
+  const [row] = await query<UserWithPasswordHash>(
     `SELECT id, email, name, phone, password_hash
      FROM tb_user
      WHERE email = $1 OR name = $1
@@ -49,8 +48,7 @@ export const findByEmailOrName = async (
     [emailOrName]
   );
 
-  const row = result[0];
-  return row ? (row as UserWithPasswordHash) : null;
+  return row;
 };
 
 export const alter = async ({ id, name, email, phone, roleId }: UserEntity) => {

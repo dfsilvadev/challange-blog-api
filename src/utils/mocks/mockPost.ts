@@ -1,5 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import { FindPostResponse } from '../../app/repositories/models/postRepositoryTypes';
+
 const generateRandomPosts = (count: number) => {
   const posts = [];
   for (let i = 0; i < count; i++) {
@@ -17,7 +19,7 @@ const generateRandomPosts = (count: number) => {
   return posts;
 };
 
-const mockPost = {
+const mockPost: FindPostResponse = {
   id: uuidv4(),
   title: 'Título de Teste',
   content: 'Conteúdo de Teste',
@@ -25,7 +27,9 @@ const mockPost = {
   created_at: new Date(),
   updated_at: new Date(),
   user_id: uuidv4(),
-  category_id: uuidv4()
+  user_name: 'John Doe',
+  category_id: uuidv4(),
+  category_name: 'Categoria Teste'
 };
 
 const mockPosts = [
