@@ -43,7 +43,7 @@ describe('createUser controller', () => {
     jest.clearAllMocks();
   });
 
-  it('deve criar um usuário com dados válidos', async () => {
+  it('should create a user with valid data', async () => {
     mockCreate.mockResolvedValue(mockUser);
 
     const req = {
@@ -59,7 +59,7 @@ describe('createUser controller', () => {
     });
   });
 
-  it('deve retornar 500 em caso de erro', async () => {
+  it('should return 500 if unexpected error occurs', async () => {
     const errorMessage = 'Erro na criação';
     mockCreate.mockRejectedValue(new Error(errorMessage));
 

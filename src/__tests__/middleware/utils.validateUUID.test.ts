@@ -23,7 +23,7 @@ describe('validateUUID middleware (com mocks)', () => {
     next = jest.fn();
   });
 
-  it('deve retornar UUID válido', () => {
+  it('should return valid UUID', () => {
     req.params = { id: '123e4567-e89b-12d3-a456-426614174000' };
 
     validateUUID(req as Request, res as Response, next as NextFunction);
@@ -33,8 +33,8 @@ describe('validateUUID middleware (com mocks)', () => {
     expect(res.json).not.toHaveBeenCalled();
   });
 
-  it('deve retornar 400 se o UUID for inválido', () => {
-    req.params = { id: 'invalido' };
+  it('should return 400 if UUID is invalid', () => {
+    req.params = { id: 'invalid' };
 
     validateUUID(req as Request, res as Response, next as NextFunction);
 
@@ -59,7 +59,7 @@ describe('validate middleware', () => {
     jest.clearAllMocks();
   });
 
-  it('deve chamar next() se não houver erros de validação', () => {
+  it('should call next() if no validation errors exist', () => {
     (validationResult as unknown as jest.Mock).mockReturnValue({
       isEmpty: () => true
     });
@@ -72,7 +72,7 @@ describe('validate middleware', () => {
     expect(mockRes.json).not.toHaveBeenCalled();
   });
 
-  it('deve retornar 422 e json com erros se houver erros de validação', () => {
+  it('should return 422 and json with errors if validation errors exist', () => {
     const errorMessage = 'Campo obrigatório';
     const fakeErrors = [{ msg: errorMessage, param: 'name' }];
     (validationResult as unknown as jest.Mock).mockReturnValue({

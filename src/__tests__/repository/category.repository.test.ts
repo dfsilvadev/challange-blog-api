@@ -6,7 +6,7 @@ jest.mock('../../database/db', () => ({
 }));
 
 describe('findById', () => {
-  it('deve retornar true quando o registro existir', async () => {
+  it('should return true when the record exists', async () => {
     (query as jest.Mock).mockResolvedValue([{ exists: true }]);
 
     const result = await findById('some-id');
@@ -15,7 +15,7 @@ describe('findById', () => {
     expect(query).toHaveBeenCalledWith(expect.any(String), ['some-id']);
   });
 
-  it('deve retornar false quando o registro não existir', async () => {
+  it('should return false when the record does not exist', async () => {
     (query as jest.Mock).mockResolvedValue([{ exists: false }]);
 
     const result = await findById('another-id');
@@ -24,7 +24,7 @@ describe('findById', () => {
     expect(query).toHaveBeenCalledWith(expect.any(String), ['another-id']);
   });
 
-  it('deve retornar false se result[0] for undefined', async () => {
+  it('should return false if result[0] is undefined', async () => {
     (query as jest.Mock).mockResolvedValue([]);
 
     const result = await findById('missing-id');

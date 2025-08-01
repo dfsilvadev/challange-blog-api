@@ -1,38 +1,33 @@
-import { asyncHandler } from '../../utils/asyncHandler';
 import { Request, Response } from 'express';
+import { asyncHandler } from '../../utils/asyncHandler';
 
 describe('asyncHandler middleware', () => {
-  it('deve chamar a função async sem erros', async () => {
+  it('should call the async function without errors', async () => {
     const req = {} as Request;
     const res = { send: jest.fn() } as unknown as Response;
     const next = jest.fn();
 
-    // Função async que resolve normalmente
     const fn = async (req: Request, res: Response) => {
       res.send('ok');
     };
 
-    // Cria o middleware usando asyncHandler
     const middleware = asyncHandler(fn);
 
-    // Chama o middleware (note que ele não retorna promise, pois não é async)
     middleware(req, res, next);
 
-    // Espera o evento do nextTick para garantir promise resolvida
     await new Promise(process.nextTick);
 
     expect(res.send).toHaveBeenCalledWith('ok');
     expect(next).not.toHaveBeenCalled();
   });
 
-  it('deve chamar next com o erro se a função async lançar erro', async () => {
+  it('should call next with the error if the async function throws an error', async () => {
     const req = {} as Request;
     const res = {} as Response;
     const next = jest.fn();
 
     const erro = new Error('falha');
 
-    // Função async que rejeita
     const fn = async () => {
       throw erro;
     };
@@ -41,7 +36,6 @@ describe('asyncHandler middleware', () => {
 
     middleware(req, res, next);
 
-    // Espera o próximo tick para a promise rejeitar
     await new Promise(process.nextTick);
 
     expect(next).toHaveBeenCalledWith(erro);
