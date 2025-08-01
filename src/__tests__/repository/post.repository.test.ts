@@ -18,58 +18,74 @@ describe('postRepository', () => {
   });
 
   describe('findAll', () => {
-    it('should fetch posts with pagination and orderBy ASC', async () => {
-      const mockRows = [{ id: uuidv4(), title: 'Post 1' }];
-      mockedQuery.mockResolvedValueOnce(mockRows);
-
-      const params = {
+    it('should return posts with default params', async () => {
+      const posts = [mockPost];
+      mockedQuery.mockResolvedValueOnce(posts);
+      const result = await postRepository.findAll({
         page: 1,
         limit: 10,
-        orderBy: 'ASC' as 'ASC'
-      };
-      const result = await postRepository.findAll(params);
-
-      expect(mockedQuery).toHaveBeenCalledWith(
-        expect.stringContaining('SELECT'),
-        [10, 0]
-      );
-      expect(result).toBe(mockRows);
+        orderBy: 'ASC',
+        userId: undefined
+      });
+      expect(result).toEqual(posts);
+      expect(mockedQuery).toHaveBeenCalled();
     });
 
-    it('should fetch posts with pagination and orderBy DESC', async () => {
-      const mockRows = [{ id: uuidv4(), title: 'Post 2' }];
-      mockedQuery.mockResolvedValueOnce(mockRows);
+    it('should return posts filtered by userId', async () => {
+      const posts = [mockPost];
+      mockedQuery.mockResolvedValueOnce(posts);
+      const result = await postRepository.findAll({
+        page: 1,
+        limit: 10,
+        orderBy: 'ASC',
+        userId: mockPost.user_id
+      });
+      expect(result).toEqual(posts);
+      expect(mockedQuery).toHaveBeenCalled();
+      const [[sql, params]] = mockedQuery.mock.calls;
+      expect(sql).toContain('tb_post.user_id = $3::uuid');
+      expect(params).toContain(mockPost.user_id);
+    });
 
-      const params = {
+    it('should return paginated posts', async () => {
+      const posts = [mockPost];
+      mockedQuery.mockResolvedValueOnce(posts);
+      const result = await postRepository.findAll({
         page: 2,
         limit: 5,
-        orderBy: 'DESC' as 'DESC'
-      };
-      const result = await postRepository.findAll(params);
-
-      expect(mockedQuery).toHaveBeenCalledWith(
-        expect.stringContaining('ORDER BY'),
-        [5, 5]
-      );
-      expect(result).toBe(mockRows);
+        orderBy: 'DESC',
+        userId: undefined
+      });
+      expect(result).toEqual(posts);
+      expect(mockedQuery).toHaveBeenCalled();
+      const [[sql, params]] = mockedQuery.mock.calls;
+      expect(sql).toContain('ORDER BY');
+      expect(sql).toContain('DESC');
+      expect(params[0]).toBe(5); // limit
+      expect(params[1]).toBe(5); // offset
     });
 
-    it('should fetch posts filtering by userId', async () => {
-      const mockRows = [{ id: uuidv4(), title: 'Post 3' }];
-      mockedQuery.mockResolvedValueOnce(mockRows);
-      const userId = uuidv4();
-      const params = {
+    it('should return empty array if userId does not exist', async () => {
+      mockedQuery.mockResolvedValueOnce([]);
+      const result = await postRepository.findAll({
         page: 1,
         limit: 10,
-        orderBy: 'ASC' as 'ASC',
-        userId
-      };
-      const result = await postRepository.findAll(params);
-      expect(mockedQuery).toHaveBeenCalledWith(
-        expect.stringContaining('user_id'),
-        [10, 0, userId]
-      );
-      expect(result).toBe(mockRows);
+        orderBy: 'ASC',
+        userId: 'non-existent-user'
+      });
+      expect(result).toEqual([]);
+    });
+
+    it('should propagate database error', async () => {
+      mockedQuery.mockRejectedValueOnce(new Error('DB error'));
+      await expect(
+        postRepository.findAll({
+          page: 1,
+          limit: 10,
+          orderBy: 'ASC',
+          userId: undefined
+        })
+      ).rejects.toThrow('DB error');
     });
   });
 
@@ -376,6 +392,38 @@ describe('postRepository', () => {
       );
 
       expect(resp).toEqual(mockPost);
+    });
+  });
+
+  it('should throw error if no fields are provided for update', async () => {
+    await expect(postRepository.update('some-id', {})).rejects.toThrow(
+      'Nenhum campo fornecido para atualização'
+    );
+  });
+
+  describe('deleteOne', () => {
+    it('should propagate database error', async () => {
+      mockedQuery.mockRejectedValueOnce(new Error('DB error'));
+      await expect(postRepository.deleteOne('any-id')).rejects.toThrow(
+        'DB error'
+      );
+    });
+  });
+
+  describe('update', () => {
+    it('should return null if id does not exist', async () => {
+      mockedQuery.mockResolvedValueOnce([]);
+      const result = await postRepository.update('non-existent-id', {
+        title: 'Novo título'
+      });
+      expect(result).toBeUndefined();
+    });
+
+    it('should propagate database error', async () => {
+      mockedQuery.mockRejectedValueOnce(new Error('DB error'));
+      await expect(
+        postRepository.update('any-id', { title: 'Novo título' })
+      ).rejects.toThrow('DB error');
     });
   });
 });

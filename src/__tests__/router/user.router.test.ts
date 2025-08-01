@@ -60,7 +60,8 @@ describe('createUser controller', () => {
   });
 
   it('deve retornar 500 em caso de erro', async () => {
-    mockCreate.mockRejectedValue(new Error('Erro na criação'));
+    const errorMessage = 'Erro na criação';
+    mockCreate.mockRejectedValue(new Error(errorMessage));
 
     const req = {
       body
@@ -71,7 +72,32 @@ describe('createUser controller', () => {
     expect(status).toHaveBeenCalledWith(500);
     expect(json).toHaveBeenCalledWith({
       error: true,
-      details: expect.any(Error)
+      details: errorMessage
     });
+  });
+
+  it('should return 500 if name is less than 10 characters', async () => {
+    const req = { body: { ...body, name: 'short' } } as any;
+    await userController.create(req, res, jest.fn());
+
+    expect(status).toHaveBeenCalledWith(500);
+    expect(json).toHaveBeenCalledWith(expect.objectContaining({ error: true }));
+  });
+
+  it('should return 500 if phone is invalid', async () => {
+    const req = { body: { ...body, phone: '12345' } } as any;
+    await userController.create(req, res, jest.fn());
+
+    expect(status).toHaveBeenCalledWith(500);
+    expect(json).toHaveBeenCalledWith(expect.objectContaining({ error: true }));
+  });
+
+  it('should return 500 if email already exists', async () => {
+    mockFindUserByEmailOrName.mockResolvedValueOnce({ ...mockUser });
+    const req = { body: { ...body, email: mockUser.email } } as any;
+    await userController.create(req, res, jest.fn());
+
+    expect(status).toHaveBeenCalledWith(500);
+    expect(json).toHaveBeenCalledWith(expect.objectContaining({ error: true }));
   });
 });
