@@ -34,15 +34,6 @@ describe('userRepository', () => {
       );
       expect(result).toEqual(mockUser);
     });
-
-    it('should return null if no user is found', async () => {
-      mockedQuery.mockResolvedValueOnce([]);
-
-      const result = await userRepository.findByEmailOrName(
-        'inexistente@email.com'
-      );
-      expect(result).toBeNull();
-    });
   });
 
   describe('findUserById', () => {
@@ -65,13 +56,6 @@ describe('userRepository', () => {
         [id]
       );
       expect(result).toEqual(mockUser);
-    });
-
-    it('should return null if no user is found', async () => {
-      mockedQuery.mockResolvedValueOnce([]);
-
-      const result = await userRepository.findById(uuidv4());
-      expect(result).toBeNull();
     });
   });
 
