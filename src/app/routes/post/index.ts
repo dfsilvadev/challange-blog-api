@@ -40,6 +40,11 @@ router.delete(
   validateUUID,
   postController.removeById
 );
+router.get(
+  '/:userId',
+  asyncHandler(authenticateToken),
+  postController.listByUserId
+);
 
 /* Public routes */
 router.get('/:id', validateUUID, postController.getById);

@@ -113,54 +113,60 @@ export const removeById: RequestHandler = async (
 };
 
 const getPostsWithPagination = async (req: Request, res: Response) => {
-  const { userId } = req.params;
-  const { page = 1, limit = 10, orderBy = 'ASC' } = req.query;
+  try {
+    const { userId } = req.params;
+    const { page = 1, limit = 10, orderBy = 'ASC' } = req.query;
 
-  const currentPage = Number(page);
-  const currentLimit = Number(limit);
+    const currentPage = Number(page);
+    const currentLimit = Number(limit);
 
-  const validOrder =
-    typeof orderBy === 'string' && (orderBy === 'ASC' || orderBy === 'DESC')
-      ? orderBy
-      : 'ASC';
+    const validOrder =
+      typeof orderBy === 'string' && (orderBy === 'ASC' || orderBy === 'DESC')
+        ? orderBy
+        : 'ASC';
 
-  const [posts, total] = await Promise.all([
-    postRepository.findAll({
-      page: currentPage,
-      limit: currentLimit,
-      orderBy: validOrder,
-      userId
-    }),
-    postRepository.count({ userId })
-  ]);
+    const [posts, total] = await Promise.all([
+      postRepository.findAll({
+        page: currentPage,
+        limit: currentLimit,
+        orderBy: validOrder,
+        userId
+      }),
+      postRepository.count({ userId })
+    ]);
 
-  const totalPages = Math.ceil(total / currentLimit);
-  const registersPerPage = currentLimit;
-  const hasNextPage = currentPage < totalPages;
-  const hasPreviousPage = currentPage > 1;
-  const nextPage = hasNextPage ? currentPage + 1 : 0;
-  const previousPage = hasPreviousPage ? currentPage - 1 : 0;
-  const firstPage = currentPage > 1 ? 1 : 0;
-  const lastPage = currentPage < totalPages ? totalPages : 0;
+    const totalPages = Math.ceil(total / currentLimit);
+    const registersPerPage = currentLimit;
+    const hasNextPage = currentPage < totalPages;
+    const hasPreviousPage = currentPage > 1;
+    const nextPage = hasNextPage ? currentPage + 1 : 0;
+    const previousPage = hasPreviousPage ? currentPage - 1 : 0;
+    const firstPage = currentPage > 1 ? 1 : 0;
+    const lastPage = currentPage < totalPages ? totalPages : 0;
 
-  const pagination: Pagination = {
-    total,
-    totalPages,
-    registersPerPage,
-    currentPage,
-    hasNextPage,
-    hasPreviousPage,
-    nextPage,
-    previousPage,
-    firstPage,
-    lastPage
-  };
+    const pagination: Pagination = {
+      total,
+      totalPages,
+      registersPerPage,
+      currentPage,
+      hasNextPage,
+      hasPreviousPage,
+      nextPage,
+      previousPage,
+      firstPage,
+      lastPage
+    };
 
-  res.status(200).json({
-    status: 'Ok',
-    details: posts,
-    pagination
-  });
+    res.status(200).json({
+      status: 'Ok',
+      details: posts,
+      pagination
+    });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: true, details: err instanceof Error ? err.message : err });
+  }
 };
 
 export const list = getPostsWithPagination;

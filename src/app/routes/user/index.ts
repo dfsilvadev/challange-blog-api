@@ -1,6 +1,5 @@
 import express from 'express';
 
-import * as postController from '../../controllers/postController';
 import * as userController from '../../controllers/userController';
 
 import { userValidationRules } from '../../middlewares/user/validateUser';
@@ -19,11 +18,6 @@ const router = express.Router();
  */
 /* Authenticated routes */
 router.get('/:id', asyncHandler(authenticateToken), userController.findOne);
-router.get(
-  '/posts/:userId',
-  asyncHandler(authenticateToken),
-  postController.listByUserId
-);
 
 /* Public routes */
 router.post('/', userValidationRules, validate, userController.create);

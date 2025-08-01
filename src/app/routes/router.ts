@@ -16,7 +16,7 @@ router.get('/health', (req, res) => {
 });
 
 router.use('/auth', authRoutes);
-router.use('/users', userRoutes);
-router.use('/posts', postRoutes);
+router.use('/user', userRoutes);
+router.use('/post', postRoutes);
 
 export default router;
