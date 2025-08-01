@@ -1,10 +1,15 @@
 # 🚀 Challenge Blog API
 
-[![CI](https://github.com/dfsilvadev/challange-blog-api/actions/workflows/ci.yml/badge.svg)](https://github.com/dfsilvadev/challange-blog-api/actions/workflows/ci.yml)
+API RESTful para gerenciamento de posts, usuários e categorias de um blog.
 
-Uma API RESTful moderna para gerenciamento de blog educacional, construída com Node.js, TypeScript, Express e PostgreSQL.
+## Features
 
-## 📋 Descrição
+- CRUD de posts, usuários e categorias
+- Autenticação JWT
+- Validação de dados com middlewares
+- Paginação e filtros
+- Testes unitários e de integração
+- Docker e Docker Compose para ambiente isolado
 
 Esta API foi desenvolvida para gerenciar um sistema de blog educacional com funcionalidades de usuários, posts e categorias. O projeto utiliza uma arquitetura limpa com separação de responsabilidades e implementa boas práticas de desenvolvimento.
 
@@ -276,3 +281,131 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 ---
 
 ⭐ Se este projeto te ajudou, considere dar uma estrela no repositório!
+
+## 📚 Funcionalidades
+
+- Cadastro e autenticação de usuários (JWT)
+- CRUD de posts (criação, listagem, atualização, deleção)
+- CRUD de categorias
+- Filtros por usuário, categoria, paginação e ordenação
+- Validação de dados com middlewares
+- Testes automatizados
+- Docker para ambiente isolado
+
+---
+
+## 🔑 Autenticação
+
+A API utiliza autenticação JWT.  
+Para acessar rotas protegidas, obtenha um token via `/auth/login` e envie no header:
+
+```
+Authorization: Bearer SEU_TOKEN_AQUI
+```
+
+---
+
+## 📖 Rotas Principais
+
+| Método | Endpoint           | Descrição                        | Autenticação | Payload/Query         |
+|--------|--------------------|----------------------------------|--------------|----------------------|
+| POST   | /auth/login        | Login e obtenção de token JWT    | Não          | `{ username, password }` |
+| GET    | /posts             | Listar posts ativos              | Não          | `?page&limit&orderBy` |
+| GET    | /posts/:id         | Buscar post por ID               | Não          |                      |
+| POST   | /posts             | Criar novo post                  | Sim          | `{ title, content, is_active, user_id, category_id }` |
+| PATCH  | /posts/:id         | Atualizar post                   | Sim          | `{ title?, content?, is_active?, category_id? }` |
+| DELETE | /posts/:id         | Remover post                     | Sim          |                      |
+| GET    | /users/:id         | Buscar usuário por ID            | Sim          |                      |
+| POST   | /users             | Criar usuário                    | Não          | `{ name, email, password, ... }` |
+| ...    | ...                | ...                              | ...          | ...                  |
+
+---
+
+## 📝 Exemplos de Payloads
+
+### Login
+
+```json
+POST /auth/login
+{
+  "username": "dfsilva@email.com",
+  "password": "SENHA_AQUI"
+}
+```
+
+### Criar Post
+
+```json
+POST /posts
+{
+  "title": "Novo Post",
+  "content": "Conteúdo do post",
+  "is_active": true,
+  "user_id": "d290f1ee-6c54-4b01-90e6-d701748f0851",
+  "category_id": "c0a8012e-7f4f-4f33-b3b2-9a47f845a6aa"
+}
+```
+
+### Atualizar Post
+
+```json
+PATCH /posts/:id
+{
+  "title": "Título atualizado",
+  "is_active": false
+}
+```
+
+---
+
+## 🧑‍💻 Exemplos de Uso (curl)
+
+### Login e uso do token
+
+```bash
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"dfsilva@email.com","password":"SENHA_AQUI"}'
+```
+
+### Listar posts
+
+```bash
+curl http://localhost:3000/posts
+```
+
+### Criar post (autenticado)
+
+```bash
+curl -X POST http://localhost:3000/posts \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI" \
+  -d '{"title":"Novo Post","content":"Conteúdo","is_active":true,"user_id":"...","category_id":"..."}'
+```
+
+### Atualizar post
+
+```bash
+curl -X PATCH http://localhost:3000/posts/POST_ID \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI" \
+  -d '{"title":"Novo título"}'
+```
+
+### Deletar post
+
+```bash
+curl -X DELETE http://localhost:3000/posts/POST_ID \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI"
+```
+
+---
+
+## 🔄 Fluxo de uso recomendado
+
+1. **Crie um usuário** (se necessário)
+2. **Faça login** para obter o token JWT
+3. **Use o token** para acessar rotas protegidas (criar, atualizar, deletar posts)
+4. **Liste, busque, atualize e remova posts conforme necessário**
+
+---

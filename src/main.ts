@@ -29,7 +29,9 @@ import routes from './app/routes/router';
 
 app.use(routes);
 
-app.listen(PORT, () => {
-  // eslint-disable-next-line no-console
-  console.log(`🔥 Server started at http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    // eslint-disable-next-line no-console
+    console.log(`🔥 Server started at http://localhost:${PORT}`);
+  });
+}

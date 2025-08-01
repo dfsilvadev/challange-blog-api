@@ -1,13 +1,9 @@
 import { Router } from 'express';
 
-import {
-  created,
-  getById,
-  removeById,
-  updateById
-} from '../../controllers/postController';
+import * as postController from '../../controllers/postController';
 
 import { authenticateToken } from '../../middlewares/auth/authenticationValidate';
+
 import {
   postUpdateValidationRules,
   postValidationRules
@@ -25,22 +21,33 @@ const router = Router();
  */
 
 /* Authenticated routes */
-router.post('/', asyncHandler(authenticateToken), postValidationRules, created);
+router.post(
+  '/',
+  asyncHandler(authenticateToken),
+  postValidationRules,
+  postController.create
+);
 router.patch(
   '/:id',
   asyncHandler(authenticateToken),
   validateUUID,
   postUpdateValidationRules,
-  updateById
+  postController.updateById
 );
 router.delete(
   '/:id',
   asyncHandler(authenticateToken),
   validateUUID,
-  removeById
+  postController.removeById
+);
+router.get(
+  '/:userId',
+  asyncHandler(authenticateToken),
+  postController.listByUserId
 );
 
 /* Public routes */
-router.get('/:id', validateUUID, getById);
+router.get('/:id', validateUUID, postController.getById);
+router.get('/', postController.list);
 
 export default router;

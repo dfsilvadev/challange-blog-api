@@ -1,12 +1,8 @@
-import {
-  create,
-  deleteById,
-  findById
-} from '../../app/repositories/postRepository';
+import { v4 as uuidv4 } from 'uuid';
+
+import * as postRepository from '../../app/repositories/postRepository';
 
 import { mockPost } from '../../utils/mocks/mockPost';
-
-import { v4 as uuidv4 } from 'uuid';
 
 import { query } from '../../database/db';
 
@@ -21,11 +17,153 @@ describe('postRepository', () => {
     jest.clearAllMocks();
   });
 
+  describe('findAll', () => {
+    it('should fetch posts with pagination and orderBy ASC', async () => {
+      const mockRows = [{ id: uuidv4(), title: 'Post 1' }];
+      mockedQuery.mockResolvedValueOnce(mockRows);
+
+      const params = {
+        page: 1,
+        limit: 10,
+        orderBy: 'ASC' as 'ASC'
+      };
+      const result = await postRepository.findAll(params);
+
+      expect(mockedQuery).toHaveBeenCalledWith(
+        expect.stringContaining('SELECT'),
+        [10, 0]
+      );
+      expect(result).toBe(mockRows);
+    });
+
+    it('should fetch posts with pagination and orderBy DESC', async () => {
+      const mockRows = [{ id: uuidv4(), title: 'Post 2' }];
+      mockedQuery.mockResolvedValueOnce(mockRows);
+
+      const params = {
+        page: 2,
+        limit: 5,
+        orderBy: 'DESC' as 'DESC'
+      };
+      const result = await postRepository.findAll(params);
+
+      expect(mockedQuery).toHaveBeenCalledWith(
+        expect.stringContaining('ORDER BY'),
+        [5, 5]
+      );
+      expect(result).toBe(mockRows);
+    });
+
+    it('should fetch posts filtering by userId', async () => {
+      const mockRows = [{ id: uuidv4(), title: 'Post 3' }];
+      mockedQuery.mockResolvedValueOnce(mockRows);
+      const userId = uuidv4();
+      const params = {
+        page: 1,
+        limit: 10,
+        orderBy: 'ASC' as 'ASC',
+        userId
+      };
+      const result = await postRepository.findAll(params);
+      expect(mockedQuery).toHaveBeenCalledWith(
+        expect.stringContaining('user_id'),
+        [10, 0, userId]
+      );
+      expect(result).toBe(mockRows);
+    });
+  });
+
+  describe('count', () => {
+    it('should count posts without filters', async () => {
+      mockedQuery.mockResolvedValueOnce([{ count: 42 }]);
+      const result = await postRepository.count();
+      expect(mockedQuery).toHaveBeenCalledWith(
+        expect.stringContaining('COUNT'),
+        []
+      );
+      expect(result).toBe(42);
+    });
+
+    it('should count posts filtering by userId', async () => {
+      const userId = uuidv4();
+      mockedQuery.mockResolvedValueOnce([{ count: 10 }]);
+      const result = await postRepository.count({ userId });
+      expect(mockedQuery).toHaveBeenCalledWith(
+        expect.stringContaining('user_id'),
+        [userId]
+      );
+      expect(result).toBe(10);
+    });
+
+    it('should count posts filtering by categoryId', async () => {
+      const categoryId = uuidv4();
+      mockedQuery.mockResolvedValueOnce([{ count: 5 }]);
+      const result = await postRepository.count({ categoryId });
+      expect(mockedQuery).toHaveBeenCalledWith(
+        expect.stringContaining('category_id'),
+        [categoryId]
+      );
+      expect(result).toBe(5);
+    });
+
+    it('should count posts filtering by createdAtStart', async () => {
+      const createdAtStart = new Date();
+      mockedQuery.mockResolvedValueOnce([{ count: 3 }]);
+      const result = await postRepository.count({ createdAtStart });
+      expect(mockedQuery).toHaveBeenCalledWith(
+        expect.stringContaining('created_at >='),
+        [createdAtStart]
+      );
+      expect(result).toBe(3);
+    });
+
+    it('should count posts filtering by createdAtEnd', async () => {
+      const createdAtEnd = new Date();
+      mockedQuery.mockResolvedValueOnce([{ count: 2 }]);
+      const result = await postRepository.count({ createdAtEnd });
+      expect(mockedQuery).toHaveBeenCalledWith(
+        expect.stringContaining('created_at <='),
+        [createdAtEnd]
+      );
+      expect(result).toBe(2);
+    });
+
+    it('should count posts filtering by isActive true', async () => {
+      mockedQuery.mockResolvedValueOnce([{ count: 1 }]);
+      const result = await postRepository.count({ isActive: true });
+      expect(mockedQuery).toHaveBeenCalledWith(
+        expect.stringContaining('is_active = $'),
+        [true]
+      );
+      expect(result).toBe(1);
+    });
+
+    it('should count posts with all filters combined', async () => {
+      const userId = uuidv4();
+      const categoryId = uuidv4();
+      const createdAtStart = new Date('2023-01-01');
+      const createdAtEnd = new Date('2023-12-31');
+      mockedQuery.mockResolvedValueOnce([{ count: 7 }]);
+      const result = await postRepository.count({
+        userId,
+        categoryId,
+        createdAtStart,
+        createdAtEnd,
+        isActive: false
+      });
+      expect(mockedQuery).toHaveBeenCalledWith(
+        expect.stringContaining('user_id'),
+        [userId, categoryId, createdAtStart, createdAtEnd, false]
+      );
+      expect(result).toBe(7);
+    });
+  });
+
   describe('findById', () => {
     it('should return a POST when found by ID', async () => {
       mockedQuery.mockResolvedValueOnce(mockPost);
 
-      const result = await findById(mockPost.id);
+      const result = await postRepository.findById(mockPost.id);
 
       expect(mockedQuery).toHaveBeenCalledWith(
         expect.stringContaining('SELECT'),
@@ -37,14 +175,14 @@ describe('postRepository', () => {
     it('should return null if no post is found', async () => {
       mockedQuery.mockResolvedValueOnce(null);
 
-      const result = await findById(uuidv4());
+      const result = await postRepository.findById(uuidv4());
       expect(result).toBeNull();
     });
 
     it('should include all necessary fields in SELECT query', async () => {
       mockedQuery.mockResolvedValueOnce([mockPost]);
 
-      await findById(mockPost.id);
+      await postRepository.findById(mockPost.id);
 
       expect(mockedQuery).toHaveBeenCalledWith(
         expect.stringMatching(
@@ -57,7 +195,7 @@ describe('postRepository', () => {
     it('should use WHERE id = $1 in query', async () => {
       mockedQuery.mockResolvedValueOnce([mockPost]);
 
-      await findById(mockPost.id);
+      await postRepository.findById(mockPost.id);
 
       expect(mockedQuery).toHaveBeenCalledWith(
         expect.stringContaining('WHERE p.id = $1'),
@@ -71,7 +209,7 @@ describe('postRepository', () => {
       const mockResult = [{ id: mockPost.id }];
       mockedQuery.mockResolvedValueOnce(mockResult);
 
-      const result = await deleteById(mockPost.id);
+      const result = await postRepository.deleteOne(mockPost.id);
 
       expect(mockedQuery).toHaveBeenCalledWith(
         expect.stringContaining('DELETE FROM tb_post WHERE id = $1'),
@@ -83,7 +221,7 @@ describe('postRepository', () => {
     it('should return empty array when no post is deleted', async () => {
       mockedQuery.mockResolvedValueOnce([]);
 
-      const result = await deleteById(uuidv4());
+      const result = await postRepository.deleteOne(uuidv4());
 
       expect(result).toEqual([]);
     });
@@ -91,7 +229,7 @@ describe('postRepository', () => {
     it('should use correct DELETE query', async () => {
       mockedQuery.mockResolvedValueOnce([]);
 
-      await deleteById(mockPost.id);
+      await postRepository.deleteOne(mockPost.id);
 
       expect(mockedQuery).toHaveBeenCalledWith(
         expect.stringMatching(/DELETE FROM tb_post/),
@@ -102,7 +240,7 @@ describe('postRepository', () => {
     it('should call query only once', async () => {
       mockedQuery.mockResolvedValueOnce([]);
 
-      await deleteById(mockPost.id);
+      await postRepository.deleteOne(mockPost.id);
 
       expect(mockedQuery).toHaveBeenCalledTimes(1);
     });
@@ -113,14 +251,18 @@ describe('postRepository', () => {
       const errorMessage = 'Database connection error';
       mockedQuery.mockRejectedValueOnce(new Error(errorMessage));
 
-      await expect(findById(mockPost.id)).rejects.toThrow(errorMessage);
+      await expect(postRepository.findById(mockPost.id)).rejects.toThrow(
+        errorMessage
+      );
     });
 
     it('should propagate deleteById error', async () => {
       const errorMessage = 'Database connection error';
       mockedQuery.mockRejectedValueOnce(new Error(errorMessage));
 
-      await expect(deleteById(mockPost.id)).rejects.toThrow(errorMessage);
+      await expect(postRepository.deleteOne(mockPost.id)).rejects.toThrow(
+        errorMessage
+      );
     });
   });
 
@@ -129,7 +271,7 @@ describe('postRepository', () => {
       mockedQuery.mockResolvedValueOnce([]);
       const testId = uuidv4();
 
-      await findById(testId);
+      await postRepository.findById(testId);
 
       expect(mockedQuery).toHaveBeenCalledWith(expect.any(String), [testId]);
       expect(typeof mockedQuery.mock.calls[0][1][0]).toBe('string');
@@ -139,7 +281,7 @@ describe('postRepository', () => {
       mockedQuery.mockResolvedValueOnce([]);
       const testId = uuidv4();
 
-      await deleteById(testId);
+      await postRepository.deleteOne(testId);
 
       expect(mockedQuery).toHaveBeenCalledWith(expect.any(String), [testId]);
       expect(typeof mockedQuery.mock.calls[0][1][0]).toBe('string');
@@ -150,7 +292,7 @@ describe('postRepository', () => {
     it('deve inserir um post e retornar o resultado', async () => {
       mockedQuery.mockResolvedValueOnce([mockPost]);
 
-      const result = await create(
+      const result = await postRepository.create(
         mockPost.title,
         mockPost.content,
         mockPost.is_active,
@@ -181,7 +323,7 @@ describe('postRepository', () => {
       mockedQuery.mockRejectedValueOnce(new Error(errorMessage));
 
       await expect(
-        create(
+        postRepository.create(
           mockPost.title,
           mockPost.content,
           mockPost.is_active,
@@ -194,7 +336,7 @@ describe('postRepository', () => {
     it('deve passar os parâmetros corretamente para o query', async () => {
       mockedQuery.mockResolvedValueOnce([mockPost]);
 
-      await create(
+      await postRepository.create(
         mockPost.title,
         mockPost.content,
         mockPost.is_active,
@@ -214,7 +356,7 @@ describe('postRepository', () => {
     it('deve retornar um array com o post criado', async () => {
       mockedQuery.mockResolvedValueOnce([mockPost]);
 
-      const result = await create(
+      const result = await postRepository.create(
         mockPost.title,
         mockPost.content,
         mockPost.is_active,

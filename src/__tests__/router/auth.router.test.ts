@@ -1,8 +1,14 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
-import { login } from '../../app/controllers/authenticationController';
-import * as userRepo from '../../app/repositories/userRepository';
+
+import * as authenticationController from '../../app/controllers/authenticationController';
+import * as userRepository from '../../app/repositories/userRepository';
+
+jest.mock('../../database/db', () => ({
+  query: jest.fn()
+}));
+jest.spyOn(console, 'log').mockImplementation(() => {});
 
 jest.mock('../../app/repositories/userRepository');
 jest.mock('bcryptjs');
@@ -41,7 +47,7 @@ describe('login controller', () => {
   });
 
   it('deve retornar 200 e token se login for bem-sucedido', async () => {
-    (userRepo.findUserByEmailOrName as jest.Mock).mockResolvedValue({
+    (userRepository.findByEmailOrName as jest.Mock).mockResolvedValue({
       id: idFake,
       email: 'teste@email.com',
       name: 'teste',
@@ -51,7 +57,7 @@ describe('login controller', () => {
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
     (jwt.sign as jest.Mock).mockReturnValue('fake-token');
 
-    await login(mockReq, mockRes);
+    await authenticationController.login(mockReq, mockRes);
 
     expect(mockRes.status).toHaveBeenCalledWith(200);
     expect(mockRes.json).toHaveBeenCalledWith({
@@ -61,9 +67,9 @@ describe('login controller', () => {
   });
 
   it('deve retornar 401 se o usuário não existir', async () => {
-    (userRepo.findUserByEmailOrName as jest.Mock).mockResolvedValue(null);
+    (userRepository.findByEmailOrName as jest.Mock).mockResolvedValue(null);
 
-    await login(mockReq, mockRes);
+    await authenticationController.login(mockReq, mockRes);
 
     expect(mockRes.status).toHaveBeenCalledWith(401);
     expect(mockRes.json).toHaveBeenCalledWith({
@@ -73,7 +79,7 @@ describe('login controller', () => {
   });
 
   it('deve retornar 401 se a senha for inválida', async () => {
-    (userRepo.findUserByEmailOrName as jest.Mock).mockResolvedValue({
+    (userRepository.findByEmailOrName as jest.Mock).mockResolvedValue({
       id: idFake,
       email: 'teste@email.com',
       name: 'teste',
@@ -81,7 +87,7 @@ describe('login controller', () => {
     });
     (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-    await login(mockReq, mockRes);
+    await authenticationController.login(mockReq, mockRes);
 
     expect(mockRes.status).toHaveBeenCalledWith(401);
     expect(mockRes.json).toHaveBeenCalledWith({
@@ -91,11 +97,11 @@ describe('login controller', () => {
   });
 
   it('deve retornar 500 em erro inesperado', async () => {
-    (userRepo.findUserByEmailOrName as jest.Mock).mockRejectedValue(
+    (userRepository.findByEmailOrName as jest.Mock).mockRejectedValue(
       new Error('DB Error')
     );
 
-    await login(mockReq, mockRes);
+    await authenticationController.login(mockReq, mockRes);
 
     expect(mockRes.status).toHaveBeenCalledWith(500);
     expect(mockRes.json).toHaveBeenCalledWith({

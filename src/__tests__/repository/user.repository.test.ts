@@ -1,13 +1,7 @@
-import {
-  alter,
-  alterPassword,
-  create,
-  findUserByEmailOrName,
-  findUserById
-} from '../../app/repositories/userRepository';
-
 import { v4 as uuidv4 } from 'uuid';
 import { query } from '../../database/db';
+
+import * as userRepository from '../../app/repositories/userRepository';
 
 jest.mock('../../database/db', () => ({
   query: jest.fn()
@@ -32,7 +26,7 @@ describe('userRepository', () => {
 
       mockedQuery.mockResolvedValueOnce([mockUser]);
 
-      const result = await findUserByEmailOrName('teste@email.com');
+      const result = await userRepository.findByEmailOrName('teste@email.com');
 
       expect(mockedQuery).toHaveBeenCalledWith(
         expect.stringContaining('SELECT'),
@@ -44,7 +38,9 @@ describe('userRepository', () => {
     it('should return null if no user is found', async () => {
       mockedQuery.mockResolvedValueOnce([]);
 
-      const result = await findUserByEmailOrName('inexistente@email.com');
+      const result = await userRepository.findByEmailOrName(
+        'inexistente@email.com'
+      );
       expect(result).toBeNull();
     });
   });
@@ -62,7 +58,7 @@ describe('userRepository', () => {
 
       mockedQuery.mockResolvedValueOnce([mockUser]);
 
-      const result = await findUserById(id);
+      const result = await userRepository.findById(id);
 
       expect(mockedQuery).toHaveBeenCalledWith(
         expect.stringContaining('SELECT'),
@@ -74,7 +70,7 @@ describe('userRepository', () => {
     it('should return null if no user is found', async () => {
       mockedQuery.mockResolvedValueOnce([]);
 
-      const result = await findUserById(uuidv4());
+      const result = await userRepository.findById(uuidv4());
       expect(result).toBeNull();
     });
   });
@@ -86,12 +82,12 @@ describe('userRepository', () => {
         email: 'teste@email.com',
         name: 'teste',
         phone: '11900001111',
-        roleid: uuidv4()
+        roleId: uuidv4()
       };
 
       mockedQuery.mockResolvedValueOnce([mockUser]);
 
-      const result = await alter(mockUser);
+      const result = await userRepository.alter(mockUser);
 
       expect(mockedQuery).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE'),
@@ -100,7 +96,7 @@ describe('userRepository', () => {
           mockUser.name,
           mockUser.email,
           mockUser.phone,
-          mockUser.roleid
+          mockUser.roleId
         ]
       );
       expect(result).toEqual(mockUser);
@@ -111,16 +107,16 @@ describe('userRepository', () => {
     it('should update a user password and return the modified row', async () => {
       const userPassword = {
         id: uuidv4(),
-        password_hash: 'newhash123'
+        passwordHash: 'newhash123'
       };
 
       mockedQuery.mockResolvedValueOnce([userPassword]);
 
-      const result = await alterPassword(userPassword);
+      const result = await userRepository.alterPassword(userPassword);
 
       expect(mockedQuery).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE'),
-        [userPassword.id, userPassword.password_hash]
+        [userPassword.id, userPassword.passwordHash]
       );
       expect(result).toEqual(userPassword);
     });
@@ -132,7 +128,7 @@ describe('userRepository', () => {
         name: 'teste',
         email: 'teste@email.com',
         phone: '11999998888',
-        password_hash: 'senha123',
+        passwordHash: 'senha123',
         roleId: uuidv4()
       };
 
@@ -140,7 +136,7 @@ describe('userRepository', () => {
 
       mockedQuery.mockResolvedValueOnce([createdUser]);
 
-      const result = await create(newUser);
+      const result = await userRepository.create(newUser);
 
       expect(mockedQuery).toHaveBeenCalledWith(
         expect.stringContaining('INSERT'),
@@ -148,7 +144,7 @@ describe('userRepository', () => {
           newUser.name,
           newUser.email,
           newUser.phone,
-          newUser.password_hash,
+          newUser.passwordHash,
           newUser.roleId
         ]
       );

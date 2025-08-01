@@ -1,6 +1,5 @@
-import { removeById } from '../../app/controllers/postController';
-
-import { deleteById, findById } from '../../app/repositories/postRepository';
+import * as postController from '../../app/controllers/postController';
+import * as postRepository from '../../app/repositories/postRepository';
 
 import { mockPost } from '../../utils/mocks/mockPost';
 
@@ -9,8 +8,8 @@ jest.mock('../../database/db', () => ({
   query: jest.fn()
 }));
 
-const mockFindById = findById as jest.Mock;
-const mockDeleteById = deleteById as jest.Mock;
+const mockFindById = postRepository.findById as jest.Mock;
+const mockDeleteById = postRepository.deleteOne as jest.Mock;
 
 describe('post Controller', () => {
   const json = jest.fn();
@@ -32,7 +31,7 @@ describe('post Controller', () => {
       mockFindById.mockResolvedValue(mockPost.id);
       mockDeleteById.mockResolvedValue(mockPost.id);
 
-      await removeById(req, res, jest.fn());
+      await postController.removeById(req, res, jest.fn());
 
       expect(status).toHaveBeenCalledWith(200);
       expect(json).toHaveBeenCalledWith({
@@ -45,7 +44,7 @@ describe('post Controller', () => {
       mockFindById.mockResolvedValue(null);
       mockDeleteById.mockResolvedValue(null);
 
-      await removeById(req, res, jest.fn());
+      await postController.removeById(req, res, jest.fn());
 
       expect(status).toHaveBeenCalledWith(404);
       expect(json).toHaveBeenCalledWith({
@@ -59,7 +58,7 @@ describe('post Controller', () => {
         throw new Error('SERVER_ERROR_INTERNAL');
       });
 
-      await removeById(req, res, jest.fn());
+      await postController.removeById(req, res, jest.fn());
 
       expect(status).toHaveBeenCalledWith(500);
       expect(json).toHaveBeenCalledWith({

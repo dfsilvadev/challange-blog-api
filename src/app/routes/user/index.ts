@@ -1,17 +1,25 @@
 import express from 'express';
 
-import { createUser, getUser } from '../../controllers/userController';
+import * as userController from '../../controllers/userController';
+
+import { userValidationRules } from '../../middlewares/user/validateUser';
 
 import { authenticateToken } from '../../middlewares/auth/authenticationValidate';
-import { userValidationRules } from '../../middlewares/user/validateUser';
-import { validate } from '../../middlewares/utils/validateUtils';
 
 import { asyncHandler } from '../../../utils/asyncHandler';
+import { validate } from '../../middlewares/utils/validateUtils';
 
 const router = express.Router();
 
-router.post('/', userValidationRules, validate, createUser);
+/**
+ * User routes
+ * @route /user
+ * @group User - Operations about users
+ */
+/* Authenticated routes */
+router.get('/:id', asyncHandler(authenticateToken), userController.findOne);
 
-router.get('/:id', asyncHandler(authenticateToken), getUser);
+/* Public routes */
+router.post('/', userValidationRules, validate, userController.create);
 
 export default router;

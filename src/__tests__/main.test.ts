@@ -1,3 +1,5 @@
+import { NextFunction, Request, Response } from 'express';
+
 jest.mock('express', () => {
   const actualExpress = jest.requireActual('express');
   const listen = jest.fn((port, cb) => cb && cb());
@@ -6,7 +8,9 @@ jest.mock('express', () => {
     app.listen = listen;
     return app;
   };
-  expressMock.json = jest.fn(() => (_req: any, _res: any, next: any) => next());
+  expressMock.json = jest.fn(
+    () => (_req: Request, _res: Response, next: NextFunction) => next()
+  );
   expressMock.Router = actualExpress.Router;
   expressMock.__listen = listen;
   return expressMock;
@@ -26,27 +30,27 @@ jest.mock('pg', () => {
 });
 
 describe('main.ts', () => {
+  afterEach(() => {
+    jest.resetModules();
+    delete process.env.NODE_ENV;
+  });
+
   it('should start the server and call listen', () => {
     jest.resetModules();
-    try {
-      // Mock process.exit to prevent test runner from exiting
-      const exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {
-        throw new Error('process.exit called');
-      });
-      require('../main.ts'); // Executa o main.ts
-      exitSpy.mockRestore();
-    } catch (error) {
-      // Log the error for debugging
-      // eslint-disable-next-line no-console
-      console.error('Error requiring main.ts:', error);
-      throw error;
-    }
-
-    // Recupera o mock do listen do mock do express
+    process.env.NODE_ENV = 'production';
+    require('../main');
     const express = require('express');
     const listen = express.__listen;
-
     expect(listen).toHaveBeenCalled();
     expect(listen).toHaveBeenCalledWith(3000, expect.any(Function));
+  });
+
+  it('should NOT start the server in test environment', () => {
+    jest.resetModules();
+    process.env.NODE_ENV = 'test';
+    require('../main');
+    const express = require('express');
+    const listen = express.__listen;
+    expect(listen).not.toHaveBeenCalled();
   });
 });

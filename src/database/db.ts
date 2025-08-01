@@ -9,10 +9,12 @@ const client = new Client({
   connectionString: config.databaseUrl
 });
 
-client
-  .connect()
-  .then(() => console.log('🔥 Connected to the database!'))
-  .catch((err) => console.error('Error connecting to database:', err));
+if (process.env.NODE_ENV !== 'test') {
+  client
+    .connect()
+    .then(() => console.log('🔥 Connected to the database!'))
+    .catch((err) => console.error('Error connecting to database:', err));
+}
 
 export async function query<T extends PGQueryResultRow = PGQueryResultRow>(
   query: string,

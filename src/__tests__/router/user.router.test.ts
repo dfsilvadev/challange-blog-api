@@ -1,12 +1,9 @@
 import bcrypt from 'bcryptjs';
 
-import { createUser } from '../../app/controllers/userController';
+import * as userController from '../../app/controllers/userController';
 
-import { findIdByName } from '../../app/repositories/roleRepository';
-import {
-  create,
-  findUserByEmailOrName
-} from '../../app/repositories/userRepository';
+import * as roleRepository from '../../app/repositories/roleRepository';
+import * as userRepository from '../../app/repositories/userRepository';
 
 import crypto from 'crypto';
 import { mockUser, roleFake } from '../../utils/mocks/mockUser';
@@ -18,9 +15,9 @@ jest.mock('../../database/db', () => ({
   query: jest.fn()
 }));
 
-const mockFindIdByName = findIdByName as jest.Mock;
-const mockCreate = create as jest.Mock;
-const mockFindUserByEmailOrName = findUserByEmailOrName as jest.Mock;
+const mockFindIdByName = roleRepository.findIdByName as jest.Mock;
+const mockCreate = userRepository.create as jest.Mock;
+const mockFindUserByEmailOrName = userRepository.findByEmailOrName as jest.Mock;
 const mockBcryptHash = bcrypt.hash as jest.Mock;
 
 const generateRandomHash = (): string => {
@@ -53,7 +50,7 @@ describe('createUser controller', () => {
       body
     } as any;
 
-    await createUser(req, res, jest.fn());
+    await userController.create(req, res, jest.fn());
 
     expect(status).toHaveBeenCalledWith(201);
     expect(json).toHaveBeenCalledWith({
@@ -71,7 +68,7 @@ describe('createUser controller', () => {
       body
     } as any;
 
-    await createUser(req, res, jest.fn());
+    await userController.create(req, res, jest.fn());
 
     expect(status).toHaveBeenCalledWith(500);
     expect(json).toHaveBeenCalledWith({
