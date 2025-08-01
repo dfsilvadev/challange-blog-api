@@ -2,6 +2,8 @@
 
 API RESTful para gerenciamento de posts, usuários e categorias de um blog.
 
+[📄 Documentação Técnica (Design Doc)](docs/DESIGN.md)
+
 ## Features
 
 - CRUD de posts, usuários e categorias
