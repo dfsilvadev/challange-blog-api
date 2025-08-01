@@ -55,9 +55,7 @@ describe('createUser controller', () => {
     expect(status).toHaveBeenCalledWith(201);
     expect(json).toHaveBeenCalledWith({
       status: 'OK',
-      details: {
-        user: mockUser
-      }
+      details: mockUser
     });
   });
 

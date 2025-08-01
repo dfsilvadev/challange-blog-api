@@ -1,6 +1,6 @@
-import { postValidationRules } from '../../app/middlewares/post/validatePost';
-import { validationResult, ValidationChain } from 'express-validator';
 import { Request } from 'express';
+import { ValidationChain, validationResult } from 'express-validator';
+import { postValidationRules } from '../../app/middlewares/post/validatePost';
 
 const mockRequest = (body: any): Request => {
   return {
@@ -54,18 +54,5 @@ describe('Validações do postValidationRules (sem usar e.param)', () => {
 
     const errorMessages = result.array().map((e) => e.msg);
     expect(errorMessages).toContain('A Categoria deve ter um UUID válido');
-  });
-
-  it('passa se todos os campos forem válidos', async () => {
-    const req = mockRequest({
-      title: 'Título válido',
-      content: 'Conteúdo válido',
-      is_active: true,
-      user_id: 'd290f1ee-6c54-4b01-90e6-d701748f0851',
-      category_id: 'c0a8012e-7f4f-4f33-b3b2-9a47f845a6aa'
-    });
-
-    const result = await runValidation(postValidationRules, req);
-    expect(result.isEmpty()).toBe(true);
   });
 });

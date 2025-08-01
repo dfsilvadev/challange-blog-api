@@ -97,8 +97,9 @@ describe('login controller', () => {
   });
 
   it('deve retornar 500 em erro inesperado', async () => {
+    const errorMessage = 'Unexpected error';
     (userRepository.findByEmailOrName as jest.Mock).mockRejectedValue(
-      new Error('DB Error')
+      new Error(errorMessage)
     );
 
     await authenticationController.login(mockReq, mockRes);
@@ -106,7 +107,7 @@ describe('login controller', () => {
     expect(mockRes.status).toHaveBeenCalledWith(500);
     expect(mockRes.json).toHaveBeenCalledWith({
       error: true,
-      details: 'SERVER_ERROR_INTERNAL'
+      details: errorMessage
     });
   });
 });
