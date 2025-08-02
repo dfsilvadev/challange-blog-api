@@ -4,10 +4,7 @@ import * as categoryRepository from '../repositories/categoryRepository';
 import * as postRepository from '../repositories/postRepository';
 import * as userRepository from '../repositories/userRepository';
 
-import {
-  Pagination,
-  getPagination
-} from '../repositories/models/postRepositoryTypes';
+import { getPagination } from '../../utils/pagination/pagination';
 
 import {
   parseDate,
@@ -154,28 +151,7 @@ const getPostsWithPagination = async (req: Request, res: Response) => {
       }),
       postRepository.count({ userId })
     ]);
-
-    const totalPages = Math.ceil(total / currentLimit);
-    const registersPerPage = currentLimit;
-    const hasNextPage = currentPage < totalPages;
-    const hasPreviousPage = currentPage > 1;
-    const nextPage = hasNextPage ? currentPage + 1 : 0;
-    const previousPage = hasPreviousPage ? currentPage - 1 : 0;
-    const firstPage = currentPage > 1 ? 1 : 0;
-    const lastPage = currentPage < totalPages ? totalPages : 0;
-
-    const pagination: Pagination = {
-      total,
-      totalPages,
-      registersPerPage,
-      currentPage,
-      hasNextPage,
-      hasPreviousPage,
-      nextPage,
-      previousPage,
-      firstPage,
-      lastPage
-    };
+    const pagination = getPagination(total, currentPage, currentLimit);
 
     res.status(200).json({
       status: 'Ok',
