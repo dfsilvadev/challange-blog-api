@@ -4,7 +4,8 @@ import {
   FindAllParams,
   FindPostResponse,
   Post,
-  PostCountFilters
+  PostCountFilters,
+  FindFilters
 } from './models/postRepositoryTypes';
 
 export const create = async (
@@ -99,6 +100,79 @@ export const findAll = async ({
         tb_post.created_at ${direction}
       LIMIT $1 OFFSET $2
     `,
+    values
+  );
+
+  return rows;
+};
+
+export const findFilter = async (
+  filters: FindFilters
+): Promise<FindPostResponse[]> => {
+  const direction = filters.orderBy.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+  const conditions = [];
+  const values: (string | number | boolean)[] = [];
+  let paramIndex = 1;
+
+  if (filters.userId) {
+    values.push(filters.userId);
+    conditions.push(`tb_post.user_id = $${paramIndex++}::uuid`);
+  }
+
+  if (filters.categoryId) {
+    values.push(filters.categoryId);
+    conditions.push(`tb_post.category_id = $${paramIndex++}::uuid`);
+  }
+
+  if (filters.createdAtStart) {
+    values.push(filters.createdAtStart.toISOString());
+    conditions.push(`tb_post.created_at >= $${paramIndex++}::timestamp`);
+  }
+
+  if (filters.createdAtEnd) {
+    values.push(filters.createdAtEnd.toISOString());
+    conditions.push(`tb_post.created_at <= $${paramIndex++}::timestamp`);
+  }
+
+  if (filters.isActive !== undefined) {
+    values.push(filters.isActive);
+    conditions.push(`tb_post.is_active = $${paramIndex++}::boolean`);
+  } else {
+    conditions.push('tb_post.is_active = true');
+  }
+  values.push(filters.limit);
+  const limitPlaceholder = `$${paramIndex++}`;
+
+  values.push((filters.page - 1) * filters.limit);
+  const offsetPlaceholder = `$${paramIndex++}`;
+
+  const whereClause = conditions.length ? conditions.join(' AND ') : 'TRUE';
+
+  const rows = await query<FindPostResponse>(
+    `
+    SELECT
+      tb_post.id,
+      tb_post.title,
+      tb_post.content,
+      tb_post.is_active,
+      tb_post.created_at,
+      tb_post.updated_at,
+      tb_post.user_id,
+      tb_user.name AS "user_name",
+      tb_post.category_id,
+      tb_category.name AS "category_name"
+    FROM
+      tb_post
+    INNER JOIN
+      tb_category ON tb_category.id = tb_post.category_id
+    INNER JOIN
+      tb_user ON tb_user.id = tb_post.user_id
+    WHERE
+      ${whereClause}
+    ORDER BY
+      tb_post.created_at ${direction}
+    LIMIT ${limitPlaceholder} OFFSET ${offsetPlaceholder}
+  `,
     values
   );
 

@@ -179,5 +179,94 @@ const getPostsWithPagination = async (req: Request, res: Response) => {
   }
 };
 
+const getPostsFilterWithPagination = async (req: Request, res: Response) => {
+  try {
+    const {
+      categoryId,
+      createdAtStart,
+      createdAtEnd,
+      isActive,
+      userId,
+      orderBy = 'DESC',
+      page = 1,
+      limit = 10
+    } = req.query;
+
+    const filters = {
+      createdAtStart:
+        typeof createdAtStart === 'string'
+          ? new Date(createdAtStart)
+          : undefined,
+      createdAtEnd:
+        typeof createdAtEnd === 'string' ? new Date(createdAtEnd) : undefined,
+      isActive: isActive === 'false' ? false : true, // Por padrão só trazer posts ativos
+      userId: typeof userId === 'string' ? userId : undefined,
+      categoryId: typeof categoryId === 'string' ? categoryId : undefined,
+      orderBy:
+        typeof orderBy === 'string'
+          ? (orderBy.toUpperCase() as 'ASC' | 'DESC')
+          : 'DESC',
+      page: typeof page === 'string' ? parseInt(page, 10) : 1,
+      limit: typeof limit === 'string' ? parseInt(limit, 10) : 10
+    };
+
+    const currentPage = Number(page);
+    const currentLimit = Number(limit);
+
+    const validOrder =
+      typeof orderBy === 'string' && (orderBy === 'ASC' || orderBy === 'DESC')
+        ? orderBy
+        : 'ASC';
+
+    const [posts] = await Promise.all([
+      postRepository.findFilter({
+        page: currentPage,
+        limit: currentLimit,
+        orderBy: validOrder,
+        categoryId: filters.categoryId,
+        createdAtStart: filters.createdAtStart,
+        createdAtEnd: filters.createdAtEnd,
+        isActive: filters.isActive,
+        userId: filters.userId
+      })
+    ]);
+
+    const total = posts.length;
+
+    const totalPages = Math.ceil(total / currentLimit);
+    const registersPerPage = currentLimit;
+    const hasNextPage = currentPage < totalPages;
+    const hasPreviousPage = currentPage > 1;
+    const nextPage = hasNextPage ? currentPage + 1 : 0;
+    const previousPage = hasPreviousPage ? currentPage - 1 : 0;
+    const firstPage = currentPage > 1 ? 1 : 0;
+    const lastPage = currentPage < totalPages ? totalPages : 0;
+
+    const pagination: Pagination = {
+      total,
+      totalPages,
+      registersPerPage,
+      currentPage,
+      hasNextPage,
+      hasPreviousPage,
+      nextPage,
+      previousPage,
+      firstPage,
+      lastPage
+    };
+
+    res.status(200).json({
+      status: 'Ok',
+      details: posts,
+      pagination
+    });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: true, details: err instanceof Error ? err.message : err });
+  }
+};
+
 export const list = getPostsWithPagination;
 export const listByUserId = getPostsWithPagination;
+export const listFilter = getPostsFilterWithPagination;

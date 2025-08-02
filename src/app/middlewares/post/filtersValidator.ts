@@ -8,10 +8,9 @@ export const validatePostFilters = (
   const { createdAtStart, createdAtEnd, isActive, userId } = req.query;
 
   if (userId) {
-    const isUuid =
-      /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi.test(
-        userId as string
-      );
+    const isUuid = /^[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}$/i.test(
+      userId as string
+    );
     if (!isUuid) {
       return res.status(400).json({ error: true, details: 'INVALID_USER_ID' });
     }

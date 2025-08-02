@@ -33,6 +33,17 @@ interface PostCountFilters {
   readonly userId?: string;
 }
 
+interface FindFilters {
+  readonly page: number;
+  readonly limit: number;
+  readonly orderBy: 'ASC' | 'DESC';
+  readonly categoryId?: string;
+  readonly createdAtStart?: Date;
+  readonly createdAtEnd?: Date;
+  readonly isActive?: boolean;
+  readonly userId?: string;
+}
+
 interface Pagination {
   readonly total: number;
   readonly totalPages: number;
@@ -101,5 +112,6 @@ export {
   Role,
   UserEntity,
   UserPassword,
-  UserWithPasswordHash
+  UserWithPasswordHash,
+  FindFilters
 };
