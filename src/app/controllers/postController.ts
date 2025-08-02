@@ -4,7 +4,17 @@ import * as categoryRepository from '../repositories/categoryRepository';
 import * as postRepository from '../repositories/postRepository';
 import * as userRepository from '../repositories/userRepository';
 
-import { Pagination } from '../repositories/models/postRepositoryTypes';
+import {
+  Pagination,
+  getPagination
+} from '../repositories/models/postRepositoryTypes';
+
+import {
+  parseDate,
+  parseBoolean,
+  parseNumber,
+  parseOrder
+} from '../../utils/parses/parsers';
 
 export const create: RequestHandler = async (req: Request, res: Response) => {
   const { title, content, is_active, user_id, category_id } = req.body;
@@ -181,48 +191,13 @@ const getPostsWithPagination = async (req: Request, res: Response) => {
 
 const getPostsFilterWithPagination = async (req: Request, res: Response) => {
   try {
-    const {
-      categoryId,
-      createdAtStart,
-      createdAtEnd,
-      isActive,
-      userId,
-      orderBy = 'DESC',
-      page = 1,
-      limit = 10
-    } = req.query;
-
-    const filters = {
-      createdAtStart:
-        typeof createdAtStart === 'string'
-          ? new Date(createdAtStart)
-          : undefined,
-      createdAtEnd:
-        typeof createdAtEnd === 'string' ? new Date(createdAtEnd) : undefined,
-      isActive: isActive === 'false' ? false : true, // Por padrão só trazer posts ativos
-      userId: typeof userId === 'string' ? userId : undefined,
-      categoryId: typeof categoryId === 'string' ? categoryId : undefined,
-      orderBy:
-        typeof orderBy === 'string'
-          ? (orderBy.toUpperCase() as 'ASC' | 'DESC')
-          : 'DESC',
-      page: typeof page === 'string' ? parseInt(page, 10) : 1,
-      limit: typeof limit === 'string' ? parseInt(limit, 10) : 10
-    };
-
-    const currentPage = Number(page);
-    const currentLimit = Number(limit);
-
-    const validOrder =
-      typeof orderBy === 'string' && (orderBy === 'ASC' || orderBy === 'DESC')
-        ? orderBy
-        : 'ASC';
+    const filters = getFilters(req.query);
 
     const [posts] = await Promise.all([
       postRepository.findFilter({
-        page: currentPage,
-        limit: currentLimit,
-        orderBy: validOrder,
+        page: filters.page,
+        limit: filters.limit,
+        orderBy: filters.orderBy,
         categoryId: filters.categoryId,
         createdAtStart: filters.createdAtStart,
         createdAtEnd: filters.createdAtEnd,
@@ -230,30 +205,7 @@ const getPostsFilterWithPagination = async (req: Request, res: Response) => {
         userId: filters.userId
       })
     ]);
-
-    const total = posts.length;
-
-    const totalPages = Math.ceil(total / currentLimit);
-    const registersPerPage = currentLimit;
-    const hasNextPage = currentPage < totalPages;
-    const hasPreviousPage = currentPage > 1;
-    const nextPage = hasNextPage ? currentPage + 1 : 0;
-    const previousPage = hasPreviousPage ? currentPage - 1 : 0;
-    const firstPage = currentPage > 1 ? 1 : 0;
-    const lastPage = currentPage < totalPages ? totalPages : 0;
-
-    const pagination: Pagination = {
-      total,
-      totalPages,
-      registersPerPage,
-      currentPage,
-      hasNextPage,
-      hasPreviousPage,
-      nextPage,
-      previousPage,
-      firstPage,
-      lastPage
-    };
+    const pagination = getPagination(posts.length, filters.page, filters.limit);
 
     res.status(200).json({
       status: 'Ok',
@@ -266,6 +218,20 @@ const getPostsFilterWithPagination = async (req: Request, res: Response) => {
       .json({ error: true, details: err instanceof Error ? err.message : err });
   }
 };
+
+function getFilters(query: any) {
+  return {
+    createdAtStart: parseDate(query.createdAtStart),
+    createdAtEnd: parseDate(query.createdAtEnd),
+    isActive: parseBoolean(query.isActive, true),
+    userId: typeof query.userId === 'string' ? query.userId : undefined,
+    categoryId:
+      typeof query.categoryId === 'string' ? query.categoryId : undefined,
+    orderBy: parseOrder(query.orderBy),
+    page: parseNumber(query.page, 1),
+    limit: parseNumber(query.limit, 10)
+  };
+}
 
 export const list = getPostsWithPagination;
 export const listByUserId = getPostsWithPagination;
