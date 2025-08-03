@@ -52,7 +52,7 @@ const mockPosts = [
     created_at: new Date(),
     updated_at: new Date(),
     user_id: '4536040b-22c5-4c38-a881-5966bf5b6cc3',
-    category_id: uuidv4()
+    category_id: '1289563a-ba33-4618-9099-7fb55716c595'
   }
 ];
 

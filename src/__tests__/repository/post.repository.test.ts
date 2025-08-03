@@ -89,6 +89,130 @@ describe('postRepository', () => {
     });
   });
 
+  describe('findFilter', () => {
+    it('should return posts with default params', async () => {
+      const posts = [mockPost];
+      mockedQuery.mockResolvedValueOnce(posts);
+      const result = await postRepository.findFilter({
+        page: 1,
+        limit: 10,
+        orderBy: 'ASC'
+      });
+      expect(result).toEqual(posts);
+      expect(mockedQuery).toHaveBeenCalled();
+    });
+
+    it('should return posts filtered by categoryId', async () => {
+      const posts = [mockPost];
+      mockedQuery.mockResolvedValueOnce(posts);
+      const result = await postRepository.findFilter({
+        page: 1,
+        limit: 10,
+        orderBy: 'ASC',
+        categoryId: mockPost.category_id
+      });
+      expect(result).toEqual(posts);
+      expect(mockedQuery).toHaveBeenCalled();
+      const [[sql, params]] = mockedQuery.mock.calls;
+      expect(sql).toContain('tb_post.category_id = $1::uuid');
+      expect(params).toContain(mockPost.category_id);
+    });
+
+    it('should return posts filtered by userId', async () => {
+      const posts = [mockPost];
+      mockedQuery.mockResolvedValueOnce(posts);
+      const result = await postRepository.findFilter({
+        page: 1,
+        limit: 10,
+        orderBy: 'ASC',
+        userId: mockPost.user_id
+      });
+      expect(result).toEqual(posts);
+      expect(mockedQuery).toHaveBeenCalled();
+      const [[sql, params]] = mockedQuery.mock.calls;
+      expect(sql).toContain('tb_post.user_id = $1::uuid');
+      expect(params).toContain(mockPost.user_id);
+    });
+
+    it('should return posts filtered by Active', async () => {
+      const posts = [mockPost];
+      mockedQuery.mockResolvedValueOnce(posts);
+      const result = await postRepository.findFilter({
+        page: 1,
+        limit: 10,
+        orderBy: 'ASC',
+        isActive: mockPost.is_active
+      });
+      expect(result).toEqual(posts);
+      expect(mockedQuery).toHaveBeenCalled();
+      const [[sql, params]] = mockedQuery.mock.calls;
+      expect(sql).toContain('tb_post.is_active = $1::boolean');
+      expect(params).toContain(mockPost.is_active);
+    });
+
+    it('should return posts filtered by date range of createdAt', async () => {
+      const posts = [mockPost];
+      mockedQuery.mockResolvedValueOnce(posts);
+
+      const createdAt = new Date(mockPost.created_at);
+      const createdAtStart = new Date(createdAt);
+      createdAtStart.setDate(createdAtStart.getDate() - 1);
+
+      const createdAtEnd = new Date(createdAt);
+      createdAtEnd.setDate(createdAtEnd.getDate() + 1);
+
+      const result = await postRepository.findFilter({
+        page: 1,
+        limit: 10,
+        orderBy: 'ASC',
+        createdAtStart,
+        createdAtEnd
+      });
+
+      expect(result).toEqual(posts);
+      expect(mockedQuery).toHaveBeenCalled();
+
+      const [[sql, params]] = mockedQuery.mock.calls;
+
+      expect(sql).toContain('tb_post.created_at >=');
+      expect(sql).toContain('tb_post.created_at <=');
+      expect(params).toEqual(
+        expect.arrayContaining([
+          createdAtStart.toISOString(),
+          createdAtEnd.toISOString()
+        ])
+      );
+    });
+
+    it('should return paginated posts', async () => {
+      const posts = [mockPost];
+      mockedQuery.mockResolvedValueOnce(posts);
+      const result = await postRepository.findFilter({
+        page: 2,
+        limit: 5,
+        orderBy: 'DESC'
+      });
+      expect(result).toEqual(posts);
+      expect(mockedQuery).toHaveBeenCalled();
+      const [[sql, params]] = mockedQuery.mock.calls;
+      expect(sql).toContain('ORDER BY');
+      expect(sql).toContain('DESC');
+      expect(params[0]).toBe(5);
+      expect(params[1]).toBe(5);
+    });
+
+    it('should propagate database error', async () => {
+      mockedQuery.mockRejectedValueOnce(new Error('DB error'));
+      await expect(
+        postRepository.findFilter({
+          page: 1,
+          limit: 10,
+          orderBy: 'ASC'
+        })
+      ).rejects.toThrow('DB error');
+    });
+  });
+
   describe('count', () => {
     it('should count posts without filters', async () => {
       mockedQuery.mockResolvedValueOnce([{ count: 42 }]);
