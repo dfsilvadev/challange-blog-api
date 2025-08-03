@@ -1,7 +1,7 @@
 import { getPagination } from '../../utils/pagination/pagination';
 
 describe('getPagination', () => {
-  it('deve retornar os valores corretos para a primeira página', () => {
+  it('should return correct values for the first page', () => {
     const result = getPagination(100, 1, 10);
 
     expect(result).toEqual({
@@ -18,7 +18,7 @@ describe('getPagination', () => {
     });
   });
 
-  it('deve retornar os valores corretos para a última página', () => {
+  it('should return correct values for the last page', () => {
     const result = getPagination(100, 10, 10);
 
     expect(result).toEqual({
@@ -35,7 +35,7 @@ describe('getPagination', () => {
     });
   });
 
-  it('deve retornar os valores corretos para uma página intermediária', () => {
+  it('should return correct values for a middle page', () => {
     const result = getPagination(50, 3, 10);
 
     expect(result).toEqual({
@@ -52,7 +52,7 @@ describe('getPagination', () => {
     });
   });
 
-  it('deve lidar corretamente com total menor que o limite', () => {
+  it('should handle total less than limit correctly', () => {
     const result = getPagination(5, 1, 10);
 
     expect(result).toEqual({
