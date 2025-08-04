@@ -169,18 +169,17 @@ const getPostsFilterWithPagination = async (req: Request, res: Response) => {
   try {
     const filters = getFilters(req.query);
 
-    const [posts] = await Promise.all([
-      postRepository.findFilter({
-        page: filters.page,
-        limit: filters.limit,
-        orderBy: filters.orderBy,
-        categoryId: filters.categoryId,
-        createdAtStart: filters.createdAtStart,
-        createdAtEnd: filters.createdAtEnd,
-        isActive: filters.isActive,
-        userId: filters.userId
-      })
-    ]);
+    const posts = await postRepository.findFilter({
+      page: filters.page,
+      limit: filters.limit,
+      orderBy: filters.orderBy,
+      categoryId: filters.categoryId,
+      createdAtStart: filters.createdAtStart,
+      createdAtEnd: filters.createdAtEnd,
+      isActive: filters.isActive,
+      userId: filters.userId,
+      search: filters.search
+    });
     const pagination = getPagination(posts.length, filters.page, filters.limit);
 
     res.status(200).json({
@@ -205,7 +204,8 @@ function getFilters(query: any) {
       typeof query.categoryId === 'string' ? query.categoryId : undefined,
     orderBy: parseOrder(query.orderBy),
     page: parseNumber(query.page, 1),
-    limit: parseNumber(query.limit, 10)
+    limit: parseNumber(query.limit, 10),
+    search: typeof query.search === 'string' ? query.search : undefined
   };
 }
 

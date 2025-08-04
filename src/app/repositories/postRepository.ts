@@ -140,6 +140,16 @@ export const findFilter = async (
   } else {
     conditions.push('tb_post.is_active = true');
   }
+
+  if (filters.search !== undefined) {
+    const searchValue = `%${filters.search}%`;
+    const searchCount = paramIndex++;
+    values.push(searchValue);
+    conditions.push(
+      `(tb_post.title ILIKE $${searchCount} OR tb_post.content ILIKE $${searchCount})`
+    );
+  }
+
   values.push(filters.limit);
   const limitPlaceholder = `$${paramIndex++}`;
 
@@ -172,7 +182,7 @@ export const findFilter = async (
     ORDER BY
       tb_post.created_at ${direction}
     LIMIT ${limitPlaceholder} OFFSET ${offsetPlaceholder}
-  `,
+    `,
     values
   );
 

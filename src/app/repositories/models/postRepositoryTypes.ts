@@ -42,6 +42,7 @@ interface FindFilters {
   readonly createdAtEnd?: Date;
   readonly isActive?: boolean;
   readonly userId?: string;
+  readonly search?: string;
 }
 
 /**
