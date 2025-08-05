@@ -17,7 +17,8 @@ jest.mock('../../app/repositories/postRepository', () => ({
   findById: jest.fn(),
   create: jest.fn(),
   deleteOne: jest.fn(),
-  update: jest.fn()
+  update: jest.fn(),
+  findFilter: jest.fn()
 }));
 
 jest.mock('../../app/repositories/userRepository', () => ({
@@ -182,6 +183,133 @@ describe('PostController', () => {
       req.params = {};
 
       await postController.list(req as Request, res as Response);
+
+      expect(jsonMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pagination: expect.objectContaining({
+            totalPages: 1,
+            hasNextPage: false,
+            hasPreviousPage: false,
+            nextPage: 0,
+            previousPage: 0,
+            firstPage: 0,
+            lastPage: 0
+          })
+        })
+      );
+    });
+  });
+
+  describe('GET all posts and GET filter posts', () => {
+    it('should return paginated posts with default values', async () => {
+      (postRepository.findFilter as jest.Mock).mockResolvedValueOnce(mockPosts);
+
+      req.query = {};
+      req.params = {};
+
+      await postController.listFilter(req as Request, res as Response);
+
+      expect(postRepository.findFilter).toHaveBeenCalledWith({
+        page: 1,
+        limit: 10,
+        orderBy: 'DESC',
+        isActive: true
+      });
+      expect(statusMock).toHaveBeenCalledWith(200);
+      expect(jsonMock).toHaveBeenCalledWith({
+        status: 'Ok',
+        details: mockPosts,
+        pagination: expect.objectContaining(mockPagination)
+      });
+    });
+
+    it('should return paginated posts with custom page, limit and orderBy DESC', async () => {
+      (postRepository.findFilter as jest.Mock).mockResolvedValueOnce([]);
+      req.query = { page: '2', limit: '2', orderBy: 'DESC' };
+      req.params = {};
+
+      await postController.listFilter(req as Request, res as Response);
+
+      expect(postRepository.findFilter).toHaveBeenCalledWith({
+        page: 2,
+        limit: 2,
+        orderBy: 'DESC',
+        isActive: true
+      });
+      expect(statusMock).toHaveBeenCalledWith(200);
+      expect(jsonMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'Ok',
+          details: [],
+          pagination: expect.objectContaining({
+            total: 0,
+            totalPages: 0,
+            registersPerPage: 2,
+            currentPage: 2,
+            hasNextPage: false,
+            hasPreviousPage: true,
+            nextPage: 0,
+            previousPage: 1,
+            firstPage: 1,
+            lastPage: 0
+          })
+        })
+      );
+    });
+
+    it('should return posts filtered by categoryId', async () => {
+      const categoryId = '1289563a-ba33-4618-9099-7fb55716c595';
+      const mockPostByCategoryId = mockPosts.filter(
+        (post) => post.category_id === categoryId
+      );
+
+      (postRepository.findFilter as jest.Mock).mockResolvedValueOnce(
+        mockPostByCategoryId
+      );
+
+      req.query = {
+        page: '2',
+        limit: '2',
+        orderBy: 'DESC',
+        categoryId: categoryId
+      };
+      req.params = {};
+
+      await postController.listFilter(req as Request, res as Response);
+      expect(postRepository.findFilter).toHaveBeenCalledWith(
+        expect.objectContaining({
+          categoryId: categoryId,
+          limit: 2,
+          orderBy: 'DESC',
+          page: 2
+        })
+      );
+      expect(jsonMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'Ok',
+          details: mockPostByCategoryId,
+          pagination: expect.objectContaining({
+            total: 1,
+            totalPages: 1,
+            registersPerPage: 2,
+            currentPage: 2,
+            hasNextPage: false,
+            hasPreviousPage: true,
+            nextPage: 0,
+            previousPage: 1,
+            firstPage: 1,
+            lastPage: 0
+          })
+        })
+      );
+    });
+
+    it('should return correct pagination when only one page', async () => {
+      (postRepository.findFilter as jest.Mock).mockResolvedValueOnce(mockPosts);
+      req.query = { page: '1', limit: '10' };
+      req.params = {};
+
+      await postController.listFilter(req as Request, res as Response);
 
       expect(jsonMock).toHaveBeenCalledWith(
         expect.objectContaining({

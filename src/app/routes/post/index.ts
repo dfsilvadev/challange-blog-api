@@ -12,6 +12,8 @@ import { validateUUID } from '../../middlewares/utils/validateUtils';
 
 import { asyncHandler } from '../../../utils/asyncHandler';
 
+import { validatePostFilters } from '../../middlewares/post/filtersValidator';
+
 const router = Router();
 
 /**
@@ -41,13 +43,13 @@ router.delete(
   postController.removeById
 );
 router.get(
-  '/:userId',
+  '/createdBy/:userId',
   asyncHandler(authenticateToken),
   postController.listByUserId
 );
 
 /* Public routes */
+router.get('/filter', validatePostFilters, postController.listFilter);
 router.get('/:id', validateUUID, postController.getById);
 router.get('/', postController.list);
-
 export default router;

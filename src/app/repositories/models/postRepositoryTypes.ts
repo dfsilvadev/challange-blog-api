@@ -33,17 +33,16 @@ interface PostCountFilters {
   readonly userId?: string;
 }
 
-interface Pagination {
-  readonly total: number;
-  readonly totalPages: number;
-  readonly registersPerPage: number;
-  readonly currentPage: number;
-  readonly hasNextPage: boolean;
-  readonly hasPreviousPage: boolean;
-  readonly nextPage: number;
-  readonly previousPage: number;
-  readonly firstPage: number;
-  readonly lastPage: number;
+interface FindFilters {
+  readonly page: number;
+  readonly limit: number;
+  readonly orderBy: 'ASC' | 'DESC';
+  readonly categoryId?: string;
+  readonly createdAtStart?: Date;
+  readonly createdAtEnd?: Date;
+  readonly isActive?: boolean;
+  readonly userId?: string;
+  readonly search?: string;
 }
 
 /**
@@ -95,11 +94,11 @@ export {
   CreateUserParams,
   FindAllParams,
   FindPostResponse,
-  Pagination,
   Post,
   PostCountFilters,
   Role,
   UserEntity,
   UserPassword,
-  UserWithPasswordHash
+  UserWithPasswordHash,
+  FindFilters
 };

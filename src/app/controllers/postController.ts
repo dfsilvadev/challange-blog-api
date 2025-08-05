@@ -4,7 +4,14 @@ import * as categoryRepository from '../repositories/categoryRepository';
 import * as postRepository from '../repositories/postRepository';
 import * as userRepository from '../repositories/userRepository';
 
-import { Pagination } from '../repositories/models/postRepositoryTypes';
+import { getPagination } from '../../utils/pagination/pagination';
+
+import {
+  parseDate,
+  parseBoolean,
+  parseNumber,
+  parseOrder
+} from '../../utils/parses/parsers';
 
 export const create: RequestHandler = async (req: Request, res: Response) => {
   const { title, content, is_active, user_id, category_id } = req.body;
@@ -144,28 +151,7 @@ const getPostsWithPagination = async (req: Request, res: Response) => {
       }),
       postRepository.count({ userId })
     ]);
-
-    const totalPages = Math.ceil(total / currentLimit);
-    const registersPerPage = currentLimit;
-    const hasNextPage = currentPage < totalPages;
-    const hasPreviousPage = currentPage > 1;
-    const nextPage = hasNextPage ? currentPage + 1 : 0;
-    const previousPage = hasPreviousPage ? currentPage - 1 : 0;
-    const firstPage = currentPage > 1 ? 1 : 0;
-    const lastPage = currentPage < totalPages ? totalPages : 0;
-
-    const pagination: Pagination = {
-      total,
-      totalPages,
-      registersPerPage,
-      currentPage,
-      hasNextPage,
-      hasPreviousPage,
-      nextPage,
-      previousPage,
-      firstPage,
-      lastPage
-    };
+    const pagination = getPagination(total, currentPage, currentLimit);
 
     res.status(200).json({
       status: 'Ok',
@@ -179,5 +165,50 @@ const getPostsWithPagination = async (req: Request, res: Response) => {
   }
 };
 
+const getPostsFilterWithPagination = async (req: Request, res: Response) => {
+  try {
+    const filters = getFilters(req.query);
+
+    const posts = await postRepository.findFilter({
+      page: filters.page,
+      limit: filters.limit,
+      orderBy: filters.orderBy,
+      categoryId: filters.categoryId,
+      createdAtStart: filters.createdAtStart,
+      createdAtEnd: filters.createdAtEnd,
+      isActive: filters.isActive,
+      userId: filters.userId,
+      search: filters.search
+    });
+    const pagination = getPagination(posts.length, filters.page, filters.limit);
+
+    res.status(200).json({
+      status: 'Ok',
+      details: posts,
+      pagination
+    });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: true, details: err instanceof Error ? err.message : err });
+  }
+};
+
+function getFilters(query: any) {
+  return {
+    createdAtStart: parseDate(query.createdAtStart),
+    createdAtEnd: parseDate(query.createdAtEnd),
+    isActive: parseBoolean(query.isActive, true),
+    userId: typeof query.userId === 'string' ? query.userId : undefined,
+    categoryId:
+      typeof query.categoryId === 'string' ? query.categoryId : undefined,
+    orderBy: parseOrder(query.orderBy),
+    page: parseNumber(query.page, 1),
+    limit: parseNumber(query.limit, 10),
+    search: typeof query.search === 'string' ? query.search : undefined
+  };
+}
+
 export const list = getPostsWithPagination;
 export const listByUserId = getPostsWithPagination;
+export const listFilter = getPostsFilterWithPagination;
