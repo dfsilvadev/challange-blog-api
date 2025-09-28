@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import * as postController from '../../controllers/postController';
+import * as comentarioController from '../../controllers/comentarioController';
 
 import { authenticateToken } from '../../middlewares/auth/authenticationValidate';
 
@@ -13,8 +14,10 @@ import { validateUUID } from '../../middlewares/utils/validateUtils';
 import { asyncHandler } from '../../../utils/asyncHandler';
 
 import { validatePostFilters } from '../../middlewares/post/filtersValidator';
+import { comentarioValidationRules } from '../../middlewares/comentario/validateComentario'; // Importa o middleware de validação
 
 const router = Router();
+const comentarioRouter = Router({ mergeParams: true });
 
 /**
  * Posts routes
@@ -22,7 +25,20 @@ const router = Router();
  * @group Post - Operations about posts
  */
 
-/* Authenticated routes */
+/* Rotas de Comentários Aninhadas (CORRIGIDAS) */
+comentarioRouter.post(
+  '/:postId/comentarios',
+  ...comentarioValidationRules, // Espalha as regras de validação
+  asyncHandler(comentarioController.create) // <-- AGORA COM asyncHandler
+);
+comentarioRouter.get(
+  '/:postId/comentarios',
+  validateUUID,
+  asyncHandler(comentarioController.list) // <-- AGORA COM asyncHandler
+);
+router.use(comentarioRouter);
+
+/* Rotas Autenticadas (Posts) */
 router.post(
   '/',
   asyncHandler(authenticateToken),
@@ -48,8 +64,9 @@ router.get(
   postController.listByUserId
 );
 
-/* Public routes */
+/* Rotas Públicas (Posts) */
 router.get('/filter', validatePostFilters, postController.listFilter);
 router.get('/:id', validateUUID, postController.getById);
 router.get('/', postController.list);
+
 export default router;

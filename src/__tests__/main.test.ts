@@ -33,16 +33,27 @@ describe('main.ts', () => {
   afterEach(() => {
     jest.resetModules();
     delete process.env.NODE_ENV;
+    delete process.env.PORT;
   });
 
   it('should start the server and call listen', () => {
     jest.resetModules();
     process.env.NODE_ENV = 'production';
+
+    // 1. Define a porta
+    process.env.PORT = '3001';
+
+    // 2. Carrega o módulo config APÓS definir o ambiente
+    const config = require('../utils/config/config').default;
+    const currentPort = config.port;
+
     require('../main');
     const express = require('express');
     const listen = express.__listen;
+
+    // Agora 'currentPort' será 3001, e o teste deve passar.
     expect(listen).toHaveBeenCalled();
-    expect(listen).toHaveBeenCalledWith(3000, expect.any(Function));
+    expect(listen).toHaveBeenCalledWith(currentPort, expect.any(Function));
   });
 
   it('should NOT start the server in test environment', () => {

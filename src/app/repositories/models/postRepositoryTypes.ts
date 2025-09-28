@@ -90,6 +90,22 @@ interface Role {
   readonly updated_at: Date;
 }
 
+// --- Comentario Repository Types ---
+interface Comentario {
+  readonly id: string;
+  readonly conteudo: string;
+  readonly autor_nome: string;
+  readonly created_at: Date;
+  readonly updated_at: Date;
+  readonly post_id: string;
+}
+
+interface CreateComentarioParams {
+  readonly conteudo: string;
+  readonly autor_nome: string;
+  readonly post_id: string;
+}
+
 export {
   CreateUserParams,
   FindAllParams,
@@ -100,5 +116,7 @@ export {
   UserEntity,
   UserPassword,
   UserWithPasswordHash,
-  FindFilters
+  FindFilters,
+  Comentario,
+  CreateComentarioParams
 };
