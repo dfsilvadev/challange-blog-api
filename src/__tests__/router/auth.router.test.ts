@@ -62,7 +62,12 @@ describe('login controller', () => {
     expect(mockRes.status).toHaveBeenCalledWith(200);
     expect(mockRes.json).toHaveBeenCalledWith({
       status: 'OK',
-      details: { token: 'fake-token' }
+      details: {
+        token: 'fake-token',
+        name: 'teste',
+        email: 'teste@email.com',
+        id: idFake
+      }
     });
   });
 
