@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as comentarioRepository from '../repositories/comentarioRepository';
+import * as commentRepository from '../repositories/commentRepository';
 import * as postRepository from '../repositories/postRepository';
 
 /**
@@ -19,13 +19,13 @@ export const create = async (req: Request, res: Response) => {
     }
 
     // 2. Criar o comentário
-    const comentario = await comentarioRepository.create({
+    const comment = await commentRepository.create({
       conteudo,
       autor_nome,
       post_id
     });
 
-    res.status(201).json({ status: 'OK', details: comentario });
+    res.status(201).json({ status: 'OK', details: comment });
   } catch (err) {
     res
       .status(500)
@@ -46,9 +46,9 @@ export const list = async (req: Request, res: Response) => {
     }
 
     // 2. Buscar os comentários
-    const comentarios = await comentarioRepository.findAllByPostId(postId);
+    const comments = await commentRepository.findAllByPostId(postId);
 
-    res.status(200).json({ status: 'OK', details: comentarios });
+    res.status(200).json({ status: 'OK', details: comments });
   } catch (err) {
     res
       .status(500)

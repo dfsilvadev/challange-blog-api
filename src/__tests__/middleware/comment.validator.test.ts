@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'; // Removido NextFunction, pois era reportado como não utilizado
 import { validationResult, ValidationChain } from 'express-validator';
-import { comentarioValidationRules } from '../../app/middlewares/comentario/validateComentario';
+import { commentValidationRules } from '../../app/middlewares/comment/validateComment';
 import { validate } from '../../app/middlewares/utils/validateUtils';
 
 // 1. Mocka a função validationResult do express-validator para controlarmos o resultado
@@ -41,12 +41,12 @@ const mockNext = jest.fn();
 
 // O array completo é [Chain1, Chain2, Chain2, ..., validate].
 // Separamos as regras (todos os elementos, exceto o último, que é o 'validate' final)
-const validationChains = comentarioValidationRules.slice(
+const validationChains = commentValidationRules.slice(
   0,
   -1
 ) as ValidationChain[];
 
-describe('comentarioValidationRules', () => {
+describe('commentValidationRules', () => {
   const validUUID = '4536040b-22c5-4c38-a881-5966bf5b6cc3';
   const validBody = {
     conteudo: 'Comentário com mais de 1 caracter.',

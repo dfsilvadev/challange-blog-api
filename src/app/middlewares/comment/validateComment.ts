@@ -1,7 +1,7 @@
 import { body } from 'express-validator';
 import { validate } from '../utils/validateUtils';
 
-const comentarioValidationRules = [
+const commentValidationRules = [
   body('conteudo')
     .exists({ checkFalsy: true })
     .withMessage('O Conteúdo do comentário é obrigatório')
@@ -20,6 +20,6 @@ const comentarioValidationRules = [
 ];
 
 // O middleware 'validate' lida com a resposta de erro 422
-const validateComentario = [...comentarioValidationRules, validate];
+const validateComment = [...commentValidationRules, validate];
 
-export { validateComentario as comentarioValidationRules };
+export { validateComment as commentValidationRules };

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import * as postController from '../../controllers/postController';
-import * as comentarioController from '../../controllers/comentarioController';
+import * as commentController from '../../controllers/commentController';
 
 import { authenticateToken } from '../../middlewares/auth/authenticationValidate';
 
@@ -14,10 +14,10 @@ import { validateUUID } from '../../middlewares/utils/validateUtils';
 import { asyncHandler } from '../../../utils/asyncHandler';
 
 import { validatePostFilters } from '../../middlewares/post/filtersValidator';
-import { comentarioValidationRules } from '../../middlewares/comentario/validateComentario'; // Importa o middleware de validação
+import { commentValidationRules } from '../../middlewares/comment/validateComment'; // Importa o middleware de validação
 
 const router = Router();
-const comentarioRouter = Router({ mergeParams: true });
+const commentRouter = Router({ mergeParams: true });
 
 /**
  * Posts routes
@@ -26,17 +26,17 @@ const comentarioRouter = Router({ mergeParams: true });
  */
 
 /* Rotas de Comentários Aninhadas (CORRIGIDAS) */
-comentarioRouter.post(
-  '/:postId/comentarios',
-  ...comentarioValidationRules, // Espalha as regras de validação
-  asyncHandler(comentarioController.create) // <-- AGORA COM asyncHandler
+commentRouter.post(
+  '/:postId/comments',
+  ...commentValidationRules, // Espalha as regras de validação
+  asyncHandler(commentController.create) // <-- AGORA COM asyncHandler
 );
-comentarioRouter.get(
-  '/:postId/comentarios',
+commentRouter.get(
+  '/:postId/comments',
   validateUUID,
-  asyncHandler(comentarioController.list) // <-- AGORA COM asyncHandler
+  asyncHandler(commentController.list) // <-- AGORA COM asyncHandler
 );
-router.use(comentarioRouter);
+router.use(commentRouter);
 
 /* Rotas Autenticadas (Posts) */
 router.post(

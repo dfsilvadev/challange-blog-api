@@ -1,19 +1,19 @@
 import { Request, Response } from 'express';
-import * as comentarioController from '../../app/controllers/comentarioController';
-import * as comentarioRepository from '../../app/repositories/comentarioRepository';
+import * as commentController from '../../app/controllers/commentController';
+import * as commentRepository from '../../app/repositories/commentRepository';
 import * as postRepository from '../../app/repositories/postRepository';
 import { v4 as uuidv4 } from 'uuid';
 
-jest.mock('../../app/repositories/comentarioRepository');
+jest.mock('../../app/repositories/commentRepository');
 jest.mock('../../app/repositories/postRepository');
 
-describe('ComentarioController', () => {
+describe('CommentController', () => {
   let req: Partial<Request>;
   let res: Partial<Response>;
   let jsonMock: jest.Mock;
   let statusMock: jest.Mock;
   const mockPostId = uuidv4();
-  const mockComentario = {
+  const mockComment = {
     id: uuidv4(),
     conteudo: 'Conteúdo de Teste',
     autor_nome: 'Autor',
@@ -35,33 +35,33 @@ describe('ComentarioController', () => {
       (postRepository.findById as jest.Mock).mockResolvedValueOnce(null);
       req.body = { post_id: mockPostId };
 
-      await comentarioController.create(req as Request, res as Response);
+      await commentController.create(req as Request, res as Response);
 
       expect(statusMock).toHaveBeenCalledWith(404);
       expect(jsonMock).toHaveBeenCalledWith({
         error: true,
         details: 'NOT_FOUND_POST'
       });
-      expect(comentarioRepository.create).not.toHaveBeenCalled();
+      expect(commentRepository.create).not.toHaveBeenCalled();
     });
 
     it('should return 201 and created comment on success', async () => {
       (postRepository.findById as jest.Mock).mockResolvedValueOnce({
         id: mockPostId
       });
-      (comentarioRepository.create as jest.Mock).mockResolvedValueOnce(
-        mockComentario
+      (commentRepository.create as jest.Mock).mockResolvedValueOnce(
+        mockComment
       );
-      req.body = { ...mockComentario, post_id: mockPostId };
+      req.body = { ...mockComment, post_id: mockPostId };
 
-      await comentarioController.create(req as Request, res as Response);
+      await commentController.create(req as Request, res as Response);
 
       expect(postRepository.findById).toHaveBeenCalledWith(mockPostId);
-      expect(comentarioRepository.create).toHaveBeenCalled();
+      expect(commentRepository.create).toHaveBeenCalled();
       expect(statusMock).toHaveBeenCalledWith(201);
       expect(jsonMock).toHaveBeenCalledWith({
         status: 'OK',
-        details: mockComentario
+        details: mockComment
       });
     });
 
@@ -71,7 +71,7 @@ describe('ComentarioController', () => {
         new Error(errorMessage)
       );
 
-      await comentarioController.create(req as Request, res as Response);
+      await commentController.create(req as Request, res as Response);
 
       expect(statusMock).toHaveBeenCalledWith(500);
       expect(jsonMock).toHaveBeenCalledWith({
@@ -86,29 +86,29 @@ describe('ComentarioController', () => {
       (postRepository.findById as jest.Mock).mockResolvedValueOnce(null);
       req.params = { postId: mockPostId };
 
-      await comentarioController.list(req as Request, res as Response);
+      await commentController.list(req as Request, res as Response);
 
       expect(statusMock).toHaveBeenCalledWith(404);
       expect(jsonMock).toHaveBeenCalledWith({
         error: true,
         details: 'NOT_FOUND_POST'
       });
-      expect(comentarioRepository.findAllByPostId).not.toHaveBeenCalled();
+      expect(commentRepository.findAllByPostId).not.toHaveBeenCalled();
     });
 
     it('should return 200 and list of comments on success', async () => {
-      const mockList = [mockComentario];
+      const mockList = [mockComment];
       (postRepository.findById as jest.Mock).mockResolvedValueOnce({
         id: mockPostId
       });
-      (comentarioRepository.findAllByPostId as jest.Mock).mockResolvedValueOnce(
+      (commentRepository.findAllByPostId as jest.Mock).mockResolvedValueOnce(
         mockList
       );
       req.params = { postId: mockPostId };
 
-      await comentarioController.list(req as Request, res as Response);
+      await commentController.list(req as Request, res as Response);
 
-      expect(comentarioRepository.findAllByPostId).toHaveBeenCalledWith(
+      expect(commentRepository.findAllByPostId).toHaveBeenCalledWith(
         mockPostId
       );
       expect(statusMock).toHaveBeenCalledWith(200);
@@ -123,12 +123,12 @@ describe('ComentarioController', () => {
       (postRepository.findById as jest.Mock).mockResolvedValueOnce({
         id: mockPostId
       });
-      (comentarioRepository.findAllByPostId as jest.Mock).mockRejectedValueOnce(
+      (commentRepository.findAllByPostId as jest.Mock).mockRejectedValueOnce(
         new Error(errorMessage)
       );
       req.params = { postId: mockPostId };
 
-      await comentarioController.list(req as Request, res as Response);
+      await commentController.list(req as Request, res as Response);
 
       expect(statusMock).toHaveBeenCalledWith(500);
       expect(jsonMock).toHaveBeenCalledWith({

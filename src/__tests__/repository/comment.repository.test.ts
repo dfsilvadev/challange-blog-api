@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
-import * as comentarioRepository from '../../app/repositories/comentarioRepository';
+import * as commentRepository from '../../app/repositories/commentRepository';
 import { query } from '../../database/db';
-import { Comentario } from '../../app/repositories/models/postRepositoryTypes';
+import { Comment } from '../../app/repositories/models/postRepositoryTypes';
 
 // Mocka a função de query do banco de dados
 jest.mock('../../database/db', () => ({
@@ -11,7 +11,7 @@ jest.mock('../../database/db', () => ({
 const mockedQuery = query as jest.Mock;
 
 const mockPostId = uuidv4();
-const mockComentarios: Comentario[] = [
+const mockComments: Comment[] = [
   {
     id: uuidv4(),
     conteudo: 'Ótimo post!',
@@ -33,7 +33,7 @@ const mockComentarios: Comentario[] = [
 // Função utilitária para remover espaços em branco e quebras de linha do SQL.
 const normalizeSql = (sql: string) => sql.trim().replace(/\s+/g, ' ');
 
-describe('comentarioRepository', () => {
+describe('commentRepository', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -55,10 +55,10 @@ describe('comentarioRepository', () => {
         }
       ]);
 
-      const result = await comentarioRepository.create(newCommentData);
+      const result = await commentRepository.create(newCommentData);
 
       const expectedSql = normalizeSql(`
-         INSERT INTO comentarios (id, conteudo, autor_nome, post_id)
+         INSERT INTO comments (id, conteudo, autor_nome, post_id)
          VALUES(uuid_generate_v4(), $1, $2, $3)
          RETURNING *
       `);
@@ -74,7 +74,7 @@ describe('comentarioRepository', () => {
 
     it('should propagate database error', async () => {
       mockedQuery.mockRejectedValueOnce(new Error('DB error on create'));
-      await expect(comentarioRepository.create(newCommentData)).rejects.toThrow(
+      await expect(commentRepository.create(newCommentData)).rejects.toThrow(
         'DB error on create'
       );
     });
@@ -82,14 +82,14 @@ describe('comentarioRepository', () => {
 
   describe('findAllByPostId', () => {
     it('should return all comments for a given post ID', async () => {
-      mockedQuery.mockResolvedValueOnce(mockComentarios);
+      mockedQuery.mockResolvedValueOnce(mockComments);
 
-      const result = await comentarioRepository.findAllByPostId(mockPostId);
+      const result = await commentRepository.findAllByPostId(mockPostId);
 
       // Corrigindo a expectativa para selecionar as colunas conforme o código do repositório
       const expectedSql = normalizeSql(`
         SELECT id, conteudo, autor_nome, created_at, updated_at, post_id
-        FROM comentarios
+        FROM comments
         WHERE post_id = $1
         ORDER BY created_at ASC
       `);
@@ -98,13 +98,13 @@ describe('comentarioRepository', () => {
       // Usa toMatch com regex para ser flexível com o formato da string SQL.
       expect(normalizeSql(mockedQuery.mock.calls[0][0])).toBe(expectedSql);
       expect(mockedQuery.mock.calls[0][1]).toEqual([mockPostId]);
-      expect(result).toEqual(mockComentarios);
+      expect(result).toEqual(mockComments);
     });
 
     it('should return empty array if no comments are found', async () => {
       mockedQuery.mockResolvedValueOnce([]);
 
-      const result = await comentarioRepository.findAllByPostId(uuidv4());
+      const result = await commentRepository.findAllByPostId(uuidv4());
 
       expect(result).toEqual([]);
     });
@@ -112,7 +112,7 @@ describe('comentarioRepository', () => {
     it('should propagate database error', async () => {
       mockedQuery.mockRejectedValueOnce(new Error('DB error on find'));
       await expect(
-        comentarioRepository.findAllByPostId(mockPostId)
+        commentRepository.findAllByPostId(mockPostId)
       ).rejects.toThrow('DB error on find');
     });
   });

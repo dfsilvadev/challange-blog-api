@@ -1,21 +1,18 @@
 import { query } from '../../database/db';
-import {
-  Comentario,
-  CreateComentarioParams
-} from './models/postRepositoryTypes';
+import { Comment, CreateCommentParams } from './models/postRepositoryTypes';
 
 /**
- * Esta camada lida com o acesso direto ao banco de dados para a tabela 'comentarios'.
+ * Esta camada lida com o acesso direto ao banco de dados para a tabela 'comments'.
  */
 
 export const create = async ({
   conteudo,
   autor_nome,
   post_id
-}: CreateComentarioParams): Promise<Comentario> => {
-  const [row] = await query<Comentario>(
+}: CreateCommentParams): Promise<Comment> => {
+  const [row] = await query<Comment>(
     `
-     INSERT INTO comentarios
+     INSERT INTO comments
       (id, conteudo, autor_nome, post_id)
       VALUES(uuid_generate_v4(), $1, $2, $3)
       RETURNING *
@@ -25,13 +22,11 @@ export const create = async ({
   return row;
 };
 
-export const findAllByPostId = async (
-  postId: string
-): Promise<Comentario[]> => {
-  const rows = await query<Comentario>(
+export const findAllByPostId = async (postId: string): Promise<Comment[]> => {
+  const rows = await query<Comment>(
     `
     SELECT id, conteudo, autor_nome, created_at, updated_at, post_id
-    FROM comentarios
+    FROM comments
     WHERE post_id = $1
     ORDER BY created_at ASC
     `,

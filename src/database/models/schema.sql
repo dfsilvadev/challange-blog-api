@@ -64,7 +64,7 @@ CREATE INDEX idx_tb_post_user_id_created_at ON tb_post (user_id, created_at);
 CREATE INDEX idx_tb_post_category_id ON tb_post (category_id);
 
 -- Tabela de comentários
-CREATE TABLE IF NOT EXISTS comentarios (
+CREATE TABLE IF NOT EXISTS comments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     conteudo TEXT NOT NULL,
     autor_nome VARCHAR(255) NOT NULL,
@@ -73,14 +73,14 @@ CREATE TABLE IF NOT EXISTS comentarios (
     post_id UUID NOT NULL,
 
     -- Chave estrangeira que se relaciona com a tabela de posts
-    CONSTRAINT fk_post_comentario
+    CONSTRAINT fk_post_comment
         FOREIGN KEY (post_id)
         REFERENCES tb_post (id)
         ON DELETE CASCADE
 );
 
 -- Criação de um índice para melhorar o desempenho de consultas
-CREATE INDEX IF NOT EXISTS idx_comentarios_post_id ON comentarios (post_id);
+CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments (post_id);
 
 -- Trigger para atualizar o campo updated_at automaticamente
 CREATE OR REPLACE FUNCTION set_updated_at()
@@ -111,8 +111,8 @@ BEFORE UPDATE ON tb_category
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 
-CREATE TRIGGER trg_comentarios_updated_at
-BEFORE UPDATE ON comentarios
+CREATE TRIGGER trg_comments_updated_at
+BEFORE UPDATE ON comments
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 
