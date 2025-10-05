@@ -32,7 +32,8 @@ describe('CommentController - create', () => {
 
   it('should return 404 if post does not exist', async () => {
     (postRepository.findById as jest.Mock).mockResolvedValueOnce(null);
-    req.body = { post_id: mockPost };
+    req.params = { postId: mockPost };
+    req.body = { content: 'teste', author: 'autor' };
 
     await commentController.create(req as Request, res as Response);
 
@@ -44,13 +45,61 @@ describe('CommentController - create', () => {
     expect(commentRepository.create).not.toHaveBeenCalled();
   });
 
-  it('should return 500 on unexpected error', async () => {
+  it('should create a comment successfully', async () => {
+    const mockComment = {
+      id: uuidv4(),
+      content: 'comentário',
+      author: 'autor',
+      post_id: mockPost,
+      created_at: new Date(),
+      updated_at: new Date()
+    };
+
+    (postRepository.findById as jest.Mock).mockResolvedValueOnce(mockPosts[0]);
+    (commentRepository.create as jest.Mock).mockResolvedValueOnce(mockComment);
+
+    req.params = { postId: mockPost };
+    req.body = { content: 'comentário', author: 'autor' };
+
+    await commentController.create(req as Request, res as Response);
+
+    expect(postRepository.findById).toHaveBeenCalledWith(mockPost);
+    expect(commentRepository.create).toHaveBeenCalledWith({
+      content: 'comentário',
+      author: 'autor',
+      post_id: mockPost
+    });
+    expect(statusMock).toHaveBeenCalledWith(201);
+    expect(jsonMock).toHaveBeenCalledWith({
+      status: 'OK',
+      details: mockComment
+    });
+  });
+
+  it('should return 500 on unexpected error (Error object)', async () => {
     const errorMessage = 'DB Error';
     (postRepository.findById as jest.Mock).mockRejectedValueOnce(
       new Error(errorMessage)
     );
 
-    req.body = { post_id: mockPost };
+    req.params = { postId: mockPost };
+    req.body = { content: 'teste', author: 'autor' };
+
+    await commentController.create(req as Request, res as Response);
+
+    expect(statusMock).toHaveBeenCalledWith(500);
+    expect(jsonMock).toHaveBeenCalledWith({
+      error: true,
+      details: errorMessage
+    });
+  });
+
+  it('should return 500 with string error when postRepository rejects with a string', async () => {
+    const errorMessage = 'DB string error';
+    (postRepository.findById as jest.Mock).mockRejectedValueOnce(errorMessage);
+
+    req.params = { postId: mockPost };
+    req.body = { content: 'teste', author: 'autor' };
 
     await commentController.create(req as Request, res as Response);
 
@@ -89,7 +138,7 @@ describe('CommentController - list', () => {
 
   it('should return 404 if post does not exist', async () => {
     (postRepository.findById as jest.Mock).mockResolvedValueOnce(null);
-    req.body = { post_id: mockPost };
+    req.params = { postId: mockPost };
 
     await commentController.list(req as Request, res as Response);
 
@@ -98,10 +147,9 @@ describe('CommentController - list', () => {
       error: true,
       details: 'NOT_FOUND_POST'
     });
-    expect(commentRepository.create).not.toHaveBeenCalled();
   });
 
-  it('should return categories', async () => {
+  it('should return comments successfully', async () => {
     (postRepository.findById as jest.Mock).mockResolvedValueOnce(mockPosts[0]);
     (commentRepository.findAllByPostId as jest.Mock).mockResolvedValueOnce([
       mockComment
@@ -120,13 +168,28 @@ describe('CommentController - list', () => {
     });
   });
 
-  it('should return 500 on unexpected error', async () => {
+  it('should return 500 on unexpected error (Error object)', async () => {
     const errorMessage = 'DB Error';
     (postRepository.findById as jest.Mock).mockRejectedValueOnce(
       new Error(errorMessage)
     );
 
-    req.body = { post_id: mockPost };
+    req.params = { postId: mockPost };
+
+    await commentController.list(req as Request, res as Response);
+
+    expect(statusMock).toHaveBeenCalledWith(500);
+    expect(jsonMock).toHaveBeenCalledWith({
+      error: true,
+      details: errorMessage
+    });
+  });
+
+  it('should return 500 with string error when postRepository rejects with a string', async () => {
+    const errorMessage = 'DB string error';
+    (postRepository.findById as jest.Mock).mockRejectedValueOnce(errorMessage);
+
+    req.params = { postId: mockPost };
 
     await commentController.list(req as Request, res as Response);
 

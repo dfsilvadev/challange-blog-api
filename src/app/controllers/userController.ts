@@ -41,7 +41,7 @@ export const findOne: RequestHandler = async (req: Request, res: Response) => {
     const user = await userRepository.findById(id);
 
     if (!user) {
-      return res.status(200).json({ status: 'OK', details: 'USER_NOT_FOUND' });
+      return res.status(404).json({ error: true, details: 'NOT_FOUND_USER' });
     }
 
     res.status(200).json({ status: 'OK', details: user });

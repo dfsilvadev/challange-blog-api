@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import * as categoryRepository from '../repositories/categoryRepository';
 
-const getCategoryAll = async (res: Response) => {
+const getCategoryAll = async (req: Request, res: Response) => {
   try {
     const categories = await categoryRepository.findAll();
 

@@ -114,12 +114,11 @@ describe('UserController', () => {
       await userController.findOne(req as Request, res as Response, next);
 
       expect(userRepository.findById).toHaveBeenCalledWith(fakeUserId);
-      expect(statusMock).toHaveBeenCalledWith(200);
+      expect(statusMock).toHaveBeenCalledWith(404);
       expect(jsonMock).toHaveBeenCalledWith({
-        status: 'OK',
-        details: 'USER_NOT_FOUND'
+        details: 'NOT_FOUND_USER',
+        error: true
       });
-      expect(next).not.toHaveBeenCalled();
     });
 
     it('should return 500 if repository throws an error', async () => {
