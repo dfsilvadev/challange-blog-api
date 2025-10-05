@@ -111,7 +111,7 @@ BEFORE UPDATE ON tb_category
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 
-CREATE TRIGGER trg_comments_updated_at
+CREATE TRIGGER trg_tb_comments_updated_at
 BEFORE UPDATE ON comments
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
