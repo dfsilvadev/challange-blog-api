@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as categoryController from '../../controllers/categoryController';
+import { validateUUID } from '../../middlewares/utils/validateUtils';
 
 const router = Router();
 
@@ -10,5 +11,6 @@ const router = Router();
  */
 
 router.get('/', categoryController.list);
+router.get('/exists/:id', validateUUID, categoryController.exists);
 
 export default router;
