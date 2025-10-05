@@ -66,7 +66,7 @@ CREATE INDEX idx_tb_post_user_id_created_at ON tb_post (user_id, created_at);
 CREATE INDEX idx_tb_post_category_id ON tb_post (category_id);
 
 -- Tabela de comentários
-CREATE TABLE IF NOT EXISTS comments (
+CREATE TABLE IF NOT EXISTS tb_comments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     conteudo TEXT NOT NULL,
     autor_nome VARCHAR(255) NOT NULL,
@@ -75,17 +75,17 @@ CREATE TABLE IF NOT EXISTS comments (
     post_id UUID NOT NULL,
 
     -- Chave estrangeira que se relaciona com a tabela de posts
-    CONSTRAINT fk_post_comment
+    CONSTRAINT fk_post_tb_comment
         FOREIGN KEY (post_id)
         REFERENCES tb_post (id)
         ON DELETE CASCADE
 );
 
 -- Criação de um índice para melhorar o desempenho de consultas
-CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments (post_id);
+CREATE INDEX IF NOT EXISTS idx_tb_comments_post_id ON tb_comments (post_id);
 
 -- Tabela de comentários
-CREATE TABLE IF NOT EXISTS comments (
+CREATE TABLE IF NOT EXISTS tb_comments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     conteudo TEXT NOT NULL,
     autor_nome VARCHAR(255) NOT NULL,
@@ -94,14 +94,14 @@ CREATE TABLE IF NOT EXISTS comments (
     post_id UUID NOT NULL,
 
     -- Chave estrangeira que se relaciona com a tabela de posts
-    CONSTRAINT fk_post_comment
+    CONSTRAINT fk_post_tb_comment
         FOREIGN KEY (post_id)
         REFERENCES tb_post (id)
         ON DELETE CASCADE
 );
 
 -- Criação de um índice para melhorar o desempenho de consultas
-CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments (post_id);
+CREATE INDEX IF NOT EXISTS idx_tb_comments_post_id ON tb_comments (post_id);
 
 -- Trigger para atualizar updated_at automaticamente
 CREATE OR REPLACE FUNCTION set_updated_at()
@@ -133,12 +133,12 @@ FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 
 CREATE TRIGGER trg_tb_comments_updated_at
-BEFORE UPDATE ON comments
+BEFORE UPDATE ON tb_comments
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 
 CREATE TRIGGER trg_tb_comments_updated_at
-BEFORE UPDATE ON comments
+BEFORE UPDATE ON tb_comments
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 
