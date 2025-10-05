@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import * as postController from '../../controllers/postController';
+import * as commentController from '../../controllers/commentController';
 
 import { authenticateToken } from '../../middlewares/auth/authenticationValidate';
 
@@ -15,6 +16,7 @@ import { asyncHandler } from '../../../utils/asyncHandler';
 import { validatePostFilters } from '../../middlewares/post/filtersValidator';
 
 const router = Router();
+const commentRouter = Router({ mergeParams: true });
 
 /**
  * Posts routes
@@ -22,7 +24,7 @@ const router = Router();
  * @group Post - Operations about posts
  */
 
-/* Authenticated routes */
+/* Rotas Autenticadas (Posts) */
 router.post(
   '/',
   asyncHandler(authenticateToken),
@@ -48,8 +50,14 @@ router.get(
   postController.listByUserId
 );
 
-/* Public routes */
+/* Rotas Públicas (Posts) */
 router.get('/filter', validatePostFilters, postController.listFilter);
 router.get('/:id', validateUUID, postController.getById);
 router.get('/', postController.list);
+/* Rotas Públicas de Comentários Aninhadas */
+commentRouter.get('/', validateUUID, commentController.list);
+commentRouter.post('/', validateUUID, commentController.create);
+
+// Use o router de comentários dentro do post
+router.use('/:postId/comments', commentRouter);
 export default router;

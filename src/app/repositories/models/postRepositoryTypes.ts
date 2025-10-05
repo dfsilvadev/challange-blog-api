@@ -90,6 +90,22 @@ interface Role {
   readonly updated_at: Date;
 }
 
+// --- Comment Repository Types ---
+interface Comment {
+  readonly id: string;
+  readonly content: string;
+  readonly author: string;
+  readonly created_at: Date;
+  readonly updated_at: Date;
+  readonly post_id: string;
+}
+
+interface CreateCommentParams {
+  readonly content: string;
+  readonly author: string;
+  readonly post_id: string;
+}
+
 export {
   CreateUserParams,
   FindAllParams,
@@ -100,5 +116,7 @@ export {
   UserEntity,
   UserPassword,
   UserWithPasswordHash,
-  FindFilters
+  FindFilters,
+  Comment,
+  CreateCommentParams
 };
