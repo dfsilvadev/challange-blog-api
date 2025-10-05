@@ -1,5 +1,6 @@
-import { findById } from '../../app/repositories/categoryRepository';
+import { findById, findAll } from '../../app/repositories/categoryRepository';
 import { query } from '../../database/db';
+import { mockCategory } from '../../utils/mocks/mockCategory';
 
 jest.mock('../../database/db', () => ({
   query: jest.fn()
@@ -30,5 +31,17 @@ describe('findById', () => {
     const result = await findById('missing-id');
 
     expect(result).toBe(false);
+  });
+});
+
+describe('findAll', () => {
+  it('should return all category', async () => {
+    const categories = [mockCategory];
+    (query as jest.Mock).mockResolvedValue(categories);
+
+    const result = await findAll();
+
+    expect(result).toBe(categories);
+    expect(query).toHaveBeenCalled();
   });
 });
