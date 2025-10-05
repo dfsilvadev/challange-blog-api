@@ -128,81 +128,52 @@ BEGIN
     END IF;
 END $$;
 
--- Migration para inserir categorias escolares se não existirem
-DO $$
-DECLARE
-    category_name tb_category_enum;
-BEGIN
-    FOREACH category_name IN ARRAY ARRAY[
-        'portuguese', 'mathematics', 'history', 'geography',
-        'science', 'art', 'physical_education'
-    ]
-    LOOP
-        IF NOT EXISTS (SELECT 1 FROM tb_category WHERE name = category_name) THEN
-            INSERT INTO tb_category (name) VALUES (category_name);
-        END IF;
-    END LOOP;
-END $$;
-
--- Migration para inserir posts do Substitute teacher
+    'portuguese', 'mathematics', 'history', 'geography',
+    'science', 'art', 'physical_education'
+-- Migration para inserir posts do Substitute teacher sem duplicação
 DO $$
 DECLARE
     substitute_user_id UUID;
+    category_name tb_category_enum;
+    post_titles TEXT[] := ARRAY[
+        'portuguese', 
+        'mathematics', 
+        'history',
+        'geography',
+        'science',
+        'art', 
+        'physical_education'
+    ];
+    post_contents TEXT[] := ARRAY[
+        'Conteúdo de Português criado pelo Substitute teacher.',
+        'Conteúdo de Matemática criado pelo Substitute teacher.',
+        'Conteúdo de História criado pelo Substitute teacher.',
+        'Conteúdo de Geografia criado pelo Substitute teacher.',
+        'Conteúdo de Ciência criado pelo Substitute teacher.',
+        'Conteúdo de Artes criado pelo Substitute teacher.',
+        'Conteúdo de Educação Física criado pelo Substitute teacher.'
+    ];
+    i INT;
     category_id UUID;
 BEGIN
     -- Buscar o id do usuário Substitute teacher
     SELECT id INTO substitute_user_id FROM tb_user WHERE email = 'substitute@blog.com';
 
-    -- Inserir post de Matemática
-    SELECT id INTO category_id FROM tb_category WHERE name = 'mathematics';
-    IF NOT EXISTS (SELECT 1 FROM tb_post WHERE user_id = substitute_user_id AND category_id = category_id) THEN
-        INSERT INTO tb_post (title, content, is_active, user_id, category_id)
-        VALUES (
-            'Post de Matemática',
-            'Conteúdo de Matemática criado pelo Substitute teacher.',
-            true,
-            substitute_user_id,
-            category_id
-        );
-    END IF;
+    -- Loop para inserir os posts
+    FOR i IN 1..array_length(post_titles, 1) LOOP
+        category_name := post_titles[i];
+        SELECT id INTO category_id FROM tb_category WHERE name = category_name;
 
-    -- Inserir post de Português
-    SELECT id INTO category_id FROM tb_category WHERE name = 'portuguese';
-    IF NOT EXISTS (SELECT 1 FROM tb_post WHERE user_id = substitute_user_id AND category_id = category_id) THEN
-        INSERT INTO tb_post (title, content, is_active, user_id, category_id)
-        VALUES (
-            'Post de Português',
-            'Conteúdo de Português criado pelo Substitute teacher.',
-            true,
-            substitute_user_id,
-            category_id
-        );
-    END IF;
-
-    -- Inserir post de Artes
-    SELECT id INTO category_id FROM tb_category WHERE name = 'art';
-    IF NOT EXISTS (SELECT 1 FROM tb_post WHERE user_id = substitute_user_id AND category_id = category_id) THEN
-        INSERT INTO tb_post (title, content, is_active, user_id, category_id)
-        VALUES (
-            'Post de Artes',
-            'Conteúdo de Artes criado pelo Substitute teacher.',
-            true,
-            substitute_user_id,
-            category_id
-        );
-    END IF;
-
-    -- Inserir post de Educação Física
-    SELECT id INTO category_id FROM tb_category WHERE name = 'physical_education';
-    IF NOT EXISTS (SELECT 1 FROM tb_post WHERE user_id = substitute_user_id AND category_id = category_id) THEN
-        INSERT INTO tb_post (title, content, is_active, user_id, category_id)
-        VALUES (
-            'Post de Educação Física',
-            'Conteúdo de Educação Física criado pelo Substitute teacher.',
-            true,
-            substitute_user_id,
-            category_id
-        );
-    END IF;
-
+        -- Inserir apenas se não existir
+        IF NOT EXISTS (SELECT 1 FROM tb_post WHERE user_id = substitute_user_id AND category_id = category_id) THEN
+            INSERT INTO tb_post (title, content, is_active, user_id, category_id)
+            VALUES (
+                'Post de ' || INITCAP(REPLACE(category_name, '_', ' ')),
+                post_contents[i],
+                true,
+                substitute_user_id,
+                category_id
+            );
+        END IF;
+    END LOOP;
 END $$;

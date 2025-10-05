@@ -34,7 +34,7 @@ describe('CategoryController', () => {
       req.query = {};
       req.params = {};
 
-      await categoryController.list(req as Request, res as Response);
+      await categoryController.list(res as Response);
 
       expect(categoryRepository.findAll).toHaveBeenCalledWith();
       expect(statusMock).toHaveBeenCalledWith(200);
@@ -42,6 +42,18 @@ describe('CategoryController', () => {
         status: 'Ok',
         details: mockCategory
       });
+    });
+
+    it('should return 500 if repository throws an error', async () => {
+      const errorMessage = 'Unexpected error';
+      (categoryRepository.findAll as jest.Mock).mockRejectedValue(errorMessage);
+
+      await categoryController.list(res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith(
+        expect.objectContaining({ details: errorMessage, error: true })
+      );
     });
   });
 });
