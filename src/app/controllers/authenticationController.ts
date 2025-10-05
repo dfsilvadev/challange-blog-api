@@ -28,7 +28,9 @@ export const login = async (req: Request, res: Response) => {
     const payload = { id: user?.id, email: user?.email, name: user?.name };
     const token = jwt.sign(payload, config.jwtSecret, { expiresIn: '1h' });
 
-    return res.status(200).json({ status: 'OK', details: { token: token } });
+    return res
+      .status(200)
+      .json({ status: 'OK', details: { token: token, ...payload } });
   } catch (err) {
     return res
       .status(500)

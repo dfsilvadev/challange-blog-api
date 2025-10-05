@@ -6,10 +6,10 @@ CREATE TYPE tb_role_enum AS ENUM (
     'admin', 'teacher', 'student'
 );
 
--- Enum para categorias de post
+-- Enum para categorias/disciplines escolares
 CREATE TYPE tb_category_enum AS ENUM (
     'portuguese', 'mathematics', 'history', 'geography',
-    'science', 'art', 'physical education'
+    'science', 'art', 'physical_education'
 );
 
 -- Tabela de papéis
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS tb_role (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela de categorias
+-- Tabela de categorias/disciplines
 CREATE TABLE IF NOT EXISTS tb_category (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name tb_category_enum NOT NULL UNIQUE,
@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS tb_user (
     CONSTRAINT fk_tb_user_role FOREIGN KEY (role_id) REFERENCES tb_role(id)
 );
 
+-- Indexes para usuários
 CREATE INDEX idx_tb_user_email ON tb_user (email);
 CREATE INDEX idx_tb_user_role_id ON tb_user (role_id);
 
@@ -58,12 +59,13 @@ CREATE TABLE IF NOT EXISTS tb_post (
     CONSTRAINT fk_tb_post_category FOREIGN KEY (category_id) REFERENCES tb_category(id)
 );
 
+-- Indexes para posts
 CREATE INDEX idx_tb_post_is_active ON tb_post (is_active);
 CREATE INDEX idx_tb_post_created_at ON tb_post (created_at);
 CREATE INDEX idx_tb_post_user_id_created_at ON tb_post (user_id, created_at);
 CREATE INDEX idx_tb_post_category_id ON tb_post (category_id);
 
--- Trigger para atualizar o campo updated_at automaticamente
+-- Trigger para atualizar updated_at automaticamente
 CREATE OR REPLACE FUNCTION set_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -92,21 +94,18 @@ BEFORE UPDATE ON tb_category
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 
--- Migration: Inserir role e usuário teacher padrão
+-- Migration para inserir role 'teacher' e usuário padrão
 DO $$
 DECLARE
     teacher_role_id UUID;
     teacher_user_id UUID := uuid_generate_v4();
 BEGIN
-    -- Criar role 'teacher' se não existir
     IF NOT EXISTS (SELECT 1 FROM tb_role WHERE name = 'teacher') THEN
         INSERT INTO tb_role (name) VALUES ('teacher');
     END IF;
 
-    -- Buscar o id da role 'teacher'
     SELECT id INTO teacher_role_id FROM tb_role WHERE name = 'teacher';
 
-    -- Inserir usuário apenas se não existir
     IF NOT EXISTS (SELECT 1 FROM tb_user WHERE email = 'teacher@blog.com') THEN
         INSERT INTO tb_user (id, name, email, phone, password_hash, role_id)
         VALUES (
@@ -116,6 +115,65 @@ BEGIN
             '+5500000000000',
             '$2a$12$ej5.hLFzE.deiyIpm51lSOUSlZnmwn1P9x2KWuGW7lOAVBwJUpDhC',
             teacher_role_id
+        );        
+        INSERT INTO tb_user (id, name, email, phone, password_hash, role_id)
+        VALUES (
+            teacher_user_id,
+            'Substitute teacher',
+            'substitute@blog.com',
+            '+5500000000000',
+            '$2a$12$ej5.hLFzE.deiyIpm51lSOUSlZnmwn1P9x2KWuGW7lOAVBwJUpDhC',
+            teacher_role_id
         );
     END IF;
+END $$;
+
+    'portuguese', 'mathematics', 'history', 'geography',
+    'science', 'art', 'physical_education'
+-- Migration para inserir posts do Substitute teacher sem duplicação
+DO $$
+DECLARE
+    substitute_user_id UUID;
+    category_name tb_category_enum;
+    post_titles TEXT[] := ARRAY[
+        'portuguese', 
+        'mathematics', 
+        'history',
+        'geography',
+        'science',
+        'art', 
+        'physical_education'
+    ];
+    post_contents TEXT[] := ARRAY[
+        'Conteúdo de Português criado pelo Substitute teacher.',
+        'Conteúdo de Matemática criado pelo Substitute teacher.',
+        'Conteúdo de História criado pelo Substitute teacher.',
+        'Conteúdo de Geografia criado pelo Substitute teacher.',
+        'Conteúdo de Ciência criado pelo Substitute teacher.',
+        'Conteúdo de Artes criado pelo Substitute teacher.',
+        'Conteúdo de Educação Física criado pelo Substitute teacher.'
+    ];
+    i INT;
+    category_id UUID;
+BEGIN
+    -- Buscar o id do usuário Substitute teacher
+    SELECT id INTO substitute_user_id FROM tb_user WHERE email = 'substitute@blog.com';
+
+    -- Loop para inserir os posts
+    FOR i IN 1..array_length(post_titles, 1) LOOP
+        category_name := post_titles[i];
+        SELECT id INTO category_id FROM tb_category WHERE name = category_name;
+
+        -- Inserir apenas se não existir
+        IF NOT EXISTS (SELECT 1 FROM tb_post WHERE user_id = substitute_user_id AND category_id = category_id) THEN
+            INSERT INTO tb_post (title, content, is_active, user_id, category_id)
+            VALUES (
+                'Post de ' || INITCAP(REPLACE(category_name, '_', ' ')),
+                post_contents[i],
+                true,
+                substitute_user_id,
+                category_id
+            );
+        END IF;
+    END LOOP;
 END $$;
