@@ -14,7 +14,6 @@ import { validateUUID } from '../../middlewares/utils/validateUtils';
 import { asyncHandler } from '../../../utils/asyncHandler';
 
 import { validatePostFilters } from '../../middlewares/post/filtersValidator';
-import { commentValidationRules } from '../../middlewares/comment/validateComment'; // Importa o middleware de validação
 
 const router = Router();
 const commentRouter = Router({ mergeParams: true });
@@ -24,19 +23,6 @@ const commentRouter = Router({ mergeParams: true });
  * @route /post
  * @group Post - Operations about posts
  */
-
-/* Rotas de Comentários Aninhadas (CORRIGIDAS) */
-commentRouter.post(
-  '/:postId/comments',
-  ...commentValidationRules, // Espalha as regras de validação
-  asyncHandler(commentController.create) // <-- AGORA COM asyncHandler
-);
-commentRouter.get(
-  '/:postId/comments',
-  validateUUID,
-  asyncHandler(commentController.list) // <-- AGORA COM asyncHandler
-);
-router.use(commentRouter);
 
 /* Rotas Autenticadas (Posts) */
 router.post(
@@ -68,5 +54,10 @@ router.get(
 router.get('/filter', validatePostFilters, postController.listFilter);
 router.get('/:id', validateUUID, postController.getById);
 router.get('/', postController.list);
+/* Rotas Públicas de Comentários Aninhadas */
+commentRouter.get('/', validateUUID, commentController.list);
+commentRouter.post('/', validateUUID, commentController.create);
 
+// Use o router de comentários dentro do post
+router.use('/:postId/comments', commentRouter);
 export default router;

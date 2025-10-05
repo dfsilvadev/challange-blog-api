@@ -7,9 +7,21 @@ const validateUUID = (
   res: Response,
   next: NextFunction
 ): void => {
-  const { id } = req.params;
+  // Procura o primeiro parâmetro de rota que pareça ser um UUID
+  const uuidParam =
+    req.params.id ||
+    req.params.postId ||
+    req.params.userId ||
+    req.params.commentId;
 
-  if (!isUUID(id)) {
+  // Caso não exista nenhum parâmetro de UUID
+  if (!uuidParam) {
+    res.status(400).json({ error: true, details: 'UUID_PARAM_NOT_FOUND' });
+    return;
+  }
+
+  // Caso o valor não seja um UUID válido
+  if (!isUUID(uuidParam)) {
     res.status(400).json({ error: true, details: 'INVALID_UUID' });
     return;
   }

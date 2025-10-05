@@ -2,14 +2,14 @@ import { body } from 'express-validator';
 import { validate } from '../utils/validateUtils';
 
 const commentValidationRules = [
-  body('conteudo')
+  body('content')
     .exists({ checkFalsy: true })
     .withMessage('O Conteúdo do comentário é obrigatório')
     .isString()
     .withMessage('O Conteúdo deve ser uma string')
     .isLength({ min: 1, max: 500 })
     .withMessage('O comentário deve ter entre 1 e 500 caracteres'),
-  body('autor_nome')
+  body('author')
     .exists({ checkFalsy: true })
     .withMessage('O Nome do autor é obrigatório')
     .isString()

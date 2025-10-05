@@ -2,22 +2,22 @@ import { query } from '../../database/db';
 import { Comment, CreateCommentParams } from './models/postRepositoryTypes';
 
 /**
- * Esta camada lida com o acesso direto ao banco de dados para a tabela 'comments'.
+ * Esta camada lida com o acesso direto ao banco de dados para a tabela 'tb_comments'.
  */
 
 export const create = async ({
-  conteudo,
-  autor_nome,
+  content,
+  author,
   post_id
 }: CreateCommentParams): Promise<Comment> => {
   const [row] = await query<Comment>(
     `
-     INSERT INTO comments
-      (id, conteudo, autor_nome, post_id)
+     INSERT INTO tb_comments
+      (id, content, author, post_id)
       VALUES(uuid_generate_v4(), $1, $2, $3)
       RETURNING *
       `,
-    [conteudo, autor_nome, post_id]
+    [content, author, post_id]
   );
   return row;
 };
@@ -25,8 +25,8 @@ export const create = async ({
 export const findAllByPostId = async (postId: string): Promise<Comment[]> => {
   const rows = await query<Comment>(
     `
-    SELECT id, conteudo, autor_nome, created_at, updated_at, post_id
-    FROM comments
+    SELECT id, content, author, created_at, updated_at, post_id
+    FROM tb_comments
     WHERE post_id = $1
     ORDER BY created_at ASC
     `,

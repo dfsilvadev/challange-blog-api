@@ -49,8 +49,8 @@ const validationChains = commentValidationRules.slice(
 describe('commentValidationRules', () => {
   const validUUID = '4536040b-22c5-4c38-a881-5966bf5b6cc3';
   const validBody = {
-    conteudo: 'Comentário com mais de 1 caracter.',
-    autor_nome: 'Nome Completo Válido',
+    content: 'Comentário com mais de 1 caracter.',
+    auhtor: 'Nome Completo Válido',
     post_id: validUUID
   };
 
@@ -82,8 +82,8 @@ describe('commentValidationRules', () => {
   });
 
   // Teste de Conteúdo (RN: Obrigatório, min 1, max 500)
-  it('should return 422 if conteudo is missing', async () => {
-    const requestObject = mockRequest({ ...validBody, conteudo: '' });
+  it('should return 422 if content is missing', async () => {
+    const requestObject = mockRequest({ ...validBody, content: '' });
     const res = mockResponse();
 
     // Simula os erros de validação
@@ -109,8 +109,8 @@ describe('commentValidationRules', () => {
   });
 
   // Teste de Autor Nome (RN: Obrigatório, min 3, max 100)
-  it('should return 422 if autor_nome is too short', async () => {
-    const requestObject = mockRequest({ ...validBody, autor_nome: 'AB' });
+  it('should return 422 if auhtor is too short', async () => {
+    const requestObject = mockRequest({ ...validBody, auhtor: 'AB' });
     const res = mockResponse();
 
     mockValidationResult.mockReturnValue({

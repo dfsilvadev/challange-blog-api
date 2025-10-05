@@ -93,16 +93,16 @@ interface Role {
 // --- Comment Repository Types ---
 interface Comment {
   readonly id: string;
-  readonly conteudo: string;
-  readonly autor_nome: string;
+  readonly content: string;
+  readonly author: string;
   readonly created_at: Date;
   readonly updated_at: Date;
   readonly post_id: string;
 }
 
 interface CreateCommentParams {
-  readonly conteudo: string;
-  readonly autor_nome: string;
+  readonly content: string;
+  readonly author: string;
   readonly post_id: string;
 }
 

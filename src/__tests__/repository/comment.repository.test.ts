@@ -14,16 +14,16 @@ const mockPostId = uuidv4();
 const mockComments: Comment[] = [
   {
     id: uuidv4(),
-    conteudo: 'Ótimo post!',
-    autor_nome: 'Aluno Teste 1',
+    content: 'Ótimo post!',
+    author: 'Aluno Teste 1',
     post_id: mockPostId,
     created_at: new Date('2025-01-01T10:00:00Z'),
     updated_at: new Date('2025-01-01T10:00:00Z')
   },
   {
     id: uuidv4(),
-    conteudo: 'Concordo plenamente.',
-    autor_nome: 'Aluno Teste 2',
+    content: 'Concordo plenamente.',
+    author: 'Aluno Teste 2',
     post_id: mockPostId,
     created_at: new Date('2025-01-01T10:05:00Z'),
     updated_at: new Date('2025-01-01T10:05:00Z')
@@ -40,8 +40,8 @@ describe('commentRepository', () => {
 
   describe('create', () => {
     const newCommentData = {
-      conteudo: 'Novo comentário de teste.',
-      autor_nome: 'Testador',
+      content: 'Novo comentário de teste.',
+      author: 'Testador',
       post_id: mockPostId
     };
 
@@ -58,7 +58,7 @@ describe('commentRepository', () => {
       const result = await commentRepository.create(newCommentData);
 
       const expectedSql = normalizeSql(`
-         INSERT INTO comments (id, conteudo, autor_nome, post_id)
+         INSERT INTO tb_comments (id, content, author, post_id)
          VALUES(uuid_generate_v4(), $1, $2, $3)
          RETURNING *
       `);
@@ -69,7 +69,7 @@ describe('commentRepository', () => {
       expect(normalizeSql(mockedQuery.mock.calls[0][0])).toBe(expectedSql);
 
       expect(result).toHaveProperty('id');
-      expect(result.conteudo).toBe(newCommentData.conteudo);
+      expect(result.content).toBe(newCommentData.content);
     });
 
     it('should propagate database error', async () => {
@@ -88,8 +88,8 @@ describe('commentRepository', () => {
 
       // Corrigindo a expectativa para selecionar as colunas conforme o código do repositório
       const expectedSql = normalizeSql(`
-        SELECT id, conteudo, autor_nome, created_at, updated_at, post_id
-        FROM comments
+        SELECT id, content, author, created_at, updated_at, post_id
+        FROM tb_comments
         WHERE post_id = $1
         ORDER BY created_at ASC
       `);
