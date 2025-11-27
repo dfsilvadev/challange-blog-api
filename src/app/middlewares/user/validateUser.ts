@@ -25,7 +25,12 @@ const userValidationRules = [
     .matches(/[a-z]/)
     .withMessage('Deve conter ao menos uma letra minúscula')
     .matches(/[^A-Za-z0-9]/)
-    .withMessage('Deve conter ao menos um caractere especial')
+    .withMessage('Deve conter ao menos um caractere especial'),
+  body('roleName')
+    .exists({ checkFalsy: true })
+    .withMessage('Role é obrigatório')
+    .isIn(['coordinator', 'teacher', 'student'])
+    .withMessage('Role inválido')
 ];
 
 export { userValidationRules };

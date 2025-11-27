@@ -39,7 +39,8 @@ describe('UserController', () => {
         name: 'John',
         email: 'john@example.com',
         phone: '123456789',
-        password: 'secret'
+        password: 'secret',
+        roleName: 'teacher'
       };
 
       (roleRepository.findIdByName as jest.Mock).mockResolvedValue(fakeRoleId);

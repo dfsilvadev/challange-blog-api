@@ -5,11 +5,10 @@ import * as roleRepository from '../repositories/roleRepository';
 import * as userRepository from '../repositories/userRepository';
 
 export const create: RequestHandler = async (req: Request, res: Response) => {
-  const { name, email, phone, password } = req.body;
+  const { name, email, phone, password, roleName } = req.body;
 
   try {
-    const ROLE_NAME = 'teacher';
-    const role = await roleRepository.findIdByName(ROLE_NAME);
+    const role = await roleRepository.findIdByName(roleName);
 
     /*
     Criptografar a senha
