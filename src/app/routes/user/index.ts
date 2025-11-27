@@ -2,12 +2,19 @@ import express from 'express';
 
 import * as userController from '../../controllers/userController';
 
-import { userValidationRules } from '../../middlewares/user/validateUser';
+import {
+  userCreateValidationRules,
+  userUpdateValidationRules
+} from '../../middlewares/user/validateUser';
 
-import { authenticateToken } from '../../middlewares/auth/authenticationValidate';
+import {
+  authenticateToken,
+  authorizeRoles
+} from '../../middlewares/auth/authenticationValidate';
 
 import { asyncHandler } from '../../../utils/asyncHandler';
 import { validate } from '../../middlewares/utils/validateUtils';
+import { validateUUID } from '../../middlewares/utils/validateUtils';
 
 const router = express.Router();
 
@@ -17,9 +24,37 @@ const router = express.Router();
  * @group User - Operations about users
  */
 /* Authenticated routes */
-router.get('/:id', asyncHandler(authenticateToken), userController.findOne);
+router.get(
+  '/:id',
+  asyncHandler(authenticateToken),
+  authorizeRoles(['coordinator']),
+  validateUUID,
+  userController.findOne
+);
+router.patch(
+  '/:id',
+  asyncHandler(authenticateToken),
+  authorizeRoles(['coordinator']),
+  userUpdateValidationRules,
+  validateUUID,
+  userController.updateById
+);
+router.delete(
+  '/:id',
+  asyncHandler(authenticateToken),
+  authorizeRoles(['coordinator']),
+  validateUUID,
+  userController.removeById
+);
+router.post(
+  '/',
+  asyncHandler(authenticateToken),
+  authorizeRoles(['coordinator']),
+  userCreateValidationRules,
+  validate,
+  userController.create
+);
 
 /* Public routes */
-router.post('/', userValidationRules, validate, userController.create);
 
 export default router;

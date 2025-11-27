@@ -50,3 +50,73 @@ export const findOne: RequestHandler = async (req: Request, res: Response) => {
       .json({ error: true, details: err instanceof Error ? err.message : err });
   }
 };
+
+export const updateById: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
+  const { id } = req.params;
+  const { name, email, phone, roleName } = req.body;
+  let roleExists: string | undefined;
+
+  try {
+    const user = await userRepository.findById(id);
+    if (!user) {
+      return res.status(404).json({ error: true, details: 'NOT_FOUND_USER' });
+    }
+
+    if (roleName) {
+      roleExists = await roleRepository.findIdByName(roleName);
+      if (!roleExists) {
+        return res.status(404).json({ error: true, details: 'NOT_FOUND_ROLE' });
+      }
+    }
+
+    const updateFields: any = {};
+    if (name !== undefined) updateFields.name = name;
+    if (email !== undefined) updateFields.email = email;
+    if (phone !== undefined) updateFields.phone = phone;
+    if (roleName !== undefined) updateFields.roleId = roleExists;
+
+    const updated = await userRepository.update(id, updateFields);
+    res.status(200).json({ status: 'OK', details: updated });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: true, details: err instanceof Error ? err.message : err });
+  }
+};
+
+export const removeById: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
+  const id = req.params.id;
+  // @ts-ignore: user populado pelo middleware de autenticação
+  const loggedUserId = req.user?.id;
+  // @ts-ignore: user populado pelo middleware de autenticação
+  const loggedUserRole = req.user?.role;
+
+  try {
+    const user = await userRepository.findById(id);
+    if (!user) {
+      return res.status(404).json({ error: true, details: 'NOT_FOUND_USER' });
+    }
+    if (!loggedUserId) {
+      return res.status(401).json({ error: true, details: 'UNAUTHORIZED' });
+    }
+
+    if (loggedUserId !== id && loggedUserRole !== 'coordinator') {
+      return res
+        .status(403)
+        .json({ error: true, details: 'FORBIDDEN_USER_DELETION' });
+    }
+
+    await userRepository.deleteOne(id);
+    res.status(200).json({ status: 'OK', details: 'USER_DELETED' });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: true, details: err instanceof Error ? err.message : err });
+  }
+};

@@ -1,6 +1,6 @@
 import { body } from 'express-validator';
 
-const userValidationRules = [
+const userCreateValidationRules = [
   body('email').isEmail().withMessage('Email inválido'),
   body('phone')
     .exists({ checkFalsy: true })
@@ -33,4 +33,49 @@ const userValidationRules = [
     .withMessage('Role inválido')
 ];
 
-export { userValidationRules };
+const userUpdateValidationRules = [
+  body().custom((body) => {
+    const allowedFields = ['email', 'phone', 'name', 'password', 'roleName'];
+    const hasAtLeastOne = allowedFields.some(
+      (field) => body[field] !== undefined
+    );
+    if (!hasAtLeastOne) {
+      throw new Error(
+        'Pelo menos um campo deve ser fornecido para atualização'
+      );
+    }
+    return true;
+  }),
+  body('email').isEmail().withMessage('Email inválido'),
+  body('phone')
+    .exists({ checkFalsy: true })
+    .withMessage('Telefone é obrigatório')
+    .matches(/^\d{10,11}$/)
+    .withMessage(
+      'O telefone deve ser um número válido do Brasil (10 ou 11 dígitos, ex: 11999999999)'
+    ),
+  body('name')
+    .exists({ checkFalsy: true })
+    .withMessage('Nome é obrigatório')
+    .isLength({ min: 10 })
+    .withMessage('Nome deve ter no mínimo 10 caracteres')
+    .not()
+    .matches(/\d/)
+    .withMessage('Nome não pode conter números'),
+  body('password')
+    .isLength({ min: 6, max: 20 })
+    .withMessage('A senha deve ter entre 6 à 20 caracteres')
+    .matches(/[A-Z]/)
+    .withMessage('Deve conter ao menos uma letra maiúscula')
+    .matches(/[a-z]/)
+    .withMessage('Deve conter ao menos uma letra minúscula')
+    .matches(/[^A-Za-z0-9]/)
+    .withMessage('Deve conter ao menos um caractere especial'),
+  body('roleName')
+    .exists({ checkFalsy: true })
+    .withMessage('Role é obrigatório')
+    .isIn(['coordinator', 'teacher', 'student'])
+    .withMessage('Role inválido')
+];
+
+export { userCreateValidationRules, userUpdateValidationRules };

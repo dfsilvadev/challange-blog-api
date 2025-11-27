@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { promisify } from 'util';
+import * as roleRepository from '../../repositories/roleRepository';
 
 import { AuthRequest, TokenPayload } from '../../models/dtos/AuthRequest';
 import config from '../../../utils/config/config';
@@ -33,8 +34,29 @@ export const authenticateToken = async (
     req.user = decoded;
     next();
   } catch {
-    return res
-      .status(403)
-      .json({ message: 'Token de autenticação inválido ou expirado.' });
+    return res.status(403).json({ error: true, details: 'INVALID_TOKEN' });
   }
+};
+
+export const authorizeRoles = (allowedRoles: string[]) => {
+  return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    const roleId = req.user?.roleId as string | undefined;
+
+    if (!roleId) {
+      return res.status(403).json({ error: true, details: 'NOT_PERMISSION' });
+    }
+
+    try {
+      const role = await roleRepository.findById(roleId);
+      const roleName = role?.name;
+
+      if (!roleName || !allowedRoles.includes(roleName)) {
+        return res.status(403).json({ error: true, details: 'NOT_PERMISSION' });
+      }
+
+      next();
+    } catch {
+      return res.status(500).json({ error: true, details: 'ERROR_PERMISSION' });
+    }
+  };
 };

@@ -2,6 +2,7 @@ import { query } from '../../database/db';
 
 import {
   CreateUserParams,
+  UpdateUserParams,
   UserEntity,
   UserPassword,
   UserWithPasswordHash
@@ -41,7 +42,7 @@ export const findByEmailOrName = async (
   emailOrName: string
 ): Promise<UserWithPasswordHash> => {
   const [row] = await query<UserWithPasswordHash>(
-    `SELECT id, email, name, phone, password_hash
+    `SELECT id, email, name, phone, password_hash, role_id
      FROM tb_user
      WHERE email = $1 OR name = $1
      LIMIT 1;`,
@@ -71,6 +72,52 @@ export const alterPassword = async ({ id, passwordHash }: UserPassword) => {
       WHERE id = $1
       `,
     [id, passwordHash]
+  );
+  return row;
+};
+
+export const update = async (
+  id: string,
+  fields: Partial<{
+    name: string;
+    email: string;
+    phone: string;
+    roleId: string;
+  }>
+): Promise<UpdateUserParams | null> => {
+  const allowedFields = ['name', 'email', 'phone', 'roleId'];
+  const setClauses = [];
+  const values = [];
+  let idx = 1;
+
+  for (const key of allowedFields) {
+    if (fields[key as keyof typeof fields] !== undefined) {
+      setClauses.push(`${key} = $${idx}`);
+      values.push(fields[key as keyof typeof fields]);
+      idx++;
+    }
+  }
+
+  if (setClauses.length === 0) {
+    throw new Error('Nenhum campo fornecido para atualização');
+  }
+
+  values.push(id);
+
+  const [row] = await query<UpdateUserParams>(
+    `UPDATE tb_user SET ${setClauses.join(', ')} WHERE id = $${idx} RETURNING *`,
+    values
+  );
+
+  return row;
+};
+
+export const deleteOne = async (id: string) => {
+  const row = await query(
+    `
+      DELETE FROM tb_user WHERE id = $1
+    `,
+    [id]
   );
   return row;
 };

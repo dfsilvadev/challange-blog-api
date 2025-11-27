@@ -25,7 +25,12 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ error: true, details: 'ENCRYPTION_ERROR' });
     }
 
-    const payload = { id: user?.id, email: user?.email, name: user?.name };
+    const payload = {
+      id: user?.id,
+      email: user?.email,
+      name: user?.name,
+      roleId: user?.role_id
+    };
     const token = jwt.sign(payload, config.jwtSecret, { expiresIn: '1h' });
 
     return res

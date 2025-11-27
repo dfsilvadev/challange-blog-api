@@ -13,3 +13,15 @@ export const findIdByName = async (name: string): Promise<string> => {
 
   return row.id || '';
 };
+
+export const findById = async (id: string): Promise<Role | null> => {
+  const [row] = await query<Role>(
+    `SELECT id, "name"
+     FROM tb_role
+     WHERE id = $1
+     LIMIT 1;`,
+    [id]
+  );
+
+  return row || null;
+};
