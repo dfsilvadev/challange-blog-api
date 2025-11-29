@@ -1,6 +1,9 @@
 -- Extensão para geração de UUIDs
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Extensão para funções de criptografia (crypt/gen_salt)
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- Enum para papéis de usuário
 CREATE TYPE tb_role_enum AS ENUM (
     'coordinator', 'teacher', 'student'
@@ -131,7 +134,7 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM tb_user WHERE email = 'coordinator@blog.com') THEN
         INSERT INTO tb_user (name, email, phone, password_hash, role_id)
         VALUES ('Coordinator Padrão', 'coordinator@blog.com', '+5500000000000',
-                '$2a$12$ej5.hLFzE.deiyIpm51lSOUSlZnmwn1P9x2KWuGW7lOAVBwJUpDhC',
+                crypt('Test123*', gen_salt('bf', 12)),
                 coordinator_role_id);
     END IF;
 
@@ -144,7 +147,7 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM tb_user WHERE email = 'teacher@blog.com') THEN
         INSERT INTO tb_user (name, email, phone, password_hash, role_id)
         VALUES ('Teacher', 'teacher@blog.com', '+5500000000001',
-                '$2a$12$ej5.hLFzE.deiyIpm51lSOUSlZnmwn1P9x2KWuGW7lOAVBwJUpDhC',
+                crypt('Test123*', gen_salt('bf', 12)),
                 teacher_role_id);
     END IF;
 END $$;
