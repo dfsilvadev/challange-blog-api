@@ -92,24 +92,11 @@ export const removeById: RequestHandler = async (
   res: Response
 ) => {
   const id = req.params.id;
-  // @ts-ignore: user populado pelo middleware de autenticação
-  const loggedUserId = req.user?.id;
-  // @ts-ignore: user populado pelo middleware de autenticação
-  const loggedUserRole = req.user?.role;
 
   try {
     const user = await userRepository.findById(id);
     if (!user) {
       return res.status(404).json({ error: true, details: 'NOT_FOUND_USER' });
-    }
-    if (!loggedUserId) {
-      return res.status(401).json({ error: true, details: 'UNAUTHORIZED' });
-    }
-
-    if (loggedUserId !== id && loggedUserRole !== 'coordinator') {
-      return res
-        .status(403)
-        .json({ error: true, details: 'FORBIDDEN_USER_DELETION' });
     }
 
     await userRepository.deleteOne(id);

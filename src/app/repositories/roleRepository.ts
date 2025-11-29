@@ -25,3 +25,19 @@ export const findById = async (id: string): Promise<Role | null> => {
 
   return row || null;
 };
+
+export const findUserByRoleId = async (
+  roleId: string,
+  userId: string
+): Promise<Role | null> => {
+  const [row] = await query<Role>(
+    `SELECT r.id, r."name"
+     FROM tb_role as r
+     INNER JOIN tb_user as u ON r.id = u.role_id
+     WHERE r.id = $1 and u.Id = $2
+     LIMIT 1;`,
+    [roleId, userId]
+  );
+
+  return row || null;
+};

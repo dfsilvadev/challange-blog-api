@@ -41,13 +41,14 @@ export const authenticateToken = async (
 export const authorizeRoles = (allowedRoles: string[]) => {
   return async (req: AuthRequest, res: Response, next: NextFunction) => {
     const roleId = req.user?.roleId as string | undefined;
+    const userId = req.user?.id as string | undefined;
 
-    if (!roleId) {
+    if (!roleId || !userId) {
       return res.status(403).json({ error: true, details: 'NOT_PERMISSION' });
     }
 
     try {
-      const role = await roleRepository.findById(roleId);
+      const role = await roleRepository.findUserByRoleId(roleId, userId);
       const roleName = role?.name;
 
       if (!roleName || !allowedRoles.includes(roleName)) {
