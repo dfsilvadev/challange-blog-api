@@ -31,6 +31,12 @@ router.get(
   validateUUID,
   userController.findOne
 );
+router.get(
+  '/',
+  asyncHandler(authenticateToken),
+  authorizeRoles(['coordinator']),
+  userController.listAll
+);
 router.patch(
   '/:id',
   asyncHandler(authenticateToken),

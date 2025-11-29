@@ -85,6 +85,10 @@ interface UserWithPasswordHash extends User {
 interface UserEntity extends User {
   readonly roleId: string;
 }
+interface UserRoles extends User {
+  readonly roleId: string;
+  readonly roleName: string;
+}
 
 /**
  * Role Repository Types
@@ -127,5 +131,6 @@ export {
   UserWithPasswordHash,
   FindFilters,
   Comment,
-  CreateCommentParams
+  CreateCommentParams,
+  UserRoles
 };

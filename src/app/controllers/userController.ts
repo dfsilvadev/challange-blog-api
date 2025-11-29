@@ -4,6 +4,60 @@ import { Request, RequestHandler, Response } from 'express';
 import * as roleRepository from '../repositories/roleRepository';
 import * as userRepository from '../repositories/userRepository';
 
+import { getPagination } from '../../utils/pagination/pagination';
+
+export const listAll = async (req: Request, res: Response) => {
+  try {
+    const { page = 1, limit = 10, orderBy = 'ASC' } = req.query;
+
+    const currentPage = Number(page);
+    const currentLimit = Number(limit);
+
+    const validOrder =
+      typeof orderBy === 'string' && (orderBy === 'ASC' || orderBy === 'DESC')
+        ? orderBy
+        : 'ASC';
+
+    const [posts, total] = await Promise.all([
+      userRepository.findAll({
+        page: currentPage,
+        limit: currentLimit,
+        orderBy: validOrder
+      }),
+      userRepository.count()
+    ]);
+    const pagination = getPagination(total, currentPage, currentLimit);
+
+    res.status(200).json({
+      status: 'Ok',
+      details: posts,
+      pagination
+    });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: true, details: err instanceof Error ? err.message : err });
+  }
+};
+
+export const findOne: RequestHandler = async (req: Request, res: Response) => {
+  const id = req.params.id;
+
+  try {
+    const user = await userRepository.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ error: true, details: 'NOT_FOUND_USER' });
+    }
+
+    res.status(200).json({ status: 'OK', details: user });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: true, details: err instanceof Error ? err.message : err });
+  }
+};
+
 export const create: RequestHandler = async (req: Request, res: Response) => {
   const { name, email, phone, password, roleName } = req.body;
 
@@ -26,24 +80,6 @@ export const create: RequestHandler = async (req: Request, res: Response) => {
       roleId: role
     });
     res.status(201).json({ status: 'OK', details: user });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ error: true, details: err instanceof Error ? err.message : err });
-  }
-};
-
-export const findOne: RequestHandler = async (req: Request, res: Response) => {
-  const id = req.params.id;
-
-  try {
-    const user = await userRepository.findById(id);
-
-    if (!user) {
-      return res.status(404).json({ error: true, details: 'NOT_FOUND_USER' });
-    }
-
-    res.status(200).json({ status: 'OK', details: user });
   } catch (err) {
     res
       .status(500)
