@@ -78,6 +78,12 @@ interface UserEntity extends User {
   readonly roleId: string;
 }
 
+interface FindAllUsersParams {
+  readonly page: number;
+  readonly limit: number;
+  readonly orderBy: 'ASC' | 'DESC';
+}
+
 /**
  * Role Repository Types
  * Este arquivo define os tipos e interfaces usados no repositório de papéis.
@@ -116,6 +122,7 @@ export {
   UserEntity,
   UserPassword,
   UserWithPasswordHash,
+  FindAllUsersParams,
   FindFilters,
   Comment,
   CreateCommentParams

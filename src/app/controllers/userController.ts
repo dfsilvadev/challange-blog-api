@@ -3,6 +3,7 @@ import { Request, RequestHandler, Response } from 'express';
 
 import * as roleRepository from '../repositories/roleRepository';
 import * as userRepository from '../repositories/userRepository';
+import { getPagination } from '../../utils/pagination/pagination';
 
 export const create: RequestHandler = async (req: Request, res: Response) => {
   const { name, email, phone, password } = req.body;
@@ -45,6 +46,43 @@ export const findOne: RequestHandler = async (req: Request, res: Response) => {
     }
 
     res.status(200).json({ status: 'OK', details: user });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: true, details: err instanceof Error ? err.message : err });
+  }
+};
+
+export const getAllUsersWithPagination: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { page = 1, limit = 10, orderBy = 'ASC' } = req.query;
+
+    const currentPage = Number(page);
+    const currentLimit = Number(limit);
+
+    const validOrder =
+      typeof orderBy === 'string' && (orderBy === 'ASC' || orderBy === 'DESC')
+        ? orderBy
+        : 'ASC';
+
+    const [users, total] = await Promise.all([
+      userRepository.findAll({
+        page: currentPage,
+        limit: currentLimit,
+        orderBy: validOrder
+      }),
+      userRepository.findAll.length
+    ]);
+    const pagination = getPagination(total, currentPage, currentLimit);
+
+    res.status(200).json({
+      status: 'Ok',
+      details: users,
+      pagination
+    });
   } catch (err) {
     res
       .status(500)

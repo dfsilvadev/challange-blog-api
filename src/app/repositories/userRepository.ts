@@ -2,6 +2,7 @@ import { query } from '../../database/db';
 
 import {
   CreateUserParams,
+  FindAllUsersParams,
   UserEntity,
   UserPassword,
   UserWithPasswordHash
@@ -49,6 +50,40 @@ export const findByEmailOrName = async (
   );
 
   return row;
+};
+
+export const findAll = async ({
+  page,
+  limit,
+  orderBy
+}: FindAllUsersParams): Promise<UserEntity[]> => {
+  const direction = orderBy.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+  const offset = (page - 1) * limit;
+
+  const values: (string | number)[] = [limit, offset];
+
+  const rows = await query<UserEntity>(
+    `
+      SELECT
+        tb_user.id,
+        tb_user.name,
+        tb_user.email,
+        tb_user.phone,
+        tb_user.created_at,
+        tb_user.updated_at,
+        tb_user.role_id
+      FROM
+        tb_role
+      INNER JOIN
+        tb_role ON tb_role.id = tb_user.role_id
+      ORDER BY
+        tb_user.created_at ${direction}
+      LIMIT $1 OFFSET $2
+    `,
+    values
+  );
+
+  return rows;
 };
 
 export const alter = async ({ id, name, email, phone, roleId }: UserEntity) => {

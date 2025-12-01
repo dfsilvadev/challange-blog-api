@@ -18,6 +18,11 @@ const router = express.Router();
  */
 /* Authenticated routes */
 router.get('/:id', asyncHandler(authenticateToken), userController.findOne);
+router.get(
+  '/',
+  asyncHandler(authenticateToken),
+  userController.getAllUsersWithPagination
+);
 
 /* Public routes */
 router.post('/', userValidationRules, validate, userController.create);
