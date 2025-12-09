@@ -55,6 +55,7 @@ interface User {
   readonly email: string;
   readonly name: string;
   readonly phone: string;
+  readonly roleId: string;
 }
 
 interface CreateUserParams {
@@ -65,6 +66,12 @@ interface CreateUserParams {
   readonly roleId: string;
 }
 
+interface UpdateUserParams {
+  readonly name: string;
+  readonly email: string;
+  readonly phone: string;
+}
+
 interface UserPassword {
   readonly id: string;
   readonly passwordHash: string;
@@ -72,16 +79,15 @@ interface UserPassword {
 
 interface UserWithPasswordHash extends User {
   readonly password_hash: string;
+  readonly role_id: string;
 }
 
 interface UserEntity extends User {
   readonly roleId: string;
 }
-
-interface FindAllUsersParams {
-  readonly page: number;
-  readonly limit: number;
-  readonly orderBy: 'ASC' | 'DESC';
+interface UserRoles extends User {
+  readonly roleId: string;
+  readonly roleName: string;
 }
 
 /**
@@ -114,6 +120,7 @@ interface CreateCommentParams {
 
 export {
   CreateUserParams,
+  UpdateUserParams,
   FindAllParams,
   FindPostResponse,
   Post,
@@ -122,8 +129,8 @@ export {
   UserEntity,
   UserPassword,
   UserWithPasswordHash,
-  FindAllUsersParams,
   FindFilters,
   Comment,
-  CreateCommentParams
+  CreateCommentParams,
+  UserRoles
 };
