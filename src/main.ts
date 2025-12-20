@@ -20,7 +20,17 @@ app.use(express.json());
 /**
  * CORS
  */
-app.use(cors({ credentials: true, origin: 'http://localhost:5173' }));
+app.use(
+  cors({
+    credentials: true,
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:8081',
+      'http://192.168.1.108:8081',
+      'http://192.168.1.108:3001'
+    ]
+  })
+);
 
 /**
  * Routes
