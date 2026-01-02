@@ -69,7 +69,7 @@ export const findByFilter = async (req: Request, res: Response) => {
       orderBy: filters.orderBy,
       name: filters.name,
       email: filters.email,
-      roleName: filters.name
+      roleName: filters.roleName
     });
     const pagination = getPagination(users.length, filters.page, filters.limit);
 

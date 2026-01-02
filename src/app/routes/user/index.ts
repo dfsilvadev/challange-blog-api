@@ -25,6 +25,13 @@ const router = express.Router();
  */
 /* Authenticated routes */
 router.get(
+  '/filter',
+  asyncHandler(authenticateToken),
+  authorizeRoles(['coordinator']),
+  validateUserFilters,
+  userController.findByFilter
+);
+router.get(
   '/:id',
   asyncHandler(authenticateToken),
   authorizeRoles(['coordinator']),
@@ -36,13 +43,6 @@ router.get(
   asyncHandler(authenticateToken),
   authorizeRoles(['coordinator']),
   userController.listAll
-);
-router.get(
-  '/filter',
-  asyncHandler(authenticateToken),
-  authorizeRoles(['coordinator']),
-  validateUserFilters,
-  userController.findByFilter
 );
 router.patch(
   '/:id',
