@@ -25,9 +25,12 @@ export const findByEmailOrName = async (
   emailOrName: string
 ): Promise<UserWithPasswordHash> => {
   const [row] = await query<UserWithPasswordHash>(
-    `SELECT id, email, name, phone, password_hash, role_id
-     FROM tb_user
-     WHERE email = $1 OR name = $1
+    `SELECT u.id, u.email, u.name, u.phone, u.password_hash, u.role_id, r.name AS "roleName" 
+     FROM
+        tb_user as u
+      INNER JOIN
+        tb_role as r ON r.id = u.role_id
+     WHERE u.email = $1 OR u.name = $1
      LIMIT 1;`,
     [emailOrName]
   );

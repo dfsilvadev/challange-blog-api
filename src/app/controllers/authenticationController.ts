@@ -29,7 +29,8 @@ export const login = async (req: Request, res: Response) => {
       id: user?.id,
       email: user?.email,
       name: user?.name,
-      roleId: user?.role_id
+      roleId: user?.role_id,
+      roleName: user?.roleName
     };
     const token = jwt.sign(payload, config.jwtSecret, { expiresIn: '1h' });
 

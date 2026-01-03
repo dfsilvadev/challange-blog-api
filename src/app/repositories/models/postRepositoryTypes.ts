@@ -80,6 +80,7 @@ interface UserPassword {
 interface UserWithPasswordHash extends User {
   readonly password_hash: string;
   readonly role_id: string;
+  readonly roleName: string;
 }
 
 interface UserEntity extends User {
