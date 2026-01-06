@@ -16,7 +16,7 @@ export const validateUserFilters = (
   }
 
   if (email) {
-    const isEmail = /[^\s@]+@[^\s@]+\.[^\s@]+/.test(email as string);
+    const isEmail = typeof email === 'string' && email.includes('@');
     if (!isEmail) {
       return res
         .status(400)
@@ -25,7 +25,7 @@ export const validateUserFilters = (
   }
 
   if (name) {
-    const doesNotContainNumbers = !/^[a-zA-Z\s]+$/.test(name as string);
+    const doesNotContainNumbers = /^[a-zA-Z\s]+$/.test(name as string);
     if (!doesNotContainNumbers) {
       return res.status(400).json({ error: true, details: 'INVALID_NAME' });
     }
