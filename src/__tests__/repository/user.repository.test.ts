@@ -7,6 +7,11 @@ jest.mock('../../database/db', () => ({
   query: jest.fn()
 }));
 
+const mockRole = {
+  id: uuidv4(),
+  name: 'teacher'
+};
+
 const mockUser = {
   id: uuidv4(),
   name: 'Usuário Teste',
@@ -15,8 +20,10 @@ const mockUser = {
   passwordHash: 'hash',
   roleId: uuidv4(),
   password_hash: 'hash',
-  role_id: uuidv4()
+  role_id: mockRole.id
 };
+
+const mockedQuery = query as jest.Mock;
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -103,6 +110,67 @@ describe('userRepository', () => {
       await expect(
         userRepository.findByEmailOrName(mockUser.email)
       ).rejects.toThrow('DB error');
+    });
+  });
+
+  describe('findByFilter', () => {
+    it('should return users by name', async () => {
+      const users = [mockUser];
+      (query as jest.Mock).mockResolvedValueOnce(users);
+      const result = await userRepository.findByFilter({
+        page: 1,
+        limit: 10,
+        orderBy: 'ASC',
+        name: mockUser.name
+      });
+      expect(result).toEqual(users);
+    });
+    it('should return users by roleName', async () => {
+      const users = [mockUser];
+      (query as jest.Mock).mockResolvedValueOnce(users);
+      const result = await userRepository.findByFilter({
+        page: 1,
+        limit: 10,
+        orderBy: 'ASC',
+        roleName: mockRole.name
+      });
+      expect(result).toEqual(users);
+    });
+    it('should return user by email', async () => {
+      const users = [mockUser];
+      (query as jest.Mock).mockResolvedValueOnce(users);
+      const result = await userRepository.findByFilter({
+        page: 1,
+        limit: 10,
+        orderBy: 'ASC',
+        email: mockUser.email
+      });
+      expect(result).toEqual(users);
+    });
+    it('should return users with default params', async () => {
+      const users = [mockUser];
+      (query as jest.Mock).mockResolvedValueOnce(users);
+      const result = await userRepository.findByFilter({
+        page: 1,
+        limit: 10,
+        orderBy: 'ASC'
+      });
+      expect(result).toEqual(users);
+    });
+    it('should return paginated posts', async () => {
+      const users = [mockUser];
+      mockedQuery.mockResolvedValueOnce(users);
+      const result = await userRepository.findByFilter({
+        page: 2,
+        limit: 5,
+        orderBy: 'DESC'
+      });
+      expect(result).toEqual(users);
+      const [[sql, params]] = mockedQuery.mock.calls;
+      expect(sql).toContain('ORDER BY');
+      expect(sql).toContain('DESC');
+      expect(params[0]).toBe(5);
+      expect(params[1]).toBe(5);
     });
   });
 

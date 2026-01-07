@@ -185,6 +185,109 @@ describe('UserController', () => {
     });
   });
 
+  describe('findByFilter', () => {
+    it('should return paginated users', async () => {
+      (userRepository.findByFilter as jest.Mock).mockResolvedValueOnce(
+        mockList
+      );
+
+      req.query = {};
+      req.params = {};
+
+      await userController.findByFilter(req as Request, res as Response);
+
+      expect(userRepository.findByFilter).toHaveBeenCalledWith({
+        page: 1,
+        limit: 10,
+        orderBy: 'DESC'
+      });
+      expect(statusMock).toHaveBeenCalledWith(200);
+      expect(jsonMock).toHaveBeenCalledWith({
+        status: 'Ok',
+        details: mockList,
+        pagination: expect.objectContaining(mockPagination)
+      });
+    });
+
+    it('should return paginated users with custom page, limit and orderBy DESC', async () => {
+      (userRepository.findByFilter as jest.Mock).mockResolvedValueOnce([]);
+      req.query = { page: '2', limit: '2', orderBy: 'DESC' };
+      req.params = {};
+
+      await userController.findByFilter(req as Request, res as Response);
+
+      expect(userRepository.findByFilter).toHaveBeenCalledWith({
+        page: 2,
+        limit: 2,
+        orderBy: 'DESC'
+      });
+      expect(statusMock).toHaveBeenCalledWith(200);
+      expect(jsonMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'Ok',
+          details: [],
+          pagination: expect.objectContaining({
+            total: 0,
+            totalPages: 0,
+            registersPerPage: 2,
+            currentPage: 2,
+            hasNextPage: false,
+            hasPreviousPage: true,
+            nextPage: 0,
+            previousPage: 1,
+            firstPage: 1,
+            lastPage: 0
+          })
+        })
+      );
+    });
+
+    it('should return users filtered by criteria', async () => {
+      const email = 'teste@email.com';
+      const mockUsersByFilter = mockList.filter((user) => user.email === email);
+
+      (userRepository.findByFilter as jest.Mock).mockResolvedValueOnce(
+        mockUsersByFilter
+      );
+
+      req.query = {
+        page: '2',
+        limit: '2',
+        orderBy: 'DESC',
+        email: email
+      };
+      req.params = {};
+
+      await userController.findByFilter(req as Request, res as Response);
+      expect(userRepository.findByFilter).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: email,
+          limit: 2,
+          orderBy: 'DESC',
+          page: 2
+        })
+      );
+      expect(jsonMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'Ok',
+          details: mockUsersByFilter,
+          pagination: expect.objectContaining({
+            total: 1,
+            totalPages: 1,
+            registersPerPage: 2,
+            currentPage: 2,
+            hasNextPage: false,
+            hasPreviousPage: true,
+            nextPage: 0,
+            previousPage: 1,
+            firstPage: 1,
+            lastPage: 0
+          })
+        })
+      );
+    });
+  });
+
   describe('create', () => {
     it('should create a user successfully', async () => {
       const fakeRoleId = uuidv4();

@@ -15,6 +15,7 @@ import {
 import { asyncHandler } from '../../../utils/asyncHandler';
 import { validate } from '../../middlewares/utils/validateUtils';
 import { validateUUID } from '../../middlewares/utils/validateUtils';
+import { validateUserFilters } from '../../middlewares/user/userFiltersValidator';
 
 const router = express.Router();
 
@@ -24,6 +25,14 @@ const router = express.Router();
  * @group User - Operations about users
  */
 /* Authenticated routes */
+router.get(
+  '/filter',
+  asyncHandler(authenticateToken),
+  authorizeRoles(['coordinator']),
+  validateUserFilters,
+  userController.findByFilter
+);
+
 router.get(
   '/:id',
   asyncHandler(authenticateToken),

@@ -8,6 +8,7 @@ import {
   UserWithPasswordHash,
   FindAllParams
 } from './models/postRepositoryTypes';
+import { FindFilters } from './models/userRepositoryTypes';
 
 export const findById = async (id: string): Promise<UserEntity> => {
   const [row] = await query<UserEntity>(
@@ -33,6 +34,64 @@ export const findByEmailOrName = async (
   );
 
   return row;
+};
+
+export const findByFilter = async (
+  filters: FindFilters
+): Promise<UserEntity[]> => {
+  const direction = filters.orderBy.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+  const conditions = [];
+  const values: (string | number | boolean)[] = [];
+  let paramIndex = 1;
+
+  if (filters.roleName) {
+    values.push(filters.roleName);
+    conditions.push(`tb_role.name = $${paramIndex++}`);
+  }
+
+  if (filters.name) {
+    values.push(filters.name);
+    conditions.push(`tb_user.name = $${paramIndex++}`);
+  }
+
+  if (filters.email) {
+    values.push(filters.email);
+    conditions.push(`tb_user.email = $${paramIndex++}`);
+  }
+
+  values.push(filters.limit);
+  const limitPlaceholder = `$${paramIndex++}`;
+
+  values.push((filters.page - 1) * filters.limit);
+  const offsetPlaceholder = `$${paramIndex++}`;
+
+  const whereClause = conditions.length ? conditions.join(' AND ') : 'TRUE';
+
+  const rows = await query<UserEntity>(
+    `
+    SELECT
+      tb_user.id,
+      tb_user.email,
+      tb_user.name,
+      tb_user.phone,
+      tb_user.role_id AS "roleId",
+      tb_user.created_at,
+      tb_user.updated_at,
+      tb_role.name AS "role_name"
+    FROM
+      tb_user
+    INNER JOIN
+      tb_role ON tb_role.id = tb_user.role_id
+    WHERE
+      ${whereClause}
+    ORDER BY
+      tb_user.created_at ${direction}
+    LIMIT ${limitPlaceholder} OFFSET ${offsetPlaceholder}
+    `,
+    values
+  );
+
+  return rows;
 };
 
 export const findAll = async ({

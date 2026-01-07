@@ -5,6 +5,7 @@ import * as roleRepository from '../repositories/roleRepository';
 import * as userRepository from '../repositories/userRepository';
 
 import { getPagination } from '../../utils/pagination/pagination';
+import { parseOrder, parseNumber } from '../../utils/parses/parsers';
 
 export const listAll = async (req: Request, res: Response) => {
   try {
@@ -51,6 +52,32 @@ export const findOne: RequestHandler = async (req: Request, res: Response) => {
     }
 
     res.status(200).json({ status: 'OK', details: user });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: true, details: err instanceof Error ? err.message : err });
+  }
+};
+
+export const findByFilter = async (req: Request, res: Response) => {
+  try {
+    const filters = getFilters(req.query);
+
+    const users = await userRepository.findByFilter({
+      page: filters.page,
+      limit: filters.limit,
+      orderBy: filters.orderBy,
+      name: filters.name,
+      email: filters.email,
+      roleName: filters.roleName
+    });
+    const pagination = getPagination(users.length, filters.page, filters.limit);
+
+    res.status(200).json({
+      status: 'Ok',
+      details: users,
+      pagination
+    });
   } catch (err) {
     res
       .status(500)
@@ -143,3 +170,15 @@ export const removeById: RequestHandler = async (
       .json({ error: true, details: err instanceof Error ? err.message : err });
   }
 };
+
+function getFilters(query: any) {
+  return {
+    roleName: query.roleName,
+    email: query.email,
+    name: query.name,
+    orderBy: parseOrder(query.orderBy),
+    page: parseNumber(query.page, 1),
+    limit: parseNumber(query.limit, 10),
+    search: typeof query.search === 'string' ? query.search : undefined
+  };
+}
