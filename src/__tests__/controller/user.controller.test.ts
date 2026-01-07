@@ -242,7 +242,7 @@ describe('UserController', () => {
       );
     });
 
-    it('should return posts filtered by criteria', async () => {
+    it('should return users filtered by criteria', async () => {
       const email = 'teste@email.com';
       const mockUsersByFilter = mockList.filter((user) => user.email === email);
 

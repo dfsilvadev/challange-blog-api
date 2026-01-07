@@ -13,7 +13,8 @@ import {
 } from '../../middlewares/auth/authenticationValidate';
 
 import { asyncHandler } from '../../../utils/asyncHandler';
-import { validate, validateUUID } from '../../middlewares/utils/validateUtils';
+import { validate } from '../../middlewares/utils/validateUtils';
+import { validateUUID } from '../../middlewares/utils/validateUtils';
 import { validateUserFilters } from '../../middlewares/user/userFiltersValidator';
 
 const router = express.Router();
@@ -31,6 +32,7 @@ router.get(
   validateUserFilters,
   userController.findByFilter
 );
+
 router.get(
   '/:id',
   asyncHandler(authenticateToken),

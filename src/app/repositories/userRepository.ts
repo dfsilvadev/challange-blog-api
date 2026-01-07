@@ -8,7 +8,6 @@ import {
   UserWithPasswordHash,
   FindAllParams
 } from './models/postRepositoryTypes';
-
 import { FindFilters } from './models/userRepositoryTypes';
 
 export const findById = async (id: string): Promise<UserEntity> => {
