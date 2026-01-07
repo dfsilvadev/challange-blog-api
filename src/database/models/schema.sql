@@ -1,9 +1,12 @@
 -- Extensão para geração de UUIDs
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Extensão para funções de criptografia (crypt/gen_salt)
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- Enum para papéis de usuário
 CREATE TYPE tb_role_enum AS ENUM (
-    'admin', 'teacher', 'student'
+    'coordinator', 'teacher', 'student'
 );
 
 -- Enum para categorias/disciplines escolares
@@ -117,28 +120,34 @@ EXECUTE FUNCTION set_updated_at();
 -- Inserir roles e usuários sem duplicação
 DO $$
 DECLARE
+    coordinator_role_id UUID;
     teacher_role_id UUID;
 BEGIN
-    -- Inserir role 'teacher'
+    -- Inserir role 'coordinator'
+    IF NOT EXISTS (SELECT 1 FROM tb_role WHERE name = 'coordinator') THEN
+        INSERT INTO tb_role (name) VALUES ('coordinator');
+    END IF;
+
+    SELECT id INTO coordinator_role_id FROM tb_role WHERE name = 'coordinator';
+
+    -- Inserir Teacher Padrão
+    IF NOT EXISTS (SELECT 1 FROM tb_user WHERE email = 'coordinator@blog.com') THEN
+        INSERT INTO tb_user (name, email, phone, password_hash, role_id)
+        VALUES ('Coordinator Padrão', 'coordinator@blog.com', '+5500000000000',
+                crypt('Test123*', gen_salt('bf', 12)),
+                coordinator_role_id);
+    END IF;
+
     IF NOT EXISTS (SELECT 1 FROM tb_role WHERE name = 'teacher') THEN
         INSERT INTO tb_role (name) VALUES ('teacher');
     END IF;
 
     SELECT id INTO teacher_role_id FROM tb_role WHERE name = 'teacher';
-
-    -- Inserir Teacher Padrão
+    -- Inserir teacher Teacher
     IF NOT EXISTS (SELECT 1 FROM tb_user WHERE email = 'teacher@blog.com') THEN
         INSERT INTO tb_user (name, email, phone, password_hash, role_id)
-        VALUES ('Teacher Padrão', 'teacher@blog.com', '+5500000000000',
-                '$2a$12$ej5.hLFzE.deiyIpm51lSOUSlZnmwn1P9x2KWuGW7lOAVBwJUpDhC',
-                teacher_role_id);
-    END IF;
-
-    -- Inserir Substitute Teacher
-    IF NOT EXISTS (SELECT 1 FROM tb_user WHERE email = 'substitute@blog.com') THEN
-        INSERT INTO tb_user (name, email, phone, password_hash, role_id)
-        VALUES ('Substitute teacher', 'substitute@blog.com', '+5500000000001',
-                '$2a$12$ej5.hLFzE.deiyIpm51lSOUSlZnmwn1P9x2KWuGW7lOAVBwJUpDhC',
+        VALUES ('Teacher', 'teacher@blog.com', '+5500000000001',
+                crypt('Test123*', gen_salt('bf', 12)),
                 teacher_role_id);
     END IF;
 END $$;
@@ -158,31 +167,31 @@ BEGIN
     END LOOP;
 END $$;
 
--- Inserir posts do Substitute Teacher
+-- Inserir posts do teacher Teacher
 DO $$
 DECLARE
-    substitute_user_id UUID;
+    teacher_user_id UUID;
     rec RECORD;
 BEGIN
-    SELECT id INTO substitute_user_id FROM tb_user WHERE email = 'substitute@blog.com';
+    SELECT id INTO teacher_user_id FROM tb_user WHERE email = 'teacher@blog.com';
 
     FOR rec IN
         SELECT id AS category_id,
                name AS category_name,
                CASE name
-                   WHEN 'portuguese' THEN 'Conteúdo de Português criado pelo Substitute teacher.'
-                   WHEN 'mathematics' THEN 'Conteúdo de Matemática criado pelo Substitute teacher.'
-                   WHEN 'history' THEN 'Conteúdo de História criado pelo Substitute teacher.'
-                   WHEN 'geography' THEN 'Conteúdo de Geografia criado pelo Substitute teacher.'
-                   WHEN 'science' THEN 'Conteúdo de Ciência criado pelo Substitute teacher.'
-                   WHEN 'art' THEN 'Conteúdo de Artes criado pelo Substitute teacher.'
-                   WHEN 'physical education' THEN 'Conteúdo de Educação Física criado pelo Substitute teacher.'
+                   WHEN 'portuguese' THEN 'Conteúdo de Português criado pelo teacher teacher.'
+                   WHEN 'mathematics' THEN 'Conteúdo de Matemática criado pelo teacher teacher.'
+                   WHEN 'history' THEN 'Conteúdo de História criado pelo teacher teacher.'
+                   WHEN 'geography' THEN 'Conteúdo de Geografia criado pelo teacher teacher.'
+                   WHEN 'science' THEN 'Conteúdo de Ciência criado pelo teacher teacher.'
+                   WHEN 'art' THEN 'Conteúdo de Artes criado pelo teacher teacher.'
+                   WHEN 'physical education' THEN 'Conteúdo de Educação Física criado pelo teacher teacher.'
                END AS content
         FROM tb_category
     LOOP
         IF NOT EXISTS (
             SELECT 1 FROM tb_post p 
-            WHERE p.user_id = substitute_user_id 
+            WHERE p.user_id = teacher_user_id 
               AND p.category_id = rec.category_id
         ) THEN
             INSERT INTO tb_post (title, content, is_active, user_id, category_id)
@@ -190,7 +199,7 @@ BEGIN
                 'Post de ' || INITCAP(rec.category_name::TEXT),  -- <-- cast ENUM para TEXT
                 rec.content,
                 true,
-                substitute_user_id,
+                teacher_user_id,
                 rec.category_id
             );
         END IF;

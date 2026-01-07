@@ -3,7 +3,10 @@ import { Router } from 'express';
 import * as postController from '../../controllers/postController';
 import * as commentController from '../../controllers/commentController';
 
-import { authenticateToken } from '../../middlewares/auth/authenticationValidate';
+import {
+  authenticateToken,
+  authorizeRoles
+} from '../../middlewares/auth/authenticationValidate';
 
 import {
   postUpdateValidationRules,
@@ -28,12 +31,14 @@ const commentRouter = Router({ mergeParams: true });
 router.post(
   '/',
   asyncHandler(authenticateToken),
+  authorizeRoles(['teacher']),
   postValidationRules,
   postController.create
 );
 router.patch(
   '/:id',
   asyncHandler(authenticateToken),
+  authorizeRoles(['teacher']),
   validateUUID,
   postUpdateValidationRules,
   postController.updateById
@@ -41,12 +46,14 @@ router.patch(
 router.delete(
   '/:id',
   asyncHandler(authenticateToken),
+  authorizeRoles(['teacher']),
   validateUUID,
   postController.removeById
 );
 router.get(
   '/createdBy/:userId',
   asyncHandler(authenticateToken),
+  authorizeRoles(['teacher']),
   postController.listByUserId
 );
 
