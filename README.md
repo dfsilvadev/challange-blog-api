@@ -148,6 +148,14 @@ A aplicação estará disponível em:
 
 - API: http://localhost:3001
 
+Como acessar a API a partir do Expo (React Native):
+
+- Android emulator (AVD): use `http://10.0.2.2:3001`
+- iOS simulator: use `http://localhost:3001`
+- Dispositivo físico (mesma rede): use `http://<IP_DO_SEU_PC>:3001` (ex.: `http://192.168.0.42:3001`)
+
+Observação: certifique-se de que o firewall do Windows permite conexões na porta `3001` e que o container Docker está em execução.
+
 #### Estrutura do Banco
 
 Após conectar, você verá:
