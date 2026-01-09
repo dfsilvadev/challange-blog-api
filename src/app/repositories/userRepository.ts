@@ -136,15 +136,23 @@ export const update = async (
     roleId: string;
   }>
 ): Promise<UpdateUserParams | null> => {
-  const allowedFields = ['name', 'email', 'phone', 'roleId'];
+  const columnMapping: Record<string, string> = {
+    name: 'name',
+    email: 'email',
+    phone: 'phone',
+    roleId: 'role_id'
+  };
+
   const setClauses = [];
   const values = [];
   let idx = 1;
 
-  for (const key of allowedFields) {
-    if (fields[key as keyof typeof fields] !== undefined) {
-      setClauses.push(`${key} = $${idx}`);
-      values.push(fields[key as keyof typeof fields]);
+  for (const [tsKey, sqlColumn] of Object.entries(columnMapping)) {
+    const value = fields[tsKey as keyof typeof fields];
+
+    if (value !== undefined) {
+      setClauses.push(`${sqlColumn} = $${idx}`);
+      values.push(value);
       idx++;
     }
   }
