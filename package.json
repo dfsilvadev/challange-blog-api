@@ -23,7 +23,8 @@
     "test:all": "jest --detectOpenHandles --forceExit --coverage",
     "sonar:local": "yarn test:coverage && sonar-scanner",
     "docker:build": "docker build -t blog-api:local .",
-    "docker:test": "docker run -d --name test-container -p 3000:3000 blog-api:local && sleep 10 && curl -f http://localhost:3000/health && docker stop test-container && docker rm test-container"
+    "docker:test": "docker run -d --name test-container -p 3000:3000 blog-api:local && sleep 10 && curl -f http://localhost:3000/health && docker stop test-container && docker rm test-container",
+    "db:migrate": "ts-node src/scripts/run-migrations.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

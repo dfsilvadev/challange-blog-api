@@ -47,8 +47,10 @@ src/
 │   └── utils/           # Utilitários da aplicação
 ├── database/
 │   ├── db.ts           # Configuração da conexão com banco
+│   ├── migrations/     # Migrations do módulo pedagógico (executar após schema base)
+│   │   └── 001_pedagogico.sql
 │   └── models/
-│       └── schema.sql  # Schema do banco de dados
+│       └── schema.sql  # Schema do banco de dados (blog + base)
 ├── utils/
 │   └── config/
 │       └── config.ts   # Configurações da aplicação
@@ -73,6 +75,34 @@ O projeto utiliza PostgreSQL com as seguintes tabelas principais:
 - Science
 - Art
 - Physical Education
+
+### Módulo pedagógico (MVP)
+
+As tabelas do módulo de acompanhamento pedagógico são criadas pela migration em `src/database/migrations/001_pedagogico.sql` (executada **após** o schema base).
+
+**Tabelas criadas/alteradas:**
+
+- **tb_user:** novos campos `date_of_birth`, `current_grade`, `guardians` (JSONB), `is_active`
+- **tb_teacher_subject**, **tb_student_learning_level**, **tb_content**, **tb_learning_path**, **tb_learning_path_content**
+- **tb_assessment**, **tb_question**, **tb_student_answer**, **tb_assessment_result**, **tb_recommendation**, **tb_student_progress**
+
+**Como rodar as migrations:**
+
+1. **Ambiente já configurado** (`.env` com `DATABASE_URL` definida):
+
+   ```bash
+   yarn db:migrate
+   # ou
+   npm run db:migrate
+   ```
+
+   O script executa, em ordem, todos os arquivos `.sql` em `src/database/migrations/` usando a conexão do projeto (não precisa ter `psql` instalado).
+
+2. **Configuração do ambiente com Docker:** na **primeira vez** que você sobe o banco com `docker compose up`, o Postgres executa automaticamente o schema base e as migrations (arquivos em `docker-entrypoint-initdb.d/`). Ou seja, **não é preciso rodar `db:migrate` manualmente** quando o ambiente é criado pelo Docker; as migrations já foram aplicadas na inicialização do container.
+
+   Se você recriar o volume do banco (`docker compose down -v` e subir de novo), o schema e as migrations rodarão de novo na subida.
+
+Referência: [docs/DATA_MODEL.md](docs/DATA_MODEL.md) e [docs/CHECKLIST_IMPLEMENTACAO_MVP.md](docs/CHECKLIST_IMPLEMENTACAO_MVP.md) (Parte 1).
 
 ## 🚀 Como Executar
 
@@ -133,6 +163,8 @@ npm start
 
 1. **Execute com Docker Compose**
 
+   Na **primeira execução**, o Postgres aplica automaticamente o schema base e as migrations do módulo pedagógico (arquivos em `docker-entrypoint-initdb.d/`). Não é necessário rodar `yarn db:migrate` quando o ambiente é criado pelo Docker.
+
 ```bash
 # Primeira execução ou após mudanças
 docker compose up --build
@@ -183,6 +215,9 @@ blog_db/
 npm run dev          # Executa em modo desenvolvimento
 npm run build        # Compila o TypeScript
 npm start           # Executa em produção
+
+# Banco de dados (migrations do módulo pedagógico)
+npm run db:migrate   # Executa migrations em src/database/migrations/ (requer DATABASE_URL no .env)
 
 # Qualidade de Código
 npm run lint        # Executa o ESLint
